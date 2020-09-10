@@ -1,12 +1,14 @@
 package io.github.ocelot.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import cpw.mods.modlauncher.api.INameMappingService;
 import io.github.ocelot.client.model.GeometryModel;
 import io.github.ocelot.client.model.texture.GeometryModelTexture;
 import io.github.ocelot.client.model.texture.GeometryModelTextureTable;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -64,7 +66,7 @@ public class GeometryModelRenderer
             {
                 try
                 {
-                    renderers.put(field.getName(), (ModelRenderer) field.get(model));
+                    renderers.put(ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, field.getName()), (ModelRenderer) field.get(model));
                 }
                 catch (Exception ignored)
                 {

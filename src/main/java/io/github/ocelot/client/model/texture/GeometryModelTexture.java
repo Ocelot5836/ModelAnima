@@ -148,7 +148,7 @@ public class GeometryModelTexture
     public enum Type
     {
         LOCATION((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "location"), parseColor(json)), ResourceLocation::new),
-        ONLINE((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "name"), parseColor(json)), data -> new ResourceLocation(ModelAnima.DOMAIN, DigestUtils.md5Hex(data)));
+        ONLINE((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "url"), parseColor(json)), data -> new ResourceLocation(ModelAnima.DOMAIN, DigestUtils.md5Hex(data)));
 
         private final BiFunction<Type, JsonObject, GeometryModelTexture> deserializer;
         private final Function<String, ResourceLocation> locationGenerator;

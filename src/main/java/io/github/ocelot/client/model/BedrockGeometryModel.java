@@ -2,6 +2,7 @@ package io.github.ocelot.client.model;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import cpw.mods.modlauncher.api.INameMappingService;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
@@ -62,7 +63,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel
             {
                 if (parent.startsWith("parent."))
                 {
-                    parts.put(currentBone, parent.substring("parent.".length()));
+                    parts.put(currentBone, ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, parent.substring("parent.".length())));
                 }
                 else
                 {

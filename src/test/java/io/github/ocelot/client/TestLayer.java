@@ -14,8 +14,8 @@ import net.minecraft.util.ResourceLocation;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {
-    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(TestMod.MOD_ID, "hoodie");
-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(TestMod.MOD_ID, "hoodie/default");
+    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(TestMod.MOD_ID, "coldman");
+    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(TestMod.MOD_ID, "coldman");
 
     public TestLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer)
     {
@@ -25,8 +25,8 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        GeometryModel model = GeometryModelManager.getModel(new ResourceLocation(TestMod.MOD_ID, "owl"));
-        GeometryModelTextureTable texture = GeometryModelManager.getTextureTable(new ResourceLocation(TestMod.MOD_ID, "hoodie/default"));
+        GeometryModel model = GeometryModelManager.getModel(MODEL_LOCATION);
+        GeometryModelTextureTable texture = GeometryModelManager.getTextureTable(TEXTURE_LOCATION);
         GeometryModelRenderer.render(this.getEntityModel(), model, texture, matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }
