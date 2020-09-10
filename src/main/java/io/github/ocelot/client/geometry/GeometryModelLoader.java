@@ -1,8 +1,7 @@
-package io.github.ocelot.client;
+package io.github.ocelot.client.geometry;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
-import io.github.ocelot.client.model.GeometryModelData;
 
 import java.io.Reader;
 
@@ -12,9 +11,9 @@ import java.io.Reader;
  * @author Ocelot
  * @since 1.0.0
  */
-public class BedrockModelLoader
+public class GeometryModelLoader
 {
-    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(GeometryModelData.Description.class, new GeometryModelData.Description.Deserializer()).registerTypeAdapter(GeometryModelData.Bone.class, new GeometryModelData.Bone.Deserializer()).registerTypeAdapter(GeometryModelData.Cube.class, new GeometryModelData.Cube.Deserializer()).create();
+    public static final Gson GSON = new GsonBuilder().registerTypeAdapter(GeometryModelData.Description.class, new GeometryModelData.Description.Deserializer()).registerTypeAdapter(GeometryModelData.Bone.class, new GeometryModelData.Bone.Deserializer()).registerTypeAdapter(GeometryModelData.Cube.class, new GeometryModelData.Cube.Deserializer()).create();
 
     /**
      * Creates a new bedrock model from the specified reader.

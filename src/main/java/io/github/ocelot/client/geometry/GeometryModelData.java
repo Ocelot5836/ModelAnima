@@ -1,4 +1,4 @@
-package io.github.ocelot.client.model;
+package io.github.ocelot.client.geometry;
 
 import com.google.gson.*;
 import net.minecraft.client.renderer.model.Model;

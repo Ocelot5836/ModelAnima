@@ -1,10 +1,10 @@
-package io.github.ocelot.client.model.texture;
+package io.github.ocelot.client.model;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import io.github.ocelot.ModelAnima;
-import io.github.ocelot.client.model.BedrockGeometryModel;
+import io.github.ocelot.client.render.BedrockGeometryModel;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.LazyValue;

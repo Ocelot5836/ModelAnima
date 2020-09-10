@@ -1,10 +1,10 @@
-package io.github.ocelot.client;
+package io.github.ocelot.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import cpw.mods.modlauncher.api.INameMappingService;
 import io.github.ocelot.client.model.GeometryModel;
-import io.github.ocelot.client.model.texture.GeometryModelTexture;
-import io.github.ocelot.client.model.texture.GeometryModelTextureTable;
+import io.github.ocelot.client.model.GeometryModelTexture;
+import io.github.ocelot.client.model.GeometryModelTextureTable;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;

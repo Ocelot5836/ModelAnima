@@ -1,13 +1,13 @@
 package io.github.ocelot;
 
-import io.github.ocelot.client.model.GeometryModelData;
-import io.github.ocelot.client.BedrockModelLoader;
+import io.github.ocelot.client.geometry.GeometryModelData;
+import io.github.ocelot.client.geometry.GeometryModelLoader;
 
 public class ApiTest
 {
     public static void main(String[] args) throws Exception
     {
-        GeometryModelData model = BedrockModelLoader.parse("{\n" +
+        GeometryModelData model = GeometryModelLoader.parse("{\n" +
                 "\t\"format_version\": \"1.12.0\",\n" +
                 "\t\"minecraft:geometry\": [{\n" +
                 "\t\t\"description\": {\n" +

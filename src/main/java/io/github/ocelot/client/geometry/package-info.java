@@ -1,6 +1,6 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-package io.github.ocelot.client.model.texture;
+package io.github.ocelot.client.geometry;
 
 import mcp.MethodsReturnNonnullByDefault;
 

@@ -1,8 +1,10 @@
-package io.github.ocelot.client.model;
+package io.github.ocelot.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import cpw.mods.modlauncher.api.INameMappingService;
+import io.github.ocelot.client.geometry.GeometryModelData;
+import io.github.ocelot.client.model.GeometryModel;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;

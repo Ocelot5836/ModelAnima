@@ -3,11 +3,12 @@ package io.github.ocelot.client;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
-import io.github.ocelot.client.model.GeometryModelData;
-import io.github.ocelot.client.model.BedrockGeometryModel;
+import io.github.ocelot.client.geometry.GeometryModelLoader;
+import io.github.ocelot.client.geometry.GeometryModelData;
+import io.github.ocelot.client.render.BedrockGeometryModel;
 import io.github.ocelot.client.model.GeometryModel;
-import io.github.ocelot.client.model.texture.GeometryModelTexture;
-import io.github.ocelot.client.model.texture.GeometryModelTextureTable;
+import io.github.ocelot.client.model.GeometryModelTexture;
+import io.github.ocelot.client.model.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -128,7 +129,7 @@ public final class GeometryModelManager
                             ResourceLocation modelName = new ResourceLocation(modelLocation.getNamespace(), modelLocation.getPath().substring("models/geometry/".length(), modelLocation.getPath().length() - ".json".length()));
                             try (IResource resource = resourceManager.getResource(modelLocation))
                             {
-                                modelLocations.put(modelName, BedrockModelLoader.parse(IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8)));
+                                modelLocations.put(modelName, GeometryModelLoader.parse(IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8)));
                             }
                             catch (Exception e)
                             {
