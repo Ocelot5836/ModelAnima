@@ -1,0 +1,7 @@
+{
+  "texture": {
+    "type": "location",
+    "location": "examplemod:textures/entity/owl.png",
+    "color": 0
+  }
+}

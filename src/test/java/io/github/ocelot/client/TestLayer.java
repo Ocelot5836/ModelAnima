@@ -2,6 +2,8 @@ package io.github.ocelot.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.TestMod;
+import io.github.ocelot.client.model.GeometryModel;
+import io.github.ocelot.client.model.texture.GeometryModelTextureTable;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
@@ -12,6 +14,9 @@ import net.minecraft.util.ResourceLocation;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {
+    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(TestMod.MOD_ID, "hoodie");
+    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(TestMod.MOD_ID, "hoodie/default");
+
     public TestLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer)
     {
         super(entityRenderer);
@@ -20,6 +25,8 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        GeometryModelRenderer.render(this.getEntityModel(), GeometryModelManager.getRenderer(new ResourceLocation(TestMod.MOD_ID, "owl")), GeometryModelManager.getTextureTable(new ResourceLocation(TestMod.MOD_ID, "owl")), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModel model = GeometryModelManager.getModel(new ResourceLocation(TestMod.MOD_ID, "owl"));
+        GeometryModelTextureTable texture = GeometryModelManager.getTextureTable(new ResourceLocation(TestMod.MOD_ID, "hoodie/default"));
+        GeometryModelRenderer.render(this.getEntityModel(), model, texture, matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }

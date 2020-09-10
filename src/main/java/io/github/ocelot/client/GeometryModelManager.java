@@ -74,7 +74,7 @@ public final class GeometryModelManager
      * @param name The name of the model
      * @return The bedrock model found or {@link #MISSING}
      */
-    public static GeometryModel getRenderer(ResourceLocation name)
+    public static GeometryModel getModel(ResourceLocation name)
     {
         return RENDERERS.getOrDefault(name, MISSING);
     }
@@ -140,7 +140,7 @@ public final class GeometryModelManager
                     }, backgroundExecutor).thenCompose(stage::markCompleteAwaitingOthers).thenAcceptAsync(modelLocations ->
                     {
                         RENDERERS.clear();
-                        modelLocations.forEach((name, model) -> RENDERERS.put(name, new BedrockGeometryModel(RenderType::getEntityCutout, model)));
+                        modelLocations.forEach((name, model) -> RENDERERS.put(name, new BedrockGeometryModel(RenderType::getEntityCutoutNoCull, model)));
                     }, gameExecutor));
         }
 
