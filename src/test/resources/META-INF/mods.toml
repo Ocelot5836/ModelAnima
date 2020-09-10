@@ -1,0 +1,10 @@
+modLoader="javafml" #mandatory
+loaderVersion="[31,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+license="https://www.gnu.org/licenses/gpl-3.0.en.html"
+
+[[mods]] #mandatory
+modId="examplemod" #mandatory
+version="${modVersion}" #mandatory
+displayName="Model Anima Testing" #mandatory
+authors="Ocelot5836" #optional
+description="A testing mod used by Model Anima to test features" #mandatory

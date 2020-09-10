@@ -1,0 +1,96 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.hoodie",
+        "texture_width": 64,
+        "texture_height": 32,
+        "visible_bounds_width": 3,
+        "visible_bounds_height": 3.5,
+        "visible_bounds_offset": [0, 1.25, 0]
+      },
+      "bones": [
+        {
+          "name": "Torso",
+          "parent": "parent.bipedBody",
+          "pivot": [0, 24, 0],
+          "cubes": [
+            {
+              "origin": [-4, 13, -2],
+              "size": [8, 11, 4],
+              "inflate": 0.47,
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "Pocket",
+          "parent": "Torso",
+          "pivot": [0, 24, 0],
+          "cubes": [
+            {
+              "origin": [-3, 13.7, -3.2],
+              "size": [6, 3, 1],
+              "inflate": 0.35,
+              "uv": [0, 28]
+            }
+          ]
+        },
+        {
+          "name": "Head",
+          "parent": "parent.bipedHead",
+          "pivot": [0, 24, 0],
+          "cubes": [
+            {
+              "origin": [-4, 24, -4],
+              "size": [8, 8, 9],
+              "inflate": 0.71,
+              "uv": [30, 0]
+            }
+          ]
+        },
+        {
+          "name": "RightArm",
+          "parent": "parent.bipedRightArm",
+          "pivot": [-5, 22, 0],
+          "cubes": [
+            {
+              "origin": [-8, 13, -2],
+              "size": [4, 11, 4],
+              "inflate": 0.32,
+              "uv": [14, 17]
+            }
+          ]
+        },
+        {
+          "name": "LeftArm",
+          "parent": "parent.bipedLeftArm",
+          "pivot": [5, 22, 0],
+          "mirror": true,
+          "cubes": [
+            {
+              "origin": [4, 13, -2],
+              "size": [4, 11, 4],
+              "inflate": 0.32,
+              "uv": [14, 17]
+            }
+          ]
+        },
+        {
+          "name": "TorsoLayer",
+          "parent": "parent.bipedBody",
+          "pivot": [0, 24, 0],
+          "cubes": [
+            {
+              "origin": [-4, 13, -2],
+              "size": [8, 11, 4],
+              "inflate": 0.82,
+              "uv": [30, 17]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
