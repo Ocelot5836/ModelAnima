@@ -1,4 +1,4 @@
-package io.github.ocelot.client.geometry;
+package io.github.ocelot.common.geometry;
 
 import com.google.gson.*;
 import net.minecraft.client.renderer.model.Model;
@@ -8,7 +8,10 @@ import net.minecraft.util.math.vector.Vector3f;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Deserializes custom java models from JSON.</p>
@@ -160,8 +163,9 @@ public class GeometryModelData
         private final Vector3f rotation;
         private final boolean mirror;
         private final Cube[] cubes;
+        private final Locator[] locators;
 
-        public Bone(String name, @Nullable String parent, String texture, Vector3f pivot, Vector3f rotation, boolean mirror, Cube[] cubes)
+        public Bone(String name, @Nullable String parent, String texture, Vector3f pivot, Vector3f rotation, boolean mirror, Cube[] cubes, Locator[] locators)
         {
             this.name = name;
             this.parent = parent;
@@ -170,6 +174,7 @@ public class GeometryModelData
             this.rotation = rotation;
             this.mirror = mirror;
             this.cubes = cubes;
+            this.locators = locators;
         }
 
         /**
@@ -253,6 +258,14 @@ public class GeometryModelData
             return cubes;
         }
 
+        /**
+         * @return The locators inside of this part
+         */
+        public Locator[] getLocators()
+        {
+            return locators;
+        }
+
         @Override
         public String toString()
         {
@@ -264,6 +277,7 @@ public class GeometryModelData
                     ", rotation=" + rotation +
                     ", mirror=" + mirror +
                     ", cubes=" + Arrays.toString(cubes) +
+                    ", locators=" + Arrays.toString(locators) +
                     '}';
         }
 
@@ -273,7 +287,17 @@ public class GeometryModelData
             public Bone deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
             {
                 JsonObject cubeJson = json.getAsJsonObject();
-                return new Bone(cubeJson.get("name").getAsString(), JSONUtils.getString(cubeJson, "parent", null), JSONUtils.getString(cubeJson, "texture", "texture"), parseVector(cubeJson, "pivot", 3, true), parseVector(cubeJson, "rotation", 3, false), JSONUtils.getBoolean(cubeJson, "mirror", false), cubeJson.has("cubes") ? context.deserialize(cubeJson.get("cubes"), Cube[].class) : new Cube[0]);
+
+                List<Locator> locators = new ArrayList<>();
+                if (cubeJson.has("locators"))
+                {
+                    for (Map.Entry<String, JsonElement> locatorJson : cubeJson.getAsJsonObject("locators").entrySet())
+                    {
+                        locators.add(new Locator(locatorJson.getKey(), parseVector(cubeJson.getAsJsonObject("locators"), locatorJson.getKey(), 3, true)));
+                    }
+                }
+
+                return new Bone(cubeJson.get("name").getAsString(), JSONUtils.getString(cubeJson, "parent", null), JSONUtils.getString(cubeJson, "texture", "texture"), parseVector(cubeJson, "pivot", 3, true), parseVector(cubeJson, "rotation", 3, false), JSONUtils.getBoolean(cubeJson, "mirror", false), cubeJson.has("cubes") ? context.deserialize(cubeJson.get("cubes"), Cube[].class) : new Cube[0], locators.toArray(new Locator[0]));
             }
         }
     }
@@ -363,6 +387,49 @@ public class GeometryModelData
                 Vector3f uv = parseVector(cubeJson, "uv", 2, true);
                 return new Cube(parseVector(cubeJson, "origin", 3, true), parseVector(cubeJson, "size", 3, true), JSONUtils.getFloat(cubeJson, "inflate", 0.0f), (int) uv.getX(), (int) uv.getY());
             }
+        }
+    }
+
+    /**
+     * <p>A single marker position inside a bone.</p>
+     *
+     * @author Ocelot
+     * @since 1.0.0
+     */
+    public static class Locator
+    {
+        private final String name;
+        private final Vector3f position;
+
+        public Locator(String name, Vector3f position)
+        {
+            this.name = name;
+            this.position = position;
+        }
+
+        /**
+         * @return The name of this marker
+         */
+        public String getName()
+        {
+            return name;
+        }
+
+        /**
+         * @return The location of this marker
+         */
+        public Vector3f getPosition()
+        {
+            return position;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "Locator{" +
+                    "name='" + name + '\'' +
+                    ", position=" + position +
+                    '}';
         }
     }
 

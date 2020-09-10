@@ -3,6 +3,7 @@ package io.github.ocelot.client.model;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import io.github.ocelot.client.GeometryModelManager;
+import io.github.ocelot.common.geometry.GeometryModelData;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.ResourceLocation;
@@ -41,6 +42,20 @@ public interface GeometryModel
      * @param limbRenderer The renderer to copy angles of
      */
     void copyAngles(@Nullable String part, @Nullable String textureKey, ModelRenderer limbRenderer);
+
+    /**
+     * Fetches a specific locator by name.
+     *
+     * @param name The name of the locator to fetch
+     * @return The locator by that name or <code>null</code> if there is no locator by that name
+     */
+    @Nullable
+    GeometryModelData.Locator getLocator(String name);
+
+    /**
+     * @return All locators in the model
+     */
+    GeometryModelData.Locator[] getLocators();
 
     /**
      * @return An array of all used part keys

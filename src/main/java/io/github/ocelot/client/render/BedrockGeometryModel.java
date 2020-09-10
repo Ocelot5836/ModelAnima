@@ -3,8 +3,8 @@ package io.github.ocelot.client.render;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import cpw.mods.modlauncher.api.INameMappingService;
-import io.github.ocelot.client.geometry.GeometryModelData;
 import io.github.ocelot.client.model.GeometryModel;
+import io.github.ocelot.common.geometry.GeometryModelData;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>A {@link Model} that uses data from {@link GeometryModelData}.</p>
@@ -29,6 +30,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     public static final String ALL = "all";
 
     private final Map<String, ModelRenderer> modelParts;
+    private final Map<String, GeometryModelData.Locator> locators;
     private final String[] modelKeys;
     private final String[] textureKeys;
 
@@ -43,6 +45,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
         this.modelParts = new HashMap<>();
+        this.locators = Stream.of(Arrays.stream(bones).map(GeometryModelData.Bone::getLocators).toArray(GeometryModelData.Locator[][]::new)).flatMap(Stream::of).collect(Collectors.toMap(GeometryModelData.Locator::getName, locator -> locator));
         this.textureKeys = Arrays.stream(bones).map(GeometryModelData.Bone::getTexture).distinct().toArray(String[]::new);
 
         if (bones.length == 0)
@@ -140,6 +143,19 @@ public class BedrockGeometryModel extends Model implements GeometryModel
         {
             renderer.copyModelAngles(limbRenderer);
         }
+    }
+
+    @Nullable
+    @Override
+    public GeometryModelData.Locator getLocator(String name)
+    {
+        return this.locators.get(name);
+    }
+
+    @Override
+    public GeometryModelData.Locator[] getLocators()
+    {
+        return this.locators.values().toArray(new GeometryModelData.Locator[0]);
     }
 
     @Override

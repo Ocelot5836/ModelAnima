@@ -15,8 +15,9 @@ import net.minecraft.util.ResourceLocation;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {
-    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(TestMod.MOD_ID, "coldman");
-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(TestMod.MOD_ID, "coldman");
+    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(TestMod.MOD_ID, "owl");
+    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(TestMod.MOD_ID, "owl");
+    private static final ResourceLocation ANIMATION_LOCATION = new ResourceLocation(TestMod.MOD_ID, "owl");
 
     public TestLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer)
     {
