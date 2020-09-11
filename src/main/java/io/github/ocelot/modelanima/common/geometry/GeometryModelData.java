@@ -1,4 +1,4 @@
-package io.github.ocelot.common.geometry;
+package io.github.ocelot.modelanima.common.geometry;
 
 import com.google.gson.*;
 import net.minecraft.client.renderer.model.Model;
@@ -24,10 +24,15 @@ public class GeometryModelData
     private final Description description;
     private final Bone[] bones;
 
+    public GeometryModelData(Description description, Bone[] bones)
+    {
+        this.description = description;
+        this.bones = bones;
+    }
+
     public GeometryModelData()
     {
-        this.description = new Description();
-        this.bones = new Bone[0];
+        this(new Description("custom_model", 0, 0, 0, 0, new Vector3f()), new Bone[0]);
     }
 
     /**
@@ -78,11 +83,6 @@ public class GeometryModelData
             this.visibleBoundsWidth = visibleBoundsWidth;
             this.visibleBoundsHeight = visibleBoundsHeight;
             this.visibleBoundsOffset = visibleBoundsOffset;
-        }
-
-        public Description()
-        {
-            this("custom_model", 0, 0, 0, 0, new Vector3f());
         }
 
         /**

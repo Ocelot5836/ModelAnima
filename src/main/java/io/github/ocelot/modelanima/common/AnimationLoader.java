@@ -1,9 +1,8 @@
-package io.github.ocelot.common;
+package io.github.ocelot.modelanima.common;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
-import io.github.ocelot.common.animation.AnimationData;
-import io.github.ocelot.common.geometry.GeometryModelData;
+import io.github.ocelot.modelanima.common.animation.AnimationData;
 
 import java.io.Reader;
 

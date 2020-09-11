@@ -1,7 +1,7 @@
-package io.github.ocelot;
+package io.github.ocelot.modelanima;
 
-import io.github.ocelot.common.geometry.GeometryModelData;
-import io.github.ocelot.common.geometry.GeometryModelLoader;
+import io.github.ocelot.modelanima.common.geometry.GeometryModelData;
+import io.github.ocelot.modelanima.common.geometry.GeometryModelLoader;
 
 public class ApiTest
 {

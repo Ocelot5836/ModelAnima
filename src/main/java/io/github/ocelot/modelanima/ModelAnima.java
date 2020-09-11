@@ -1,4 +1,4 @@
-package io.github.ocelot;
+package io.github.ocelot.modelanima;
 
 /**
  * <p>Contains static information about Model Anima.</p>

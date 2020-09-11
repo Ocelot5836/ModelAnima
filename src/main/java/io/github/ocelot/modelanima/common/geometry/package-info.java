@@ -1,6 +1,6 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-package io.github.ocelot.client.model;
+package io.github.ocelot.modelanima.common.geometry;
 
 import mcp.MethodsReturnNonnullByDefault;
 

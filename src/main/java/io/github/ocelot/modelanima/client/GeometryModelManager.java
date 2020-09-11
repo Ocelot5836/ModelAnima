@@ -1,14 +1,14 @@
-package io.github.ocelot.client;
+package io.github.ocelot.modelanima.client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
-import io.github.ocelot.common.geometry.GeometryModelLoader;
-import io.github.ocelot.common.geometry.GeometryModelData;
-import io.github.ocelot.client.render.BedrockGeometryModel;
-import io.github.ocelot.client.model.GeometryModel;
-import io.github.ocelot.client.model.GeometryModelTexture;
-import io.github.ocelot.client.model.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.common.geometry.GeometryModelLoader;
+import io.github.ocelot.modelanima.common.geometry.GeometryModelData;
+import io.github.ocelot.modelanima.client.render.BedrockGeometryModel;
+import io.github.ocelot.modelanima.client.model.GeometryModel;
+import io.github.ocelot.modelanima.client.model.GeometryModelTexture;
+import io.github.ocelot.modelanima.client.model.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;

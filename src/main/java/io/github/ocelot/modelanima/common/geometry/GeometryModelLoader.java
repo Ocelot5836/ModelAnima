@@ -1,4 +1,4 @@
-package io.github.ocelot.common.geometry;
+package io.github.ocelot.modelanima.common.geometry;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;

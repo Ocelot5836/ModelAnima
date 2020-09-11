@@ -1,7 +1,7 @@
-package io.github.ocelot;
+package io.github.ocelot.modelanima;
 
-import io.github.ocelot.client.GeometryModelManager;
-import io.github.ocelot.client.TestLayer;
+import io.github.ocelot.modelanima.client.GeometryModelManager;
+import io.github.ocelot.modelanima.client.TestLayer;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.PlayerRenderer;

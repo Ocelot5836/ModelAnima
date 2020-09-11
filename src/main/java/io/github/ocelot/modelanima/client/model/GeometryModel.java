@@ -1,9 +1,9 @@
-package io.github.ocelot.client.model;
+package io.github.ocelot.modelanima.client.model;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import io.github.ocelot.client.GeometryModelManager;
-import io.github.ocelot.common.geometry.GeometryModelData;
+import io.github.ocelot.modelanima.client.GeometryModelManager;
+import io.github.ocelot.modelanima.common.geometry.GeometryModelData;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.ResourceLocation;
