@@ -3,7 +3,7 @@ package io.github.ocelot.modelanima.client.render;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import cpw.mods.modlauncher.api.INameMappingService;
-import io.github.ocelot.modelanima.client.model.GeometryModel;
+import io.github.ocelot.modelanima.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.common.geometry.GeometryModelData;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.RenderType;

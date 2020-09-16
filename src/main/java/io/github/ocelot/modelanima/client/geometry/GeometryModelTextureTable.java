@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.client.model;
+package io.github.ocelot.modelanima.client.geometry;
 
 import com.google.gson.*;
 import io.github.ocelot.modelanima.client.render.BedrockGeometryModel;

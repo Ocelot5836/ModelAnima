@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.client.model;
+package io.github.ocelot.modelanima.client.geometry;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
