@@ -1,46 +1,18 @@
 package io.github.ocelot.modelanima;
 
+import io.github.ocelot.modelanima.common.animation.AnimationData;
+import io.github.ocelot.modelanima.common.animation.AnimationLoader;
 import io.github.ocelot.modelanima.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.common.geometry.GeometryModelLoader;
+
+import java.util.Arrays;
 
 public class ApiTest
 {
     public static void main(String[] args) throws Exception
     {
-        GeometryModelData model = GeometryModelLoader.parse("{\n" +
-                "\t\"format_version\": \"1.12.0\",\n" +
-                "\t\"minecraft:geometry\": [{\n" +
-                "\t\t\"description\": {\n" +
-                "\t\t\t\"identifier\": \"wise_beard\",\n" +
-                "\t\t\t\"texture_width\": 64,\n" +
-                "\t\t\t\"texture_height\": 32,\n" +
-                "\t\t\t\"visible_bounds_width\": 2,\n" +
-                "\t\t\t\"visible_bounds_height\": 3.5,\n" +
-                "\t\t\t\"visible_bounds_offset\": [0, 1.25, 0]\n" +
-                "\t\t},\n" +
-                "\t\t\"bones\": [{\n" +
-                "\t\t\t\"name\": \"beard1\",\n" +
-                "\t\t\t\"part\": \"head\",\n" +
-                "\t\t\t\"pivot\": [0, 24, 0],\n" +
-                "\t\t\t\"cubes\": [{\n" +
-                "\t\t\t\t\"origin\": [-4, 24, -4],\n" +
-                "\t\t\t\t\"size\": [8, 8, 8],\n" +
-                "\t\t\t\t\"inflate\": 0.6,\n" +
-                "\t\t\t\t\"uv\": [0, 0]\n" +
-                "\t\t\t}]\n" +
-                "\t\t}, {\n" +
-                "\t\t\t\"name\": \"beard2\",\n" +
-                "\t\t\t\"part\": \"head\",\n" +
-                "\t\t\t\"pivot\": [0, 24, 0],\n" +
-                "\t\t\t\"cubes\": [{\n" +
-                "\t\t\t\t\"origin\": [-4, 13.4, -4.5],\n" +
-                "\t\t\t\t\"size\": [8, 10, 1],\n" +
-                "\t\t\t\t\"uv\": [0, 16]\n" +
-                "\t\t\t}]\n" +
-                "\t\t}]\n" +
-                "\t}]\n" +
-                "}");
+        AnimationData[] animations= AnimationLoader.parse("{\"format_version\":\"1.8.0\",\"animations\":{\"floss\":{\"loop\":true,\"bones\":{\"body\":{\"scale\":{\"0.0\":[1,1,1],\"0.36\":[1,1,3],\"0.8\":[1,1,1]}},\"leftWing\":{\"rotation\":{\"0.0\":[-45,0,-70],\"0.52\":[0,0,90],\"1.0\":[-45,0,-70]}},\"rightWing\":{\"rotation\":{\"0.0\":[0,0,-90],\"0.52\":[-45,0,70],\"1.0\":[0,0,-90]}},\"tail\":{\"rotation\":{\"0.0\":[0,0,0],\"0.52\":[180,0,0],\"1.28\":[360,0,0]}},\"beak\":{\"position\":{\"0.0\":[0,0,0],\"0.52\":[0,0,-7],\"1.28\":[0,0,0]}}},\"sound_effects\":{\"0.24\":{\"effect\":\"block.anvil.place\"}}},\"dance\":{\"loop\":\"hold_on_last_frame\",\"animation_length\":1.68,\"bones\":{\"head\":{\"position\":{\"0.0\":[0,0,0],\"0.56\":[-6,0,0],\"1.32\":[6,0,0],\"1.68\":[0,0,0]}}},\"particle_effects\":{\"0.56\":{\"effect\":\"explosion\",\"locator\":\"fart\"}}},\"test\":{\"animation_length\":1.76,\"bones\":{\"head\":{\"rotation\":{\"0.0\":[0,0,0],\"1.76\":[62.5,0,0]}}}}}}");
 
-        System.out.println(model);
+        System.out.println(Arrays.toString(animations));
     }
 }

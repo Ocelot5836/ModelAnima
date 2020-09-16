@@ -1,8 +1,7 @@
-package io.github.ocelot.modelanima.common;
+package io.github.ocelot.modelanima.common.animation;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
-import io.github.ocelot.modelanima.common.animation.AnimationData;
 
 import java.io.Reader;
 
@@ -16,7 +15,7 @@ public class AnimationLoader
 {
     private static final String VERSION = "1.8.0";
 
-    public static final Gson GSON = new GsonBuilder().create();
+    public static final Gson GSON = new GsonBuilder().registerTypeAdapter(AnimationData[].class, new AnimationData.Deserializer()).registerTypeAdapter(AnimationData.Loop.class, new AnimationData.Loop.Deserializer()).create();
 
     /**
      * Creates a new animation from the specified JSON element.
@@ -24,7 +23,7 @@ public class AnimationLoader
      * @param reader The reader to get data from
      * @return A new animation from the json
      */
-    public static AnimationData parse(Reader reader) throws JsonSyntaxException, JsonIOException
+    public static AnimationData[] parse(Reader reader) throws JsonSyntaxException, JsonIOException
     {
         return parse(new JsonParser().parse(reader));
     }
@@ -35,7 +34,7 @@ public class AnimationLoader
      * @param reader The reader to get data from
      * @return A new animation from the json
      */
-    public static AnimationData parse(JsonReader reader) throws JsonSyntaxException, JsonIOException
+    public static AnimationData[] parse(JsonReader reader) throws JsonSyntaxException, JsonIOException
     {
         return parse(new JsonParser().parse(reader));
     }
@@ -46,7 +45,7 @@ public class AnimationLoader
      * @param json The raw json string
      * @return A new animation from the json
      */
-    public static AnimationData parse(String json) throws JsonSyntaxException
+    public static AnimationData[] parse(String json) throws JsonSyntaxException
     {
         return parse(new JsonParser().parse(json));
     }
@@ -57,10 +56,10 @@ public class AnimationLoader
      * @param json The parsed json element
      * @return A new animation from the json
      */
-    public static AnimationData parse(JsonElement json) throws JsonSyntaxException
+    public static AnimationData[] parse(JsonElement json) throws JsonSyntaxException
     {
         if (!json.getAsJsonObject().get("format_version").getAsString().equals(VERSION))
             throw new JsonSyntaxException("Unsupported model version. Only " + VERSION + " is supported."); // TODO support multiple versions
-        return GSON.fromJson(json.getAsJsonObject().getAsJsonObject("animations"), AnimationData.class);
+        return GSON.fromJson(json.getAsJsonObject().getAsJsonObject("animations"), AnimationData[].class);
     }
 }
