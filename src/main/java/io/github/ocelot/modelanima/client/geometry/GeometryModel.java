@@ -18,6 +18,11 @@ import javax.annotation.Nullable;
 public interface GeometryModel
 {
     /**
+     * A blank model that can be used for empty entries.
+     */
+    GeometryModel MISSING = new EmptyGeometryModel();
+
+    /**
      * Renders a specific part with the specified texture key.
      *
      * @param part          The parent model part being rendered or null to render all
