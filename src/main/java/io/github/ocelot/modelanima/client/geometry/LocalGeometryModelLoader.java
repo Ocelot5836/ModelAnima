@@ -1,14 +1,9 @@
-package io.github.ocelot.modelanima.client;
+package io.github.ocelot.modelanima.client.geometry;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
-import io.github.ocelot.modelanima.common.geometry.GeometryModelLoader;
 import io.github.ocelot.modelanima.common.geometry.GeometryModelData;
-import io.github.ocelot.modelanima.client.render.BedrockGeometryModel;
-import io.github.ocelot.modelanima.client.geometry.GeometryModel;
-import io.github.ocelot.modelanima.client.geometry.GeometryModelTexture;
-import io.github.ocelot.modelanima.client.geometry.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.common.geometry.GeometryModelLoader;
+import io.github.ocelot.modelanima.common.geometry.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -33,6 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +41,7 @@ import java.util.concurrent.Executor;
  * @author Ocelot
  * @since 1.0.0
  */
-public final class GeometryModelManager
+public final class LocalGeometryModelLoader
 {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final GeometryModel MISSING = new BedrockGeometryModel(RenderType::getEntitySolid, new GeometryModelData());
@@ -93,8 +89,6 @@ public final class GeometryModelManager
 
     private static class Reloader implements IFutureReloadListener
     {
-        private static final Gson GSON = new GsonBuilder().registerTypeAdapter(GeometryModelTextureTable.class, new GeometryModelTextureTable.Deserializer()).create();
-
         @Override
         public CompletableFuture<Void> reload(IStage stage, IResourceManager resourceManager, IProfiler preparationsProfiler, IProfiler reloadProfiler, Executor backgroundExecutor, Executor gameExecutor)
         {
@@ -106,7 +100,7 @@ public final class GeometryModelManager
                             ResourceLocation textureTableName = new ResourceLocation(textureTableLocation.getNamespace(), textureTableLocation.getPath().substring("textures/models/".length(), textureTableLocation.getPath().length() - ".json".length()));
                             try (IResource resource = resourceManager.getResource(textureTableLocation))
                             {
-                                textureLocations.put(textureTableName, GSON.fromJson(new JsonParser().parse(IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8)).getAsJsonObject(), GeometryModelTextureTable.class));
+                                textureLocations.put(textureTableName, GeometryModelLoader.parseTextures(new InputStreamReader(resource.getInputStream())));
                             }
                             catch (Exception e)
                             {
@@ -129,7 +123,7 @@ public final class GeometryModelManager
                             ResourceLocation modelName = new ResourceLocation(modelLocation.getNamespace(), modelLocation.getPath().substring("models/geometry/".length(), modelLocation.getPath().length() - ".json".length()));
                             try (IResource resource = resourceManager.getResource(modelLocation))
                             {
-                                modelLocations.put(modelName, GeometryModelLoader.parse(IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8)));
+                                modelLocations.put(modelName, GeometryModelLoader.parseModel(IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8)));
                             }
                             catch (Exception e)
                             {

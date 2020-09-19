@@ -1,6 +1,6 @@
 package io.github.ocelot.modelanima;
 
-import io.github.ocelot.modelanima.client.GeometryModelManager;
+import io.github.ocelot.modelanima.client.geometry.LocalGeometryModelLoader;
 import io.github.ocelot.modelanima.client.TestLayer;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -33,7 +33,7 @@ public class TestMod
     public TestMod()
     {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> GeometryModelManager.init(modBus));
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> LocalGeometryModelLoader.init(modBus));
         BLOCKS.register(modBus);
         TILE_ENTITIES.register(modBus);
         ITEMS.register(modBus);

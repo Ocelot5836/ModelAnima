@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.client.render;
+package io.github.ocelot.modelanima.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;

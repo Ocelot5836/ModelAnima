@@ -1,7 +1,7 @@
-package io.github.ocelot.modelanima.client.geometry;
+package io.github.ocelot.modelanima.common.geometry.texture;
 
 import com.google.gson.*;
-import io.github.ocelot.modelanima.client.render.BedrockGeometryModel;
+import io.github.ocelot.modelanima.client.geometry.BedrockGeometryModel;
 import net.minecraft.network.PacketBuffer;
 
 import javax.annotation.Nullable;

@@ -2,7 +2,6 @@ package io.github.ocelot.modelanima.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import io.github.ocelot.modelanima.client.GeometryModelManager;
 import io.github.ocelot.modelanima.common.geometry.GeometryModelData;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -11,7 +10,7 @@ import net.minecraft.util.ResourceLocation;
 import javax.annotation.Nullable;
 
 /**
- * <p>An abstract renderer for geometry models that can be queried by {@link GeometryModelManager}.</p>
+ * <p>An abstract renderer for geometry models that can be queried by {@link LocalGeometryModelLoader}.</p>
  *
  * @author Ocelot
  * @since 1.0.0

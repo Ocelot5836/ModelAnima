@@ -3,8 +3,9 @@ package io.github.ocelot.modelanima.client;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.TestMod;
 import io.github.ocelot.modelanima.client.geometry.GeometryModel;
-import io.github.ocelot.modelanima.client.geometry.GeometryModelTextureTable;
-import io.github.ocelot.modelanima.client.render.GeometryModelRenderer;
+import io.github.ocelot.modelanima.client.geometry.LocalGeometryModelLoader;
+import io.github.ocelot.modelanima.common.geometry.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.client.geometry.GeometryModelRenderer;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
@@ -27,8 +28,8 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        GeometryModel model = GeometryModelManager.getModel(MODEL_LOCATION);
-        GeometryModelTextureTable texture = GeometryModelManager.getTextureTable(TEXTURE_LOCATION);
+        GeometryModel model = LocalGeometryModelLoader.getModel(MODEL_LOCATION);
+        GeometryModelTextureTable texture = LocalGeometryModelLoader.getTextureTable(TEXTURE_LOCATION);
         GeometryModelRenderer.render(this.getEntityModel(), model, texture, matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }
