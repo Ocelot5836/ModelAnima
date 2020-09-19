@@ -80,11 +80,11 @@ public final class LocalGeometryModelLoader
      * Fetches a texture table by the specified name.
      *
      * @param name The name of the texture table
-     * @return The table found or {@link GeometryModelTextureTable#MISSING}
+     * @return The table found or {@link GeometryModelTextureTable#EMPTY}
      */
     public static GeometryModelTextureTable getTextureTable(ResourceLocation name)
     {
-        return TEXTURES.getOrDefault(name, GeometryModelTextureTable.MISSING);
+        return TEXTURES.getOrDefault(name, GeometryModelTextureTable.EMPTY);
     }
 
     private static class Reloader implements IFutureReloadListener

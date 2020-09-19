@@ -18,7 +18,7 @@ import java.util.Objects;
  */
 public class GeometryModelTextureTable
 {
-    public static GeometryModelTextureTable MISSING = new GeometryModelTextureTable(new HashMap<>());
+    public static GeometryModelTextureTable EMPTY = new GeometryModelTextureTable(new HashMap<>());
 
     private final Map<String, GeometryModelTexture> textures;
 

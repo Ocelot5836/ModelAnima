@@ -20,7 +20,7 @@ public interface GeometryModel
     /**
      * A blank model that can be used for empty entries.
      */
-    GeometryModel MISSING = new EmptyGeometryModel();
+    GeometryModel EMPTY = new EmptyGeometryModel();
 
     /**
      * Renders a specific part with the specified texture key.
