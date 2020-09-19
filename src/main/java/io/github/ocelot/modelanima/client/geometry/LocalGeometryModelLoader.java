@@ -44,7 +44,6 @@ import java.util.concurrent.Executor;
 public final class LocalGeometryModelLoader
 {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final GeometryModel MISSING = new BedrockGeometryModel(RenderType::getEntitySolid, new GeometryModelData());
     private static final Map<ResourceLocation, GeometryModel> RENDERERS = new HashMap<>();
     private static final Map<ResourceLocation, GeometryModelTextureTable> TEXTURES = new HashMap<>();
 
@@ -69,11 +68,11 @@ public final class LocalGeometryModelLoader
      * Fetches a geometry model by the specified name.
      *
      * @param name The name of the model
-     * @return The bedrock model found or {@link #MISSING}
+     * @return The bedrock model found or {@link GeometryModel#EMPTY}
      */
     public static GeometryModel getModel(ResourceLocation name)
     {
-        return RENDERERS.getOrDefault(name, MISSING);
+        return RENDERERS.getOrDefault(name, GeometryModel.EMPTY);
     }
 
     /**
