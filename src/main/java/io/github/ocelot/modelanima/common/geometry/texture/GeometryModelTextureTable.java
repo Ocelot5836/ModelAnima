@@ -1,7 +1,7 @@
 package io.github.ocelot.modelanima.common.geometry.texture;
 
 import com.google.gson.*;
-import io.github.ocelot.modelanima.client.geometry.BedrockGeometryModel;
+import io.github.ocelot.modelanima.client.geometry.GeometryModel;
 import net.minecraft.network.PacketBuffer;
 
 import javax.annotation.Nullable;
@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * <p>A table of textures to be used for {@link BedrockGeometryModel} rendering.</p>
+ * <p>A table of textures to be used for {@link GeometryModel} rendering.</p>
  *
  * @author Ocelot
  */

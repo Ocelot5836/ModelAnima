@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import io.github.ocelot.modelanima.ModelAnima;
-import io.github.ocelot.modelanima.client.geometry.BedrockGeometryModel;
+import io.github.ocelot.modelanima.client.geometry.GeometryModel;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.LazyValue;
@@ -16,7 +16,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * <p>A single texture used on a {@link BedrockGeometryModel}.</p>
+ * <p>A single texture used on a {@link GeometryModel}.</p>
  *
  * @author Ocelot
  */
