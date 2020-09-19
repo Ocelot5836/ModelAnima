@@ -17,7 +17,7 @@ apply plugin: 'eclipse'
 
 version = "${project.minecraft}-${project.modVersion}"
 group = 'io.github.ocelot' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'FishLib'
+archivesBaseName = 'model-anima'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 

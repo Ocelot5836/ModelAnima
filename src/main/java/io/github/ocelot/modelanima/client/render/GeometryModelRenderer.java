@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class GeometryModelRenderer
     /**
      * Renders the specified model on the specified parent model.
      *
-     * @param parent        The parent model to attach the model to
+     * @param parent        The parent model to attach parts to or <code>null</code>
      * @param model         The model to render
      * @param textures      The textures to apply to the model or <code>null</code> to use a missing texture
      * @param matrixStack   The current stack of transformations
@@ -40,9 +41,9 @@ public class GeometryModelRenderer
      * @param blue          The blue factor for color
      * @param alpha         The alpha factor for color
      */
-    public static void render(Model parent, GeometryModel model, @Nullable GeometryModelTextureTable textures, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public static void render(@Nullable Model parent, GeometryModel model, @Nullable GeometryModelTextureTable textures, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-        Map<String, ModelRenderer> parentParts = CACHE.computeIfAbsent(parent.getClass().getName(), key -> mapRenderers(parent));
+        Map<String, ModelRenderer> parentParts = parent == null ? Collections.emptyMap() : CACHE.computeIfAbsent(parent.getClass().getName(), key -> mapRenderers(parent));
         for (String textureKey : model.getTextureKeys())
         {
             GeometryModelTexture texture = textures == null ? GeometryModelTexture.MISSING : textures.getTexture(textureKey);
