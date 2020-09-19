@@ -13,7 +13,7 @@
       "bones": [
         {
           "name": "Torso",
-          "parent": "parent.bipedBody",
+          "parent": "parent.field_78115_e",
           "pivot": [0, 24, 0],
           "cubes": [
             {
@@ -39,7 +39,7 @@
         },
         {
           "name": "Head",
-          "parent": "parent.bipedHead",
+          "parent": "parent.field_78116_c",
           "pivot": [0, 24, 0],
           "cubes": [
             {
@@ -52,7 +52,7 @@
         },
         {
           "name": "RightArm",
-          "parent": "parent.bipedRightArm",
+          "parent": "parent.field_178723_h",
           "pivot": [-5, 22, 0],
           "cubes": [
             {
@@ -65,7 +65,7 @@
         },
         {
           "name": "LeftArm",
-          "parent": "parent.bipedLeftArm",
+          "parent": "parent.field_178724_i",
           "pivot": [5, 22, 0],
           "mirror": true,
           "cubes": [
@@ -79,7 +79,7 @@
         },
         {
           "name": "TorsoLayer",
-          "parent": "parent.bipedBody",
+          "parent": "parent.field_78115_e",
           "pivot": [0, 24, 0],
           "cubes": [
             {
