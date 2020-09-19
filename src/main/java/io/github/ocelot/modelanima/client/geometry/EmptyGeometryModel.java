@@ -29,6 +29,13 @@ public class EmptyGeometryModel implements GeometryModel
 
     @Nullable
     @Override
+    public ModelRenderer getModelRenderer(@Nullable String part, @Nullable String textureKey)
+    {
+        return null;
+    }
+
+    @Nullable
+    @Override
     public GeometryModelData.Locator getLocator(String name)
     {
         return null;

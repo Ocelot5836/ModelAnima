@@ -25,8 +25,8 @@ public interface GeometryModel
     /**
      * Renders a specific part with the specified texture key.
      *
-     * @param part          The parent model part being rendered or null to render all
-     * @param textureKey    The key of the texture to use for that part
+     * @param part          The parent model part being rendered or <code>null</code> to render all
+     * @param textureKey    The key of the texture to use for that part or <code>null</code> for default texture
      * @param matrixStack   The current stack of transformations
      * @param builder       The builder to put the data into
      * @param packedLight   The packed uv into the light texture the parts should be rendered at
@@ -41,11 +41,21 @@ public interface GeometryModel
     /**
      * Copies the model angles to the currently selected part.
      *
-     * @param part         The parent model part being rendered or null to render all
-     * @param textureKey   The key of the texture to use for that part
+     * @param part         The parent model part being rendered or <code>null</code> to render all
+     * @param textureKey   The key of the texture to use for that part or <code>null</code> for default texture
      * @param limbRenderer The renderer to copy angles of
      */
     void copyAngles(@Nullable String part, @Nullable String textureKey, ModelRenderer limbRenderer);
+
+    /**
+     * Fetches a model renderer from the model.
+     *
+     * @param part       The parent model part being rendered or <code>null</code> to render all
+     * @param textureKey   The key of the texture to use for that part or <code>null</code> for default texture
+     * @return The renderer by that name or <code>null</code> if there is no renderer under that name
+     */
+    @Nullable
+    ModelRenderer getModelRenderer(@Nullable String part, @Nullable String textureKey);
 
     /**
      * Fetches a specific locator by name.

@@ -3,7 +3,6 @@ package io.github.ocelot.modelanima.client.geometry;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import cpw.mods.modlauncher.api.INameMappingService;
-import io.github.ocelot.modelanima.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.common.geometry.GeometryModelData;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.RenderType;
@@ -123,12 +122,13 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     @Override
     public void render(MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
+        this.render(null, null, matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
     }
 
     @Override
     public void render(@Nullable String part, @Nullable String textureKey, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-        ModelRenderer renderer = this.modelParts.get(getPart(part, textureKey));
+        ModelRenderer renderer = this.getModelRenderer(part, textureKey);
         if (renderer != null)
         {
             renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
@@ -138,11 +138,18 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     @Override
     public void copyAngles(@Nullable String part, @Nullable String textureKey, ModelRenderer limbRenderer)
     {
-        ModelRenderer renderer = this.modelParts.get(getPart(part, textureKey));
+        ModelRenderer renderer = this.getModelRenderer(part, textureKey);
         if (renderer != null)
         {
             renderer.copyModelAngles(limbRenderer);
         }
+    }
+
+    @Nullable
+    @Override
+    public ModelRenderer getModelRenderer(@Nullable String part, @Nullable String textureKey)
+    {
+        return this.modelParts.get(getPart(part, textureKey));
     }
 
     @Nullable
