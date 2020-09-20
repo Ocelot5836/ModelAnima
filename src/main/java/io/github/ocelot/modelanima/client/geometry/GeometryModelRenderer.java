@@ -50,8 +50,9 @@ public class GeometryModelRenderer
             model.render(null, textureKey, matrixStack, buffer.getBuffer(model.getRenderType(texture.getLocation())), packedLight, packedOverlay, red * GeometryModelTexture.MISSING.getRed(), green * GeometryModelTexture.MISSING.getGreen(), blue * GeometryModelTexture.MISSING.getBlue(), alpha);
             for (String modelKey : model.getModelKeys())
             {
-                if (parentParts.containsKey(modelKey))
-                    model.copyAngles(modelKey, textureKey, parentParts.get(modelKey));
+                String deobfName = ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, modelKey);
+                if (parentParts.containsKey(deobfName))
+                    model.copyAngles(modelKey, textureKey, parentParts.get(deobfName));
                 model.render(modelKey, textureKey, matrixStack, buffer.getBuffer(model.getRenderType(texture.getLocation())), packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
             }
         }
@@ -67,7 +68,7 @@ public class GeometryModelRenderer
             {
                 try
                 {
-                    renderers.put(ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, field.getName()), (ModelRenderer) field.get(model));
+                    renderers.put(field.getName(), (ModelRenderer) field.get(model));
                 }
                 catch (Exception ignored)
                 {
