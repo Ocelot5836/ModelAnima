@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class GeometryModelRenderer
 {
-    private static final Map<String, Map<String, ModelRenderer>> CACHE = new HashMap<>();
+    private static final Map<Model, Map<String, ModelRenderer>> CACHE = new HashMap<>();
 
     /**
      * Renders the specified model on the specified parent model.
@@ -43,7 +43,7 @@ public class GeometryModelRenderer
      */
     public static void render(@Nullable Model parent, GeometryModel model, @Nullable GeometryModelTextureTable textures, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-        Map<String, ModelRenderer> parentParts = parent == null ? Collections.emptyMap() : CACHE.computeIfAbsent(parent.getClass().getName(), key -> mapRenderers(parent));
+        Map<String, ModelRenderer> parentParts = parent == null ? Collections.emptyMap() : CACHE.computeIfAbsent(parent, key -> mapRenderers(parent));
         for (String textureKey : model.getTextureKeys())
         {
             GeometryModelTexture texture = textures == null ? GeometryModelTexture.MISSING : textures.getTexture(textureKey);
