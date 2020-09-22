@@ -116,7 +116,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel
 
     private static String getPart(@Nullable String part, @Nullable String texture)
     {
-        return (texture != null ? texture + "_" : "") + (part != null ? part : ALL).toLowerCase(Locale.ROOT);
+        return (texture != null ? texture : "texture") + "_" + (part != null ? part : ALL).toLowerCase(Locale.ROOT);
     }
 
     @Override
