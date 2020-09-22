@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
  * <p>A completely empty {@link GeometryModel}.</p>
@@ -27,18 +28,16 @@ public class EmptyGeometryModel implements GeometryModel
     {
     }
 
-    @Nullable
     @Override
-    public ModelRenderer getModelRenderer(@Nullable String part, @Nullable String textureKey)
+    public Optional<ModelRenderer> getModelRenderer(@Nullable String part, @Nullable String textureKey)
     {
-        return null;
+        return Optional.empty();
     }
 
-    @Nullable
     @Override
-    public GeometryModelData.Locator getLocator(String name)
+    public Optional<GeometryModelData.Locator> getLocator(String name)
     {
-        return null;
+        return Optional.empty();
     }
 
     @Override

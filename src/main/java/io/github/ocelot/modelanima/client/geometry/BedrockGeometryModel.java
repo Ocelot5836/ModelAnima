@@ -128,35 +128,25 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     @Override
     public void render(@Nullable String part, @Nullable String textureKey, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-        ModelRenderer renderer = this.getModelRenderer(part, textureKey);
-        if (renderer != null)
-        {
-            renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
-        }
+        this.getModelRenderer(part, textureKey).ifPresent(renderer -> renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha));
     }
 
     @Override
     public void copyAngles(@Nullable String part, @Nullable String textureKey, ModelRenderer limbRenderer)
     {
-        ModelRenderer renderer = this.getModelRenderer(part, textureKey);
-        if (renderer != null)
-        {
-            renderer.copyModelAngles(limbRenderer);
-        }
+        this.getModelRenderer(part, textureKey).ifPresent(renderer -> renderer.copyModelAngles(limbRenderer));
     }
 
-    @Nullable
     @Override
-    public ModelRenderer getModelRenderer(@Nullable String part, @Nullable String textureKey)
+    public Optional<ModelRenderer> getModelRenderer(@Nullable String part, @Nullable String textureKey)
     {
-        return this.modelParts.get(getPart(part, textureKey));
+        return Optional.ofNullable(this.modelParts.get(getPart(part, textureKey)));
     }
 
-    @Nullable
     @Override
-    public GeometryModelData.Locator getLocator(String name)
+    public Optional<GeometryModelData.Locator> getLocator(String name)
     {
-        return this.locators.get(name);
+        return Optional.ofNullable(this.locators.get(name));
     }
 
     @Override

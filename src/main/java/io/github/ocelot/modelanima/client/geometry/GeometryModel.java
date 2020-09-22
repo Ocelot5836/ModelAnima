@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
  * <p>An abstract renderer for geometry models that can be queried by {@link LocalGeometryModelLoader}.</p>
@@ -51,20 +52,18 @@ public interface GeometryModel
      * Fetches a model renderer from the model.
      *
      * @param part       The parent model part being rendered or <code>null</code> to render all
-     * @param textureKey   The key of the texture to use for that part or <code>null</code> for default texture
-     * @return The renderer by that name or <code>null</code> if there is no renderer under that name
+     * @param textureKey The key of the texture to use for that part or <code>null</code> for default texture
+     * @return An optional of the model renderer by that name
      */
-    @Nullable
-    ModelRenderer getModelRenderer(@Nullable String part, @Nullable String textureKey);
+    Optional<ModelRenderer> getModelRenderer(@Nullable String part, @Nullable String textureKey);
 
     /**
      * Fetches a specific locator by name.
      *
      * @param name The name of the locator to fetch
-     * @return The locator by that name or <code>null</code> if there is no locator by that name
+     * @return An optional of the locator by that name
      */
-    @Nullable
-    GeometryModelData.Locator getLocator(String name);
+    Optional<GeometryModelData.Locator> getLocator(String name);
 
     /**
      * @return All locators in the model
