@@ -12,6 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * <p>A basic implementation of {@link EntityModel} for {@link GeometryModel}.</p>
@@ -21,12 +22,12 @@ import java.util.function.Function;
  */
 public class GeometryEntityModel<T extends Entity> extends EntityModel<T>
 {
-    private final GeometryModel model;
+    private final Supplier<GeometryModel> model;
     private final Function<T, GeometryModelTextureTable> textureFunction;
     private final Set<Pair<String, BoneTransformer<T>>> transforms;
     private GeometryModelTextureTable texture;
 
-    public GeometryEntityModel(GeometryModel model, Function<T, GeometryModelTextureTable> textureFunction)
+    public GeometryEntityModel(Supplier<GeometryModel> model, Function<T, GeometryModelTextureTable> textureFunction)
     {
         this.model = model;
         this.textureFunction = textureFunction;
@@ -39,9 +40,9 @@ public class GeometryEntityModel<T extends Entity> extends EntityModel<T>
         this.texture = this.textureFunction.apply(entity);
         for (Pair<String, BoneTransformer<T>> transform : this.transforms)
         {
-            for (String textureKey : this.model.getTextureKeys())
+            for (String textureKey : this.getModel().getTextureKeys())
             {
-                this.model.getModelRenderer(transform.getLeft(), textureKey).ifPresent(modelRenderer -> transform.getRight().transform(this, modelRenderer, entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch));
+                this.getModel().getModelRenderer(transform.getLeft(), textureKey).ifPresent(modelRenderer -> transform.getRight().transform(this, modelRenderer, entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch));
             }
         }
     }
@@ -49,7 +50,7 @@ public class GeometryEntityModel<T extends Entity> extends EntityModel<T>
     @Override
     public void render(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-        GeometryModelRenderer.render(null, this.model, this.texture, matrixStack, Minecraft.getInstance().getRenderTypeBuffers().getBufferSource(), packedLight, packedOverlay, red, green, blue, alpha);
+        GeometryModelRenderer.render(null, this.getModel(), this.texture, matrixStack, Minecraft.getInstance().getRenderTypeBuffers().getBufferSource(), packedLight, packedOverlay, red, green, blue, alpha);
     }
 
     /**
@@ -68,7 +69,7 @@ public class GeometryEntityModel<T extends Entity> extends EntityModel<T>
      */
     public GeometryModel getModel()
     {
-        return model;
+        return this.model.get();
     }
 
     /**
