@@ -12,7 +12,7 @@ plugins {
 }
 ```
 
-Add the shade configuration, repository, and the model anima dependency. Note `runtimeOnly` and `compileOnly` are used to allow sources to attach properly.
+Add the shade configuration, repository, and the model anima dependency.
 
 ```gradle
 configurations {
@@ -27,9 +27,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly "com.github.Ocelot5836:ModelAnima:${project.modelAnima}"
-    runtimeOnly fg.deobf("com.github.Ocelot5836:ModelAnima:${project.modelAnima}")
-    shade fg.deobf("com.github.Ocelot5836:ModelAnima:${project.modelAnima}")
+    implementation fg.deobf("com.github.Ocelot5836:ModelAnima:${project.modelAnima}")
+    shade "com.github.Ocelot5836:ModelAnima:${project.modelAnima}"
 }
 ```
 
