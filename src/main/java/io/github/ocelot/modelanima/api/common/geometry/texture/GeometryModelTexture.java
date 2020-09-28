@@ -22,19 +22,21 @@ import java.util.function.Function;
  */
 public class GeometryModelTexture
 {
-    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.LOCATION, "missingno", -1);
+    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.LOCATION, "missingno", -1, false);
 
     private final Type type;
     private final String data;
     private final int color;
-    private final LazyValue<ResourceLocation> location;
+    private final boolean glowing;
+    private final ResourceLocation location;
 
-    public GeometryModelTexture(Type type, String data, int color)
+    public GeometryModelTexture(Type type, String data, int color, boolean glowing)
     {
         this.type = type;
         this.data = data;
         this.color = color;
-        this.location = new LazyValue<>(() -> type.getLocation(data));
+        this.glowing = glowing;
+        this.location = type.getLocation(data);
     }
 
     public GeometryModelTexture(PacketBuffer buf)
@@ -42,7 +44,8 @@ public class GeometryModelTexture
         this.type = Type.byId(buf.readVarInt());
         this.data = buf.readString();
         this.color = buf.readInt();
-        this.location = new LazyValue<>(() -> this.type.getLocation(this.data));
+        this.glowing = buf.readBoolean();
+        this.location = type.getLocation(data);
     }
 
     /**
@@ -55,6 +58,7 @@ public class GeometryModelTexture
         buf.writeVarInt(this.type.ordinal());
         buf.writeString(this.data);
         buf.writeInt(this.color);
+        buf.writeBoolean(this.glowing);
     }
 
     /**
@@ -106,11 +110,19 @@ public class GeometryModelTexture
     }
 
     /**
+     * @return Whether or not this texture should be "fullbright"
+     */
+    public boolean isGlowing()
+    {
+        return glowing;
+    }
+
+    /**
      * @return The location of this texture
      */
     public ResourceLocation getLocation()
     {
-        return this.location.getValue();
+        return location;
     }
 
     @Override
@@ -118,25 +130,28 @@ public class GeometryModelTexture
     {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GeometryModelTexture texture = (GeometryModelTexture) o;
-        return color == texture.color &&
-                type == texture.type &&
-                data.equals(texture.data);
+        GeometryModelTexture that = (GeometryModelTexture) o;
+        return color == that.color &&
+                glowing == that.glowing &&
+                type == that.type &&
+                data.equals(that.data);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(type, data, color);
+        return Objects.hash(type, data, color, glowing);
     }
 
     @Override
     public String toString()
     {
-        return "CosmeticModelTexture{" +
+        return "GeometryModelTexture{" +
                 "type=" + type +
                 ", data='" + data + '\'' +
                 ", color=" + color +
+                ", glowing=" + glowing +
+                ", location=" + location +
                 '}';
     }
 
@@ -147,8 +162,8 @@ public class GeometryModelTexture
      */
     public enum Type
     {
-        LOCATION((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "location"), parseColor(json)), ResourceLocation::new),
-        ONLINE((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "url"), parseColor(json)), data -> new ResourceLocation(ModelAnima.DOMAIN, DigestUtils.md5Hex(data)));
+        LOCATION((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "location"), parseColor(json), JSONUtils.getBoolean(json, "glowing", false)), ResourceLocation::new),
+        ONLINE((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "url"), parseColor(json), JSONUtils.getBoolean(json, "glowing", false)), data -> new ResourceLocation(ModelAnima.DOMAIN, DigestUtils.md5Hex(data)));
 
         private final BiFunction<Type, JsonObject, GeometryModelTexture> deserializer;
         private final Function<String, ResourceLocation> locationGenerator;
