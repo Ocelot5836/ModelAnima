@@ -1,9 +1,9 @@
-package io.github.ocelot.modelanima.client.geometry;
+package io.github.ocelot.modelanima.api.client.geometry;
 
-import io.github.ocelot.modelanima.common.geometry.GeometryModelData;
-import io.github.ocelot.modelanima.common.geometry.GeometryModelLoader;
-import io.github.ocelot.modelanima.common.geometry.texture.GeometryModelTexture;
-import io.github.ocelot.modelanima.common.geometry.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
+import io.github.ocelot.modelanima.api.common.geometry.GeometryModelLoader;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;

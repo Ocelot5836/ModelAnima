@@ -1,15 +1,20 @@
 package io.github.ocelot.modelanima;
 
-import io.github.ocelot.modelanima.client.geometry.LocalGeometryModelLoader;
-import io.github.ocelot.modelanima.client.TestLayer;
+import com.mojang.brigadier.CommandDispatcher;
+import io.github.ocelot.modelanima.api.client.TestLayer;
+import io.github.ocelot.modelanima.api.client.geometry.LocalGeometryModelLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DeferredWorkQueue;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -40,6 +45,7 @@ public class TestMod
         ENTITIES.register(modBus);
         modBus.addListener(this::init);
         modBus.addListener(this::initClient);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void init(FMLCommonSetupEvent event)
@@ -55,5 +61,12 @@ public class TestMod
                 renderer.addLayer(new TestLayer(renderer));
             }
         });
+    }
+
+    @SubscribeEvent
+    public void registerCommands(RegisterCommandsEvent event)
+    {
+        CommandDispatcher<CommandSource> dispatcher = event.getDispatcher();
+        TestCommand.register(dispatcher);
     }
 }

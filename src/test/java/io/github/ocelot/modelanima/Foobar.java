@@ -6,6 +6,7 @@ import net.minecraft.block.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -43,5 +44,34 @@ public class Foobar
     public Optional<BlockState> getBlockState()
     {
         return Optional.ofNullable(this.blockState);
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Foobar foobar = (Foobar) o;
+        return foo == foobar.foo &&
+                Arrays.equals(bar, foobar.bar) &&
+                Objects.equals(blockState, foobar.blockState);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = Objects.hash(foo, blockState);
+        result = 31 * result + Arrays.hashCode(bar);
+        return result;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Foobar{" +
+                "foo=" + foo +
+                ", bar=" + Arrays.toString(bar) +
+                ", blockState=" + blockState +
+                '}';
     }
 }

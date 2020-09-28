@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.common.animation;
+package io.github.ocelot.modelanima.api.common.animation;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;

@@ -1,9 +1,7 @@
 package io.github.ocelot.modelanima;
 
-import io.github.ocelot.modelanima.common.animation.AnimationData;
-import io.github.ocelot.modelanima.common.animation.AnimationLoader;
-import io.github.ocelot.modelanima.common.geometry.GeometryModelData;
-import io.github.ocelot.modelanima.common.geometry.GeometryModelLoader;
+import io.github.ocelot.modelanima.api.common.animation.AnimationData;
+import io.github.ocelot.modelanima.api.common.animation.AnimationLoader;
 
 import java.util.Arrays;
 

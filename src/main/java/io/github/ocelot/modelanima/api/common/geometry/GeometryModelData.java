@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.common.geometry;
+package io.github.ocelot.modelanima.api.common.geometry;
 
 import com.google.gson.*;
 import net.minecraft.client.renderer.model.Model;

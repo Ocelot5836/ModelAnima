@@ -1,8 +1,8 @@
-package io.github.ocelot.modelanima.common.geometry;
+package io.github.ocelot.modelanima.api.common.geometry;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
-import io.github.ocelot.modelanima.common.geometry.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 
 import java.io.Reader;
 

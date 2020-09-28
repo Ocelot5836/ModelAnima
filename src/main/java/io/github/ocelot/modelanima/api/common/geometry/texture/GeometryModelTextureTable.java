@@ -1,7 +1,7 @@
-package io.github.ocelot.modelanima.common.geometry.texture;
+package io.github.ocelot.modelanima.api.common.geometry.texture;
 
 import com.google.gson.*;
-import io.github.ocelot.modelanima.client.geometry.GeometryModel;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import net.minecraft.network.PacketBuffer;
 
 import javax.annotation.Nullable;

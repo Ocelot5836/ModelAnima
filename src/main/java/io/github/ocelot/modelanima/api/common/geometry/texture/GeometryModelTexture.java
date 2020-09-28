@@ -1,10 +1,10 @@
-package io.github.ocelot.modelanima.common.geometry.texture;
+package io.github.ocelot.modelanima.api.common.geometry.texture;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import io.github.ocelot.modelanima.ModelAnima;
-import io.github.ocelot.modelanima.client.geometry.GeometryModel;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.LazyValue;
