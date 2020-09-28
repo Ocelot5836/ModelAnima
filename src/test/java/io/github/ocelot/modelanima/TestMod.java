@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima;
 
 import com.mojang.brigadier.CommandDispatcher;
-import io.github.ocelot.modelanima.api.client.TestLayer;
 import io.github.ocelot.modelanima.api.client.geometry.LocalGeometryModelLoader;
+import io.github.ocelot.modelanima.client.TestLayer;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.PlayerRenderer;

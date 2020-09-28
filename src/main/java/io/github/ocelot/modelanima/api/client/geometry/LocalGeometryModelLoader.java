@@ -148,18 +148,18 @@ public final class LocalGeometryModelLoader
             {
                 try (CloseableHttpClient client = HttpClients.custom().setUserAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11").build())
                 {
-                    HttpGet get = new HttpGet(cosmeticTexture.getData());
+                    HttpGet get = new HttpGet(cosmeticTexture.getTexture());
                     try (CloseableHttpResponse response = client.execute(get))
                     {
                         StatusLine statusLine = response.getStatusLine();
                         if (statusLine.getStatusCode() != 200)
-                            throw new IOException("Failed to connect to '" + cosmeticTexture.getData() + "'. " + statusLine.getStatusCode() + " " + statusLine.getReasonPhrase());
+                            throw new IOException("Failed to connect to '" + cosmeticTexture.getTexture() + "'. " + statusLine.getStatusCode() + " " + statusLine.getReasonPhrase());
                         return NativeImage.read(response.getEntity().getContent());
                     }
                 }
                 catch (Exception e)
                 {
-                    LOGGER.error("Failed to load online texture from '" + cosmeticTexture.getData() + "'", e);
+                    LOGGER.error("Failed to load online texture from '" + cosmeticTexture.getTexture() + "'", e);
                     return null;
                 }
             }, backgroundExecutor).thenCompose(stage::markCompleteAwaitingOthers).thenAcceptAsync(image ->

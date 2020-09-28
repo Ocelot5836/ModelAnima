@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.api.common.geometry.texture;
 
 import com.google.gson.*;
+import com.mojang.serialization.JsonOps;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
-import net.minecraft.network.PacketBuffer;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
@@ -25,31 +25,6 @@ public class GeometryModelTextureTable
     public GeometryModelTextureTable(Map<String, GeometryModelTexture> textures)
     {
         this.textures = textures;
-    }
-
-    public GeometryModelTextureTable(PacketBuffer buf)
-    {
-        this.textures = new HashMap<>();
-        int count = buf.readVarInt();
-        for (int i = 0; i < count; i++)
-        {
-            this.textures.put(buf.readString(), new GeometryModelTexture(buf));
-        }
-    }
-
-    /**
-     * Writes this texture information into the specified buffer.
-     *
-     * @param buf The buffer to write data into
-     */
-    public void write(PacketBuffer buf)
-    {
-        buf.writeVarInt(this.textures.size());
-        for (Map.Entry<String, GeometryModelTexture> entry : this.textures.entrySet())
-        {
-            buf.writeString(entry.getKey());
-            entry.getValue().write(buf);
-        }
     }
 
     /**
@@ -108,8 +83,7 @@ public class GeometryModelTextureTable
             Map<String, GeometryModelTexture> textures = new HashMap<>();
             for (Map.Entry<String, JsonElement> entry : texturesObject.entrySet())
             {
-                JsonObject textureObject = entry.getValue().getAsJsonObject();
-                textures.put(entry.getKey(), GeometryModelTexture.Type.byName(textureObject.get("type").getAsString()).deserialize(textureObject));
+                textures.put(entry.getKey(), GeometryModelTexture.CODEC.parse(JsonOps.INSTANCE, entry.getValue()).result().orElse(GeometryModelTexture.MISSING));
             }
             return new GeometryModelTextureTable(textures);
         }

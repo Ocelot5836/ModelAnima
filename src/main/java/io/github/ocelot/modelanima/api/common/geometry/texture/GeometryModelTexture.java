@@ -3,14 +3,16 @@ package io.github.ocelot.modelanima.api.common.geometry.texture;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.JSONUtils;
-import net.minecraft.util.LazyValue;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.codec.digest.DigestUtils;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -22,7 +24,13 @@ import java.util.function.Function;
  */
 public class GeometryModelTexture
 {
-    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.LOCATION, "missingno", -1, false);
+    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, "missingno", -1, false);
+    public static final Codec<GeometryModelTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.xmap(Type::byName, type -> type.name().toLowerCase(Locale.ROOT)).fieldOf("type").forGetter(GeometryModelTexture::getType),
+            Codec.STRING.fieldOf("texture").forGetter(GeometryModelTexture::getTexture),
+            Codec.INT.optionalFieldOf("color", -1).forGetter(GeometryModelTexture::getColor),
+            Codec.BOOL.optionalFieldOf("glowing", false).forGetter(GeometryModelTexture::isGlowing)
+    ).apply(instance, GeometryModelTexture::new));
 
     private final Type type;
     private final String data;
@@ -41,11 +49,11 @@ public class GeometryModelTexture
 
     public GeometryModelTexture(PacketBuffer buf)
     {
-        this.type = Type.byId(buf.readVarInt());
+        this.type = buf.readEnumValue(Type.class);
         this.data = buf.readString();
         this.color = buf.readInt();
         this.glowing = buf.readBoolean();
-        this.location = type.getLocation(data);
+        this.location = this.type.getLocation(this.data);
     }
 
     /**
@@ -55,7 +63,7 @@ public class GeometryModelTexture
      */
     public void write(PacketBuffer buf)
     {
-        buf.writeVarInt(this.type.ordinal());
+        buf.writeEnumValue(this.type);
         buf.writeString(this.data);
         buf.writeInt(this.color);
         buf.writeBoolean(this.glowing);
@@ -72,7 +80,7 @@ public class GeometryModelTexture
     /**
      * @return The location of this texture. May be a URL depending on {@link #getType()}
      */
-    public String getData()
+    public String getTexture()
     {
         return data;
     }
@@ -162,6 +170,7 @@ public class GeometryModelTexture
      */
     public enum Type
     {
+        UNKNOWN((type, json) -> GeometryModelTexture.MISSING, name -> new ResourceLocation("missingno")),
         LOCATION((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "location"), parseColor(json), JSONUtils.getBoolean(json, "glowing", false)), ResourceLocation::new),
         ONLINE((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "url"), parseColor(json), JSONUtils.getBoolean(json, "glowing", false)), data -> new ResourceLocation(ModelAnima.DOMAIN, DigestUtils.md5Hex(data)));
 
@@ -210,27 +219,14 @@ public class GeometryModelTexture
          * Fetches a type of texture by the specified name.
          *
          * @param name The name of the type of texture
-         * @return The type by that name
+         * @return The type by that name or {@link #UNKNOWN} if there is no type by that name
          */
         public static Type byName(String name)
         {
             for (Type type : values())
                 if (type.name().equalsIgnoreCase(name))
                     return type;
-            throw new JsonSyntaxException("Unknown cosmetic texture type '" + name + "'");
-        }
-
-        /**
-         * Fetches a type of texture by the specified ordinal.
-         *
-         * @param id The ordinal of the type of texture
-         * @return The type by that ordinal
-         */
-        public static Type byId(int id)
-        {
-            if (id < 0 || id >= values().length)
-                throw new IllegalArgumentException("Unknown cosmetic texture type with ordinal '" + id + "'");
-            return values()[id];
+            return UNKNOWN;
         }
     }
 }
