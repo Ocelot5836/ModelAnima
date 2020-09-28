@@ -86,5 +86,5 @@ public interface GeometryModel
      * @param location The texture to use
      * @return A render type using that texture
      */
-    RenderType getRenderType(ResourceLocation location);
+    RenderType getModelRenderType(ResourceLocation location);
 }

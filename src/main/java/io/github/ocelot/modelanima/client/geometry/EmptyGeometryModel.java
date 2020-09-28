@@ -59,7 +59,7 @@ public class EmptyGeometryModel implements GeometryModel
     }
 
     @Override
-    public RenderType getRenderType(ResourceLocation location)
+    public RenderType getModelRenderType(ResourceLocation location)
     {
         return RenderType.getEntitySolid(location);
     }

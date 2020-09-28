@@ -166,4 +166,10 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     {
         return textureKeys;
     }
+
+    @Override
+    public RenderType getModelRenderType(ResourceLocation location)
+    {
+        return super.getRenderType(location);
+    }
 }
