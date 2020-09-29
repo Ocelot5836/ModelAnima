@@ -1,6 +1,9 @@
 package io.github.ocelot.modelanima.api.common.geometry;
 
 import com.google.gson.*;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.JSONUtils;
@@ -8,10 +11,7 @@ import net.minecraft.util.math.vector.Vector3f;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>Deserializes custom java models from JSON.</p>

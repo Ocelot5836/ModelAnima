@@ -47,28 +47,6 @@ public class GeometryModelTexture
         this.location = type.getLocation(data);
     }
 
-    public GeometryModelTexture(PacketBuffer buf)
-    {
-        this.type = buf.readEnumValue(Type.class);
-        this.data = buf.readString();
-        this.color = buf.readInt();
-        this.glowing = buf.readBoolean();
-        this.location = this.type.getLocation(this.data);
-    }
-
-    /**
-     * Writes this texture into the specified buffer.
-     *
-     * @param buf The buffer to fill with data
-     */
-    public void write(PacketBuffer buf)
-    {
-        buf.writeEnumValue(this.type);
-        buf.writeString(this.data);
-        buf.writeInt(this.color);
-        buf.writeBoolean(this.glowing);
-    }
-
     /**
      * @return The type of texture this cosmetic texture is
      */
@@ -170,38 +148,15 @@ public class GeometryModelTexture
      */
     public enum Type
     {
-        UNKNOWN((type, json) -> GeometryModelTexture.MISSING, name -> new ResourceLocation("missingno")),
-        LOCATION((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "location"), parseColor(json), JSONUtils.getBoolean(json, "glowing", false)), ResourceLocation::new),
-        ONLINE((type, json) -> new GeometryModelTexture(type, JSONUtils.getString(json, "url"), parseColor(json), JSONUtils.getBoolean(json, "glowing", false)), data -> new ResourceLocation(ModelAnima.DOMAIN, DigestUtils.md5Hex(data)));
+        UNKNOWN(location -> new ResourceLocation("missingno")),
+        LOCATION(ResourceLocation::new),
+        ONLINE(location -> new ResourceLocation(ModelAnima.DOMAIN, DigestUtils.md5Hex(location)));
 
-        private final BiFunction<Type, JsonObject, GeometryModelTexture> deserializer;
         private final Function<String, ResourceLocation> locationGenerator;
 
-        Type(BiFunction<Type, JsonObject, GeometryModelTexture> deserializer, Function<String, ResourceLocation> locationGenerator)
+        Type(Function<String, ResourceLocation> locationGenerator)
         {
-            this.deserializer = deserializer;
             this.locationGenerator = locationGenerator;
-        }
-
-        private static int parseColor(JsonObject json)
-        {
-            if (!json.has("color"))
-                return -1;
-            JsonElement element = json.get("color");
-            if (!element.isJsonPrimitive() && !element.getAsJsonPrimitive().isString() && !element.getAsJsonPrimitive().isNumber())
-                throw new JsonSyntaxException("Missing color, expected to find a string or int");
-            return element.getAsJsonPrimitive().isString() ? Integer.parseUnsignedInt(JSONUtils.getString(json, "color"), 16) : JSONUtils.getInt(json, "color", -1);
-        }
-
-        /**
-         * Creates a new {@link GeometryModelTexture} from the specified element.
-         *
-         * @param object The json to read texture data from
-         * @return A new texture from that element
-         */
-        public GeometryModelTexture deserialize(JsonObject object)
-        {
-            return this.deserializer.apply(this, object);
         }
 
         /**
