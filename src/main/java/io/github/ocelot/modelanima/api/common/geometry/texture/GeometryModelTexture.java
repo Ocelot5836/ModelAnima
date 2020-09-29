@@ -41,11 +41,11 @@ public class GeometryModelTexture
 
     public GeometryModelTexture(PacketBuffer buf)
     {
-        this.type = Type.byId(buf.readVarInt());
+        this.type = buf.readEnumValue(Type.class);
         this.data = buf.readString();
         this.color = buf.readInt();
         this.glowing = buf.readBoolean();
-        this.location = type.getLocation(data);
+        this.location = this.type.getLocation(this.data);
     }
 
     /**
@@ -55,7 +55,7 @@ public class GeometryModelTexture
      */
     public void write(PacketBuffer buf)
     {
-        buf.writeVarInt(this.type.ordinal());
+        buf.writeEnumValue(this.type);
         buf.writeString(this.data);
         buf.writeInt(this.color);
         buf.writeBoolean(this.glowing);
@@ -218,19 +218,6 @@ public class GeometryModelTexture
                 if (type.name().equalsIgnoreCase(name))
                     return type;
             throw new JsonSyntaxException("Unknown cosmetic texture type '" + name + "'");
-        }
-
-        /**
-         * Fetches a type of texture by the specified ordinal.
-         *
-         * @param id The ordinal of the type of texture
-         * @return The type by that ordinal
-         */
-        public static Type byId(int id)
-        {
-            if (id < 0 || id >= values().length)
-                throw new IllegalArgumentException("Unknown cosmetic texture type with ordinal '" + id + "'");
-            return values()[id];
         }
     }
 }
