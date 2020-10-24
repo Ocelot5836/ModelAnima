@@ -46,7 +46,7 @@ public class GeometryModelTexture
         this.glowing = glowing;
         this.location = type.getLocation(data);
     }
-
+	
     /**
      * @return The type of texture this cosmetic texture is
      */

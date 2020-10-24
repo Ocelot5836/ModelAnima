@@ -52,7 +52,7 @@ public class GeometryModelRenderer
                 String deobfName = ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, modelKey);
                 if (parentParts.containsKey(deobfName))
                     model.copyAngles(modelKey, textureKey, parentParts.get(deobfName));
-                model.render(modelKey, textureKey, matrixStack, buffer.getBuffer(model.getModelRenderType(texture.getLocation())), texture.isGlowing() ? 15728640 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
+                model.render(modelKey, textureKey, matrixStack, buffer.getBuffer(model.getModelRenderType(texture.getLocation())), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
             }
         }
     }
