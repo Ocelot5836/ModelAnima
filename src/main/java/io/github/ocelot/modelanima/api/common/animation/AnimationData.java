@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.api.common.animation;
 
 import com.google.gson.*;
+import io.github.ocelot.modelanima.api.common.util.JSONTupleParser;
 import net.minecraft.util.JSONUtils;
-import net.minecraft.util.math.vector.Vector3f;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.Type;
@@ -102,6 +102,21 @@ public class AnimationData
         return particleEffects;
     }
 
+    @Override
+    public String toString()
+    {
+        return "AnimationData{" +
+                "name='" + name + '\'' +
+                ", loop=" + loop +
+                ", blendWeight=" + blendWeight +
+                ", animationLength=" + animationLength +
+                ", overridePreviousAnimation=" + overridePreviousAnimation +
+                ", boneAnimations=" + Arrays.toString(boneAnimations) +
+                ", soundEffects=" + Arrays.toString(soundEffects) +
+                ", particleEffects=" + Arrays.toString(particleEffects) +
+                '}';
+    }
+
     /**
      * <p>A collection of key frames to animate a single bone.</p>
      *
@@ -176,14 +191,22 @@ public class AnimationData
     public static class KeyFrame
     {
         private final float time;
-        private final Vector3f transformPre;
-        private final Vector3f transformPost;
+        private final float transformPreX;
+        private final float transformPreY;
+        private final float transformPreZ;
+        private final float transformPostX;
+        private final float transformPostY;
+        private final float transformPostZ;
 
-        public KeyFrame(float time, Vector3f transformPre, Vector3f transformPost)
+        public KeyFrame(float time, float transformPreX, float transformPreY, float transformPreZ, float transformPostX, float transformPostY, float transformPostZ)
         {
             this.time = time;
-            this.transformPre = transformPre;
-            this.transformPost = transformPost;
+            this.transformPreX = transformPreX;
+            this.transformPreY = transformPreY;
+            this.transformPreZ = transformPreZ;
+            this.transformPostX = transformPostX;
+            this.transformPostY = transformPostY;
+            this.transformPostZ = transformPostZ;
         }
 
         /**
@@ -195,19 +218,51 @@ public class AnimationData
         }
 
         /**
-         * @return The position to use when transitioning to this frame
+         * @return The position to use when transitioning to this frame in the x-axis
          */
-        public Vector3f getTransformPre()
+        public float getTransformPreX()
         {
-            return transformPre;
+            return transformPreX;
         }
 
         /**
-         * @return The position to use when transitioning away from this frame
+         * @return The position to use when transitioning to this frame in the y-axis
          */
-        public Vector3f getTransformPost()
+        public float getTransformPreY()
         {
-            return transformPost;
+            return transformPreY;
+        }
+
+        /**
+         * @return The position to use when transitioning to this frame in the z-axis
+         */
+        public float getTransformPreZ()
+        {
+            return transformPreZ;
+        }
+
+        /**
+         * @return The position to use when transitioning away from this frame in the x-axis
+         */
+        public float getTransformPostX()
+        {
+            return transformPostX;
+        }
+
+        /**
+         * @return The position to use when transitioning away from this frame in the y-axis
+         */
+        public float getTransformPostY()
+        {
+            return transformPostY;
+        }
+
+        /**
+         * @return The position to use when transitioning away from this frame in the z-axis
+         */
+        public float getTransformPostZ()
+        {
+            return transformPostZ;
         }
 
         @Override
@@ -215,8 +270,8 @@ public class AnimationData
         {
             return "KeyFrame{" +
                     "time=" + time +
-                    ", transformPre=" + transformPre +
-                    ", transformPost=" + transformPost +
+                    ", transformPre=(" + transformPreX + ", " + transformPreY + ", " + transformPreZ + ")" +
+                    ", transformPost=" + transformPostX + "," + transformPostY + ", " + transformPostZ + ")" +
                     '}';
         }
     }
@@ -436,8 +491,8 @@ public class AnimationData
                     if (frames.stream().anyMatch(keyFrame -> keyFrame.getTime() == time))
                         throw new JsonSyntaxException("Duplicate channel time '" + time + "'");
 
-                    Pair<Vector3f, Vector3f> transform = parseChannel(json.getAsJsonObject(name), entry.getKey());
-                    frames.add(new KeyFrame(time, transform.getLeft(), transform.getRight()));
+                    Pair<float[], float[]> transform = parseChannel(json.getAsJsonObject(name), entry.getKey());
+                    frames.add(new KeyFrame(time, transform.getLeft()[0], transform.getLeft()[1], transform.getLeft()[2], transform.getRight()[0], transform.getRight()[1], transform.getRight()[2]));
                 }
                 catch (NumberFormatException e)
                 {
@@ -446,54 +501,20 @@ public class AnimationData
             }
         }
 
-        private static Pair<Vector3f, Vector3f> parseChannel(JsonObject json, String name) throws JsonSyntaxException
+        private static Pair<float[], float[]> parseChannel(JsonObject json, String name) throws JsonSyntaxException
         {
-            if (!json.has(name))
+            if (!json.has(name) && !json.get(name).isJsonObject() && !json.get(name).isJsonArray())
                 throw new JsonSyntaxException("Missing " + name + ", expected to find a JsonObject or JsonArray");
 
             JsonElement transformationElement = json.get(name);
             if (transformationElement.isJsonObject())
             {
                 JsonObject transformationObject = transformationElement.getAsJsonObject();
-                return Pair.of(parseVector(transformationObject, "pre", true), parseVector(transformationObject, "post", true));
+                return Pair.of(JSONTupleParser.getFloat(transformationObject, "pre", 3, null), JSONTupleParser.getFloat(transformationObject, "post", 3, null));
             }
 
-            Vector3f transformation = parseVector(json, name, false);
+            float[] transformation = JSONTupleParser.getFloat(json, name, 3, () -> new float[3]);
             return Pair.of(transformation, transformation);
-        }
-
-        private static Vector3f parseVector(JsonObject json, String name, boolean required) throws JsonSyntaxException
-        {
-            if (!json.has(name) && !required)
-                return new Vector3f();
-            if (!json.has(name))
-                throw new JsonSyntaxException("Expected '" + name + "' as an array or number");
-            if (json.get(name).isJsonPrimitive() && json.getAsJsonPrimitive(name).isString()) // TODO add support?
-                throw new JsonSyntaxException("Molang expressions are not supported");
-            if (json.get(name).isJsonArray())
-            {
-                JsonArray vectorJson = json.getAsJsonArray(name);
-                if (vectorJson.size() != 1 && vectorJson.size() != 3)
-                    throw new JsonParseException("Expected 1 or 3 " + name + " values, found: " + vectorJson.size());
-
-                float[] values = new float[3];
-                if (vectorJson.size() == 1)
-                {
-                    Arrays.fill(values, JSONUtils.getFloat(vectorJson.get(0), name));
-                }
-                else
-                {
-                    for (int i = 0; i < values.length; i++)
-                        values[i] = JSONUtils.getFloat(vectorJson.get(i), name + "[" + i + "]");
-                }
-
-                return new Vector3f(values);
-            }
-            else
-            {
-                float value = json.get(name).getAsFloat();
-                return new Vector3f(value, value, value);
-            }
         }
     }
 }

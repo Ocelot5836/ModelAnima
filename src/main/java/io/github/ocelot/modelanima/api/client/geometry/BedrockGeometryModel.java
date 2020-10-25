@@ -2,7 +2,6 @@ package io.github.ocelot.modelanima.api.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import cpw.mods.modlauncher.api.INameMappingService;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.RenderType;
@@ -10,13 +9,13 @@ import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * <p>A {@link Model} that uses data from {@link GeometryModelData}.</p>
@@ -38,14 +37,15 @@ public class BedrockGeometryModel extends Model implements GeometryModel
         this(renderType, data.getDescription().getTextureWidth(), data.getDescription().getTextureHeight(), data.getBones());
     }
 
+    // FIXME rewrite this
     public BedrockGeometryModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight, GeometryModelData.Bone[] bones)
     {
         super(renderType);
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
         this.modelParts = new HashMap<>();
-        this.locators = Stream.of(Arrays.stream(bones).map(GeometryModelData.Bone::getLocators).toArray(GeometryModelData.Locator[][]::new)).flatMap(Stream::of).collect(Collectors.toMap(GeometryModelData.Locator::getName, locator -> locator));
-        this.textureKeys = Arrays.stream(bones).map(GeometryModelData.Bone::getTexture).distinct().toArray(String[]::new);
+        this.locators = null;// Stream.of(Arrays.stream(bones).map(GeometryModelData.Bone::getLocators).toArray(GeometryModelData.Locator[][]::new)).flatMap(Stream::of).collect(Collectors.toMap(GeometryModelData.Locator::getName, locator -> locator));
+        this.textureKeys = null;//Arrays.stream(bones).map(GeometryModelData.Bone::getTexture).distinct().toArray(String[]::new);
 
         if (bones.length == 0)
         {
@@ -53,50 +53,50 @@ public class BedrockGeometryModel extends Model implements GeometryModel
             return;
         }
 
-        Map<String, Pair<GeometryModelData.Bone, ModelRenderer>> boneLookup = Arrays.stream(bones).map(bone -> Pair.of(bone, bone.createModelRenderer(this))).collect(Collectors.toMap(pair -> pair.getKey().getName(), pair -> pair));
-        Map<GeometryModelData.Bone, String> parts = new HashMap<>();
-        List<String> unprocessedBones = Arrays.stream(bones).map(GeometryModelData.Bone::getName).collect(Collectors.toList());
+//        Map<String, Pair<GeometryModelData.Bone, ModelRenderer>> boneLookup = Arrays.stream(bones).map(bone -> Pair.of(bone, bone.createModelRenderer(this))).collect(Collectors.toMap(pair -> pair.getKey().getName(), pair -> pair));
+//        Map<GeometryModelData.Bone, String> parts = new HashMap<>();
+//        List<String> unprocessedBones = Arrays.stream(bones).map(GeometryModelData.Bone::getName).collect(Collectors.toList());
+//
+//        while (!unprocessedBones.isEmpty())
+//        {
+//            Pair<GeometryModelData.Bone, ModelRenderer> pair = boneLookup.get(unprocessedBones.remove(0));
+//            GeometryModelData.Bone currentBone = pair.getLeft();
+//            String parent = currentBone.getParent();
+//
+//            if (parent != null)
+//            {
+//                if (parent.startsWith("parent."))
+//                {
+//                    parts.put(currentBone, ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, parent.substring("parent.".length())));
+//                }
+//                else
+//                {
+//                    if (!boneLookup.containsKey(parent))
+//                        throw new IllegalStateException("Unknown bone '" + parent + "'");
+//
+//                    ModelRenderer parentRenderer = boneLookup.get(parent).getRight();
+//                    parentRenderer.addChild(pair.getRight());
+//                }
+//            }
+//
+//            unprocessedBones.remove(currentBone.getName());
+//        }
+//
+//        for (Pair<GeometryModelData.Bone, ModelRenderer> pair : boneLookup.values())
+//        {
+//            GeometryModelData.Bone currentBone = pair.getLeft();
+//            if (currentBone.getParent() != null && !currentBone.getParent().startsWith("parent."))
+//                continue;
+//
+//            ModelRenderer parentRenderer = pair.getRight();
+//            applyChildRotations(parentRenderer, 0, 0, 0);
+//            parentRenderer.rotationPointX = 0;
+//            parentRenderer.rotationPointY = 0;
+//            parentRenderer.rotationPointZ = 0;
+//            this.modelParts.computeIfAbsent(getPart(parts.getOrDefault(currentBone, ALL), currentBone.getTexture()), key -> new ModelRenderer(this)).addChild(parentRenderer);
+//        }
 
-        while (!unprocessedBones.isEmpty())
-        {
-            Pair<GeometryModelData.Bone, ModelRenderer> pair = boneLookup.get(unprocessedBones.remove(0));
-            GeometryModelData.Bone currentBone = pair.getLeft();
-            String parent = currentBone.getParent();
-
-            if (parent != null)
-            {
-                if (parent.startsWith("parent."))
-                {
-                    parts.put(currentBone, ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, parent.substring("parent.".length())));
-                }
-                else
-                {
-                    if (!boneLookup.containsKey(parent))
-                        throw new IllegalStateException("Unknown bone '" + parent + "'");
-
-                    ModelRenderer parentRenderer = boneLookup.get(parent).getRight();
-                    parentRenderer.addChild(pair.getRight());
-                }
-            }
-
-            unprocessedBones.remove(currentBone.getName());
-        }
-
-        for (Pair<GeometryModelData.Bone, ModelRenderer> pair : boneLookup.values())
-        {
-            GeometryModelData.Bone currentBone = pair.getLeft();
-            if (currentBone.getParent() != null && !currentBone.getParent().startsWith("parent."))
-                continue;
-
-            ModelRenderer parentRenderer = pair.getRight();
-            applyChildRotations(parentRenderer, 0, 0, 0);
-            parentRenderer.rotationPointX = 0;
-            parentRenderer.rotationPointY = 0;
-            parentRenderer.rotationPointZ = 0;
-            this.modelParts.computeIfAbsent(getPart(parts.getOrDefault(currentBone, ALL), currentBone.getTexture()), key -> new ModelRenderer(this)).addChild(parentRenderer);
-        }
-
-        this.modelKeys = parts.values().toArray(new String[0]);
+        this.modelKeys = null;//parts.values().toArray(new String[0]);
     }
 
     private static void applyChildRotations(ModelRenderer parent, float xOffset, float yOffset, float zOffset)

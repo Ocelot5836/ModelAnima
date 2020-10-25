@@ -64,7 +64,7 @@ public class GeometryModelTextureTable
     @Override
     public String toString()
     {
-        return "CosmeticModelTextureTable{" +
+        return "GeometryModelTextureTable{" +
                 "textures=" + textures +
                 '}';
     }
