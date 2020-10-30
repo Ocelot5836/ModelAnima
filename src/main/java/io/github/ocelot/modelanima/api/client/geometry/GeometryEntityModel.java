@@ -40,10 +40,7 @@ public class GeometryEntityModel<T extends Entity> extends EntityModel<T>
         this.texture = this.textureFunction.apply(entity);
         for (Pair<String, BoneTransformer<T>> transform : this.transforms)
         {
-            for (String textureKey : this.getModel().getTextureKeys())
-            {
-                this.getModel().getModelRenderer(transform.getLeft(), textureKey).ifPresent(modelRenderer -> transform.getRight().transform(this, modelRenderer, entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch));
-            }
+            this.getModel().getModelRenderer(transform.getLeft()).ifPresent(modelRenderer -> transform.getRight().transform(this, modelRenderer, entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch));
         }
     }
 

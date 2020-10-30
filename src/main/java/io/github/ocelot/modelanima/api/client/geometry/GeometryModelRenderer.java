@@ -39,21 +39,35 @@ public class GeometryModelRenderer
      * @param green         The green factor for color
      * @param blue          The blue factor for color
      * @param alpha         The alpha factor for color
+     * @deprecated TODO rewrite
      */
     public static void render(@Nullable Model parent, GeometryModel model, @Nullable GeometryModelTextureTable textures, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
+        // TODO use an atlas instead of unique textures
+
+//        Map<String, ModelRenderer> parentParts = parent == null ? Collections.emptyMap() : CACHE.computeIfAbsent(parent, key -> mapRenderers(parent));
+//        for (String textureKey : model.getTextureKeys())
+//        {
+//            GeometryModelTexture texture = textures == null ? GeometryModelTexture.MISSING : textures.getTexture(textureKey);
+//            model.render(null, textureKey, matrixStack, buffer.getBuffer(model.getModelRenderType(texture.getLocation())), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
+//            for (String modelKey : model.getModelKeys())
+//            {
+//                String deobfName = ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, modelKey);
+//                if (parentParts.containsKey(deobfName))
+//                    model.copyAngles(modelKey, textureKey, parentParts.get(deobfName));
+//                model.render(modelKey, textureKey, matrixStack, buffer.getBuffer(model.getModelRenderType(texture.getLocation())), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
+//            }
+//        }
+
         Map<String, ModelRenderer> parentParts = parent == null ? Collections.emptyMap() : CACHE.computeIfAbsent(parent, key -> mapRenderers(parent));
-        for (String textureKey : model.getTextureKeys())
+        GeometryModelTexture texture = GeometryModelTexture.MISSING;
+        model.render(null, matrixStack, buffer.getBuffer(model.getModelRenderType(texture.getLocation())), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
+        for (String modelKey : model.getModelKeys())
         {
-            GeometryModelTexture texture = textures == null ? GeometryModelTexture.MISSING : textures.getTexture(textureKey);
-            model.render(null, textureKey, matrixStack, buffer.getBuffer(model.getModelRenderType(texture.getLocation())), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * GeometryModelTexture.MISSING.getRed(), green * GeometryModelTexture.MISSING.getGreen(), blue * GeometryModelTexture.MISSING.getBlue(), alpha);
-            for (String modelKey : model.getModelKeys())
-            {
-                String deobfName = ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, modelKey);
-                if (parentParts.containsKey(deobfName))
-                    model.copyAngles(modelKey, textureKey, parentParts.get(deobfName));
-                model.render(modelKey, textureKey, matrixStack, buffer.getBuffer(model.getModelRenderType(texture.getLocation())), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
-            }
+            String deobfName = ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, modelKey);
+            if (parentParts.containsKey(deobfName))
+                model.copyAngles(modelKey, parentParts.get(deobfName));
+            model.render(modelKey, matrixStack, buffer.getBuffer(model.getModelRenderType(texture.getLocation())), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
         }
     }
 

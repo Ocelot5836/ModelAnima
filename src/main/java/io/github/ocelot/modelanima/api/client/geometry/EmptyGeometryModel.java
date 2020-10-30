@@ -19,19 +19,25 @@ import java.util.Optional;
 public class EmptyGeometryModel implements GeometryModel
 {
     @Override
-    public void render(@Nullable String part, @Nullable String textureKey, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public void render(@Nullable String part, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
     }
 
     @Override
-    public void copyAngles(@Nullable String part, @Nullable String textureKey, ModelRenderer limbRenderer)
+    public void copyAngles(@Nullable String part, ModelRenderer modelRenderer)
     {
     }
 
     @Override
-    public Optional<ModelRenderer> getModelRenderer(@Nullable String part, @Nullable String textureKey)
+    public Optional<ModelRenderer> getModelRenderer(String part)
     {
         return Optional.empty();
+    }
+
+    @Override
+    public ModelRenderer[] getModelRenderers()
+    {
+        return new ModelRenderer[0];
     }
 
     @Override

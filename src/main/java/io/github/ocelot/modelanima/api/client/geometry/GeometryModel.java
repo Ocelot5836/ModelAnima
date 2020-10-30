@@ -27,7 +27,6 @@ public interface GeometryModel
      * Renders a specific part with the specified texture key.
      *
      * @param part          The parent model part being rendered or <code>null</code> to render all
-     * @param textureKey    The key of the texture to use for that part or <code>null</code> for default texture
      * @param matrixStack   The current stack of transformations
      * @param builder       The builder to put the data into
      * @param packedLight   The packed uv into the light texture the parts should be rendered at
@@ -37,25 +36,23 @@ public interface GeometryModel
      * @param blue          The blue factor for color
      * @param alpha         The alpha factor for color
      */
-    void render(@Nullable String part, @Nullable String textureKey, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
+    void render(@Nullable String part, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
 
     /**
      * Copies the model angles to the currently selected part.
      *
      * @param part         The parent model part being rendered or <code>null</code> to render all
-     * @param textureKey   The key of the texture to use for that part or <code>null</code> for default texture
-     * @param limbRenderer The renderer to copy angles of
+     * @param modelRenderer The renderer to copy angles of
      */
-    void copyAngles(@Nullable String part, @Nullable String textureKey, ModelRenderer limbRenderer);
+    void copyAngles(@Nullable String part, ModelRenderer modelRenderer);
 
     /**
      * Fetches a model renderer from the model.
      *
-     * @param part       The parent model part being rendered or <code>null</code> to render all
-     * @param textureKey The key of the texture to use for that part or <code>null</code> for default texture
+     * @param part The name of the renderer to get
      * @return An optional of the model renderer by that name
      */
-    Optional<ModelRenderer> getModelRenderer(@Nullable String part, @Nullable String textureKey);
+    Optional<ModelRenderer> getModelRenderer(String part);
 
     /**
      * Fetches a specific locator by name.
@@ -64,6 +61,11 @@ public interface GeometryModel
      * @return An optional of the locator by that name
      */
     Optional<GeometryModelData.Locator> getLocator(String name);
+
+    /**
+     * @return An array of all model renderers
+     */
+    ModelRenderer[] getModelRenderers();
 
     /**
      * @return All locators in the model

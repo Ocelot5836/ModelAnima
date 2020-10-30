@@ -185,6 +185,10 @@ public class GeometryModelData
                 int textureWidth = JSONUtils.getInt(jsonObject, "texture_width", 256);
                 int textureHeight = JSONUtils.getInt(jsonObject, "texture_height", 256);
                 boolean preserveModelPose2588 = JSONUtils.getBoolean(jsonObject, "preserve_model_pose2588", false);
+                if (textureWidth == 0)
+                    throw new JsonSyntaxException("Texture width must not be zero");
+                if (textureHeight == 0)
+                    throw new JsonSyntaxException("Texture height must not be zero");
                 return new Description(identifier, visibleBoundsWidth, visibleBoundsHeight, visibleBoundsOffset[0], visibleBoundsOffset[1], visibleBoundsOffset[2], textureWidth, textureHeight, preserveModelPose2588);
             }
         }
@@ -643,6 +647,14 @@ public class GeometryModelData
             return this.uv[direction.getIndex()];
         }
 
+        /**
+         * @return The uvs for all faces
+         */
+        public CubeUV[] getUVs()
+        {
+            return uv;
+        }
+
         @Override
         public String toString()
         {
@@ -691,6 +703,7 @@ public class GeometryModelData
 
                 if (cubeJson.get("uv").isJsonArray())
                 {
+                    // FIXME this is supposed to be box uv
                     CubeUV[] uvs = new CubeUV[6];
                     float[] uv = JSONTupleParser.getFloat(cubeJson, "uv", 2, () -> new float[2]);
                     uvs[Direction.NORTH.getIndex()] = new CubeUV(uv[0], uv[1], size[0], size[1], "texture");

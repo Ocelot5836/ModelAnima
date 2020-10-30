@@ -13,10 +13,11 @@ import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {
-    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(TestMod.MOD_ID, "owl");
+    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(TestMod.MOD_ID, "button");
     private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(TestMod.MOD_ID, "owl");
     private static final ResourceLocation ANIMATION_LOCATION = new ResourceLocation(TestMod.MOD_ID, "owl");
 
@@ -28,7 +29,7 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        GeometryModel model = LocalGeometryModelLoader.getModel(MODEL_LOCATION);
+        GeometryModel model = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "missing"));
         GeometryModelTextureTable texture = LocalGeometryModelLoader.getTextureTable(TEXTURE_LOCATION);
         GeometryModelRenderer.render(this.getEntityModel(), model, texture, matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }

@@ -10,117 +10,119 @@ public class ApiTest
     public static void main(String[] args) throws Exception
     {
         String model = "{\n" +
-                "\t\"format_version\": \"1.12.0\",\n" +
-                "\t\"minecraft:geometry\": [\n" +
-                "\t\t{\n" +
-                "\t\t\t\"description\": {\n" +
-                "\t\t\t\t\"identifier\": \"geometry.OwlModel\",\n" +
-                "\t\t\t\t\"texture_width\": 44,\n" +
-                "\t\t\t\t\"texture_height\": 24,\n" +
-                "\t\t\t\t\"visible_bounds_width\": 3,\n" +
-                "\t\t\t\t\"visible_bounds_height\": 2.5,\n" +
-                "\t\t\t\t\"visible_bounds_offset\": [0, 0.75, 0]\n" +
-                "\t\t\t},\n" +
-                "\t\t\t\"bones\": [\n" +
-                "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"name\": \"lowerBody\",\n" +
-                "\t\t\t\t\t\"pivot\": [0, 5, 0],\n" +
-                "\t\t\t\t\t\"cubes\": [\n" +
-                "\t\t\t\t\t\t{\"origin\": [-3, 1, -2], \"size\": [6, 4, 4], \"uv\": [24, 0]}\n" +
-                "\t\t\t\t\t]\n" +
-                "\t\t\t\t},\n" +
-                "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"name\": \"leftLeg\",\n" +
-                "\t\t\t\t\t\"parent\": \"lowerBody\",\n" +
-                "\t\t\t\t\t\"pivot\": [0, 0, 0],\n" +
-                "\t\t\t\t\t\"cubes\": [\n" +
-                "\t\t\t\t\t\t{\"origin\": [-2, 0, -1], \"size\": [2, 1, 2], \"uv\": [24, 8]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [-1, 0, -2], \"size\": [1, 1, 1], \"uv\": [32, 8]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [-3, 0, -2], \"size\": [1, 1, 1], \"uv\": [32, 8]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [-1, 0, 1], \"size\": [1, 1, 1], \"uv\": [32, 8]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [-1, 1, 0], \"size\": [1, 3, 1], \"uv\": [36, 8]}\n" +
-                "\t\t\t\t\t]\n" +
-                "\t\t\t\t},\n" +
-                "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"name\": \"rightLeg\",\n" +
-                "\t\t\t\t\t\"parent\": \"lowerBody\",\n" +
-                "\t\t\t\t\t\"pivot\": [0, 0, 0],\n" +
-                "\t\t\t\t\t\"cubes\": [\n" +
-                "\t\t\t\t\t\t{\"origin\": [0, 0, -1], \"size\": [2, 1, 2], \"uv\": [24, 8]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [2, 0, -2], \"size\": [1, 1, 1], \"uv\": [32, 8]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [0, 0, -2], \"size\": [1, 1, 1], \"uv\": [32, 8]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [0, 0, 1], \"size\": [1, 1, 1], \"uv\": [32, 8]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [0, 1, 0], \"size\": [1, 3, 1], \"uv\": [36, 8]}\n" +
-                "\t\t\t\t\t]\n" +
-                "\t\t\t\t},\n" +
-                "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"name\": \"body\",\n" +
-                "\t\t\t\t\t\"parent\": \"lowerBody\",\n" +
-                "\t\t\t\t\t\"pivot\": [0, 5, 0],\n" +
-                "\t\t\t\t\t\"rotation\": [50.00203, 0, 0],\n" +
-                "\t\t\t\t\t\"cubes\": [\n" +
-                "\t\t\t\t\t\t{\"origin\": [-3, 2, -2.5], \"size\": [6, 8, 5], \"uv\": [0, 11]}\n" +
-                "\t\t\t\t\t]\n" +
-                "\t\t\t\t},\n" +
-                "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"name\": \"leftWing\",\n" +
-                "\t\t\t\t\t\"parent\": \"body\",\n" +
-                "\t\t\t\t\t\"pivot\": [-3, 9, 0],\n" +
-                "\t\t\t\t\t\"cubes\": [\n" +
-                "\t\t\t\t\t\t{\"origin\": [-4, 0, -2], \"size\": [1, 10, 1], \"uv\": [22, 13]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [-4, 1, -1], \"size\": [1, 9, 1], \"uv\": [22, 14]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [-4, 1, -3], \"size\": [1, 8, 1], \"uv\": [22, 15]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [-4, 2, 0], \"size\": [1, 8, 1], \"uv\": [22, 15]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [-4, 3, 1], \"size\": [1, 6, 1], \"uv\": [22, 17]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [-4, 4, 2], \"size\": [1, 4, 1], \"uv\": [22, 19]}\n" +
-                "\t\t\t\t\t]\n" +
-                "\t\t\t\t},\n" +
-                "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"name\": \"rightWing\",\n" +
-                "\t\t\t\t\t\"parent\": \"body\",\n" +
-                "\t\t\t\t\t\"pivot\": [3, 9, 0],\n" +
-                "\t\t\t\t\t\"cubes\": [\n" +
-                "\t\t\t\t\t\t{\"origin\": [3, 0, -2], \"size\": [1, 10, 1], \"uv\": [26, 13]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [3, 1, -1], \"size\": [1, 9, 1], \"uv\": [26, 14]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [3, 1, -3], \"size\": [1, 8, 1], \"uv\": [26, 15]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [3, 2, 0], \"size\": [1, 8, 1], \"uv\": [26, 15]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [3, 3, 1], \"size\": [1, 6, 1], \"uv\": [26, 17]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [3, 4, 2], \"size\": [1, 4, 1], \"uv\": [26, 19]}\n" +
-                "\t\t\t\t\t]\n" +
-                "\t\t\t\t},\n" +
-                "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"name\": \"tail\",\n" +
-                "\t\t\t\t\t\"parent\": \"body\",\n" +
-                "\t\t\t\t\t\"pivot\": [0, 2, 2.5],\n" +
-                "\t\t\t\t\t\"cubes\": [\n" +
-                "\t\t\t\t\t\t{\"origin\": [-2, -1, 2.5], \"size\": [4, 3, 0], \"uv\": [18, 0]},\n" +
-                "\t\t\t\t\t\t{\"origin\": [-1, -3, 2.5], \"size\": [2, 2, 0], \"uv\": [18, 3]}\n" +
-                "\t\t\t\t\t],\n" +
-                "\t\t\t\t\t\"locators\": {\n" +
-                "\t\t\t\t\t\t\"fart\": [0, 2.30565, 2.34456]\n" +
-                "\t\t\t\t\t}\n" +
-                "\t\t\t\t},\n" +
-                "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"name\": \"head\",\n" +
-                "\t\t\t\t\t\"parent\": \"body\",\n" +
-                "\t\t\t\t\t\"pivot\": [0, 10, -0.5],\n" +
-                "\t\t\t\t\t\"rotation\": [-50, 0, 0],\n" +
-                "\t\t\t\t\t\"cubes\": [\n" +
-                "\t\t\t\t\t\t{\"origin\": [-3, 10, -3.5], \"size\": [6, 5, 6], \"uv\": [0, 0]}\n" +
-                "\t\t\t\t\t]\n" +
-                "\t\t\t\t},\n" +
-                "\t\t\t\t{\n" +
-                "\t\t\t\t\t\"name\": \"beak\",\n" +
-                "\t\t\t\t\t\"parent\": \"head\",\n" +
-                "\t\t\t\t\t\"pivot\": [0, 12, -3],\n" +
-                "\t\t\t\t\t\"rotation\": [-39.99818, 0, 0],\n" +
-                "\t\t\t\t\t\"cubes\": [\n" +
-                "\t\t\t\t\t\t{\"origin\": [-0.5, 10.5, -3.5], \"size\": [1, 1, 1], \"uv\": [0, 0]}\n" +
-                "\t\t\t\t\t]\n" +
-                "\t\t\t\t}\n" +
-                "\t\t\t]\n" +
-                "\t\t}\n" +
-                "\t]\n" +
+                "  \"format_version\": \"1.12.0\",\n" +
+                "  \"minecraft:geometry\": [\n" +
+                "    {\n" +
+                "      \"description\": {\n" +
+                "        \"identifier\": \"geometry.button\",\n" +
+                "        \"texture_width\": 32,\n" +
+                "        \"texture_height\": 32,\n" +
+                "        \"visible_bounds_width\": 4,\n" +
+                "        \"visible_bounds_height\": 2.5,\n" +
+                "        \"visible_bounds_offset\": [0, 0.75, 0]\n" +
+                "      },\n" +
+                "      \"bones\": [\n" +
+                "        {\n" +
+                "          \"name\": \"bone\",\n" +
+                "          \"pivot\": [0, 0, 0],\n" +
+                "          \"cubes\": [\n" +
+                "            {\n" +
+                "              \"origin\": [-11, 0.6, 5],\n" +
+                "              \"size\": [6, 3, 6],\n" +
+                "              \"uv\": {\n" +
+                "                \"north\": {\n" +
+                "                  \"uv\": [0, 16],\n" +
+                "                  \"uv_size\": [6, 3]\n" +
+                "                },\n" +
+                "                \"east\": {\n" +
+                "                  \"uv\": [0, 16],\n" +
+                "                  \"uv_size\": [6, 3]\n" +
+                "                },\n" +
+                "                \"south\": {\n" +
+                "                  \"uv\": [0, 16],\n" +
+                "                  \"uv_size\": [6, 3]\n" +
+                "                },\n" +
+                "                \"west\": {\n" +
+                "                  \"uv\": [0, 16],\n" +
+                "                  \"uv_size\": [6, 3]\n" +
+                "                },\n" +
+                "                \"up\": {\n" +
+                "                  \"uv\": [12, 22],\n" +
+                "                  \"uv_size\": [-6, -6]\n" +
+                "                },\n" +
+                "                \"down\": {\n" +
+                "                  \"uv\": [6, 25],\n" +
+                "                  \"uv_size\": [-6, -6]\n" +
+                "                }\n" +
+                "              }\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"origin\": [-13, 0.6, 13],\n" +
+                "              \"size\": [10, 10, 6],\n" +
+                "              \"pivot\": [-8, 0.6, 13],\n" +
+                "              \"rotation\": [22.5, 0, 0],\n" +
+                "              \"uv\": {\n" +
+                "                \"north\": {\n" +
+                "                  \"uv\": [16, 16],\n" +
+                "                  \"uv_size\": [10, 10]\n" +
+                "                },\n" +
+                "                \"east\": {\n" +
+                "                  \"uv\": [16, 0],\n" +
+                "                  \"uv_size\": [10, 6]\n" +
+                "                },\n" +
+                "                \"south\": {\n" +
+                "                  \"uv\": [16, 6],\n" +
+                "                  \"uv_size\": [10, 10]\n" +
+                "                },\n" +
+                "                \"west\": {\n" +
+                "                  \"uv\": [16, 0],\n" +
+                "                  \"uv_size\": [10, 6]\n" +
+                "                },\n" +
+                "                \"up\": {\n" +
+                "                  \"uv\": [26, 6],\n" +
+                "                  \"uv_size\": [-10, -6]\n" +
+                "                },\n" +
+                "                \"down\": {\n" +
+                "                  \"uv\": [26, 6],\n" +
+                "                  \"uv_size\": [-10, -6]\n" +
+                "                }\n" +
+                "              }\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"origin\": [-16, 0, 0],\n" +
+                "              \"size\": [16, 0.6, 16],\n" +
+                "              \"uv\": {\n" +
+                "                \"north\": {\n" +
+                "                  \"uv\": [0, 1],\n" +
+                "                  \"uv_size\": [16, -1]\n" +
+                "                },\n" +
+                "                \"east\": {\n" +
+                "                  \"uv\": [0, 1],\n" +
+                "                  \"uv_size\": [16, -1]\n" +
+                "                },\n" +
+                "                \"south\": {\n" +
+                "                  \"uv\": [0, 1],\n" +
+                "                  \"uv_size\": [16, -1]\n" +
+                "                },\n" +
+                "                \"west\": {\n" +
+                "                  \"uv\": [0, 1],\n" +
+                "                  \"uv_size\": [16, -1]\n" +
+                "                },\n" +
+                "                \"up\": {\n" +
+                "                  \"uv\": [16, 0],\n" +
+                "                  \"uv_size\": [-16, 16]\n" +
+                "                },\n" +
+                "                \"down\": {\n" +
+                "                  \"uv\": [16, 0],\n" +
+                "                  \"uv_size\": [-16, 16]\n" +
+                "                }\n" +
+                "              }\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
                 "}";
 
         String textureTable = "{\n" +
