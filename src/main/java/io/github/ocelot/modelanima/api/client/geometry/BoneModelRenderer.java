@@ -152,22 +152,22 @@ public class BoneModelRenderer extends ModelRenderer
         if (upUV != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(x1, -y, z, (upUV.getU() + upUV.getUSize()) / this.textureWidth, upUV.getV() / this.textureHeight),
-                    new Vertex(x, -y, z, upUV.getU() / this.textureWidth, upUV.getV() / this.textureHeight),
-                    new Vertex(x, -y, z1, upUV.getU() / this.textureWidth, (upUV.getV() + upUV.getVSize()) / this.textureHeight),
-                    new Vertex(x1, -y, z1, (upUV.getU() + upUV.getUSize()) / this.textureWidth, (upUV.getV() + upUV.getVSize()) / this.textureHeight)
-            }, entry, mirror, Direction.UP));
+                    new Vertex(x1, -y1, z, (upUV.getU() + upUV.getUSize()) / this.textureWidth, upUV.getV() / this.textureHeight),
+                    new Vertex(x, -y1, z, upUV.getU() / this.textureWidth, upUV.getV() / this.textureHeight),
+                    new Vertex(x, -y1, z1, upUV.getU() / this.textureWidth, (upUV.getV() + upUV.getVSize()) / this.textureHeight),
+                    new Vertex(x1, -y1, z1, (upUV.getU() + upUV.getUSize()) / this.textureWidth, (upUV.getV() + upUV.getVSize()) / this.textureHeight)
+            }, entry, mirror, Direction.DOWN));
         }
 
         GeometryModelData.CubeUV downUV = cube.getUV(Direction.DOWN);
         if (downUV != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(x1, -y1, z1, (downUV.getU() + downUV.getUSize()) / this.textureWidth, downUV.getV() / this.textureHeight),
-                    new Vertex(x, -y1, z1, downUV.getU() / this.textureWidth, downUV.getV() / this.textureHeight),
-                    new Vertex(x, -y1, z, downUV.getU() / this.textureWidth, (downUV.getV() + downUV.getVSize()) / this.textureHeight),
-                    new Vertex(x1, -y1, z, (downUV.getU() + downUV.getUSize()) / this.textureWidth, (downUV.getV() + downUV.getVSize()) / this.textureHeight)
-            }, entry, mirror, Direction.DOWN));
+                    new Vertex(x1, -y, z1, (downUV.getU() + downUV.getUSize()) / this.textureWidth, downUV.getV() / this.textureHeight),
+                    new Vertex(x, -y, z1, downUV.getU() / this.textureWidth, downUV.getV() / this.textureHeight),
+                    new Vertex(x, -y, z, downUV.getU() / this.textureWidth, (downUV.getV() + downUV.getVSize()) / this.textureHeight),
+                    new Vertex(x1, -y, z, (downUV.getU() + downUV.getUSize()) / this.textureWidth, (downUV.getV() + downUV.getVSize()) / this.textureHeight)
+            }, entry, mirror, Direction.UP));
         }
     }
 

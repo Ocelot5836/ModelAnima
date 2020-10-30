@@ -1,20 +1,14 @@
 package io.github.ocelot.modelanima.api.common.geometry.texture;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
