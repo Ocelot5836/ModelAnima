@@ -39,10 +39,16 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.SheetData> implements AutoCloseable
+/**
+ * <p>Part of the core library, prone to change.</p>
+ *
+ * @author Ocelot
+ * @since 1.0.0
+ */
+public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.SheetData> implements GeometryAtlasTexture, AutoCloseable
 {
+    public static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(ModelAnima.DOMAIN, "textures/atlas/geometry.png");
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Pattern SERIALIZE = Pattern.compile("=");
     private static final Pattern DESERIALIZE = Pattern.compile("_");
     private final AtlasTexture textureAtlas;
 
@@ -52,6 +58,13 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         textureManager.loadTexture(this.textureAtlas.getTextureLocation(), this.textureAtlas);
     }
 
+    @Override
+    public ResourceLocation getAtlasLocation()
+    {
+        return ATLAS_LOCATION;
+    }
+
+    @Override
     public TextureAtlasSprite getSprite(ResourceLocation location)
     {
         return this.textureAtlas.getSprite(location);
@@ -60,13 +73,15 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     private Stream<ResourceLocation> getResourceLocations()
     {
         Collection<GeometryModelTexture> textures = Arrays.asList(
-//                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, "https://cdn.discordapp.com/attachments/710316430884864003/771937531621146634/unknown.png", -1, false),
-//                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, "https://cdn.discordapp.com/attachments/426584849088774187/771936845880885248/Original.PNG", -1, false),
-                new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, "block/stone", -1, false),
-                new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, "block/granite", -1, false),
-                new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, "block/diamond_block", -1, false)
+//                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, GeometryModelTexture.TextureLayer.TRANSLUCENT, "https://cdn.discordapp.com/attachments/710316430884864003/771937531621146634/unknown.png", -1, false),
+//                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, GeometryModelTexture.TextureLayer.TRANSLUCENT, "https://cdn.discordapp.com/attachments/426584849088774187/771936845880885248/Original.PNG", -1, false),
+                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, GeometryModelTexture.TextureLayer.CUTOUT, "https://cdn.discordapp.com/attachments/396902837717696523/753414876407398400/owl.png", -1, false),
+                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, GeometryModelTexture.TextureLayer.CUTOUT, "https://cdn.discordapp.com/attachments/688951388461334528/753450363801305148/coldman.png", -1, false),
+                new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, GeometryModelTexture.TextureLayer.SOLID, "block/stone", -1, false),
+                new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, GeometryModelTexture.TextureLayer.SOLID, "block/granite", -1, false),
+                new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, GeometryModelTexture.TextureLayer.SOLID, "block/diamond_block", -1, false)
         );
-        return textures.stream().map(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE ? new ResourceLocation(texture.getLocation().getNamespace(), "base32" + SERIALIZE.matcher(new Base32().encodeAsString(texture.getTexture().getBytes()).toLowerCase(Locale.ROOT)).replaceAll("_")) : texture.getLocation());
+        return textures.stream().map(GeometryModelTexture::getLocation);
     }
 
     @Override

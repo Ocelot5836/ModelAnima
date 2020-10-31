@@ -703,15 +703,17 @@ public class GeometryModelData
 
                 if (cubeJson.get("uv").isJsonArray())
                 {
+                    // size = (8, 4, 2)
+
                     // FIXME this is supposed to be box uv
                     CubeUV[] uvs = new CubeUV[6];
                     float[] uv = JSONTupleParser.getFloat(cubeJson, "uv", 2, () -> new float[2]);
-                    uvs[Direction.NORTH.getIndex()] = new CubeUV(uv[0], uv[1], size[0], size[1], "texture");
-                    uvs[Direction.EAST.getIndex()] = new CubeUV(uv[0], uv[1], size[2], size[1], "texture");
-                    uvs[Direction.SOUTH.getIndex()] = new CubeUV(uv[0], uv[1], size[0], size[1], "texture");
-                    uvs[Direction.WEST.getIndex()] = new CubeUV(uv[0], uv[1], size[2], size[1], "texture");
-                    uvs[Direction.UP.getIndex()] = new CubeUV(uv[0], uv[1], size[0], size[2], "texture");
-                    uvs[Direction.DOWN.getIndex()] = new CubeUV(uv[0], uv[1], size[0], size[2], "texture");
+                    uvs[Direction.NORTH.getIndex()] = new CubeUV(uv[0] + size[2], uv[1] + size[2], size[0], size[1], "texture");
+                    uvs[Direction.EAST.getIndex()] = new CubeUV(uv[0], uv[1] + size[2], size[2], size[1], "texture");
+                    uvs[Direction.SOUTH.getIndex()] = new CubeUV(uv[0] + size[0] + size[2] * 2, uv[1] + size[2], size[0], size[1], "texture");
+                    uvs[Direction.WEST.getIndex()] = new CubeUV(uv[0] + size[0] + size[2], uv[1] + size[2], size[2], size[1], "texture");
+                    uvs[Direction.UP.getIndex()] = new CubeUV(uv[0] + size[2], uv[1], size[0], size[2], "texture");
+                    uvs[Direction.DOWN.getIndex()] = new CubeUV(uv[0] + size[0] + size[2], uv[1], size[0], size[2], "texture");
                     return uvs;
                 }
                 if (cubeJson.get("uv").isJsonObject())

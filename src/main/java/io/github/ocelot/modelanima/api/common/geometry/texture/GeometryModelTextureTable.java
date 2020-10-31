@@ -15,6 +15,7 @@ import java.util.Objects;
  * <p>A table of textures to be used for {@link GeometryModel} rendering.</p>
  *
  * @author Ocelot
+ * @since 1.0.0
  */
 public class GeometryModelTextureTable
 {
@@ -83,7 +84,9 @@ public class GeometryModelTextureTable
             Map<String, GeometryModelTexture> textures = new HashMap<>();
             for (Map.Entry<String, JsonElement> entry : texturesObject.entrySet())
             {
-                textures.put(entry.getKey(), GeometryModelTexture.CODEC.parse(JsonOps.INSTANCE, entry.getValue()).result().orElse(GeometryModelTexture.MISSING));
+                textures.put(entry.getKey(), GeometryModelTexture.CODEC.parse(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, e ->
+                {
+                }));
             }
             return new GeometryModelTextureTable(textures);
         }

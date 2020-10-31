@@ -4,7 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import cpw.mods.modlauncher.api.INameMappingService;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
-import it.unimi.dsi.fastutil.objects.ObjectList;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -33,13 +33,13 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     private final Map<String, GeometryModelData.Locator> locators;
     private final String[] modelKeys;
     private final String[] textureKeys;
+    private String activeMaterial;
 
     public BedrockGeometryModel(Function<ResourceLocation, RenderType> renderType, GeometryModelData data)
     {
         this(renderType, data.getDescription().getTextureWidth(), data.getDescription().getTextureHeight(), data.getBones());
     }
 
-    // FIXME rewrite this
     public BedrockGeometryModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight, GeometryModelData.Bone[] bones)
     {
         super(renderType);
@@ -105,40 +105,10 @@ public class BedrockGeometryModel extends Model implements GeometryModel
             if (currentBone.getParent() != null && !currentBone.getParent().startsWith("parent."))
                 continue;
 
-            BoneModelRenderer parentRenderer = pair.getRight();
-//            applyChildRotations(parentRenderer, 0, 0, 0);
-//            parentRenderer.rotationPointX = 0;
-//            parentRenderer.rotationPointY = 0;
-//            parentRenderer.rotationPointZ = 0;
-            this.modelParts.put(currentBone.getName(), parentRenderer);
+            this.modelParts.put(currentBone.getName(), pair.getRight());
         }
 
         this.modelKeys = parts.values().toArray(new String[0]);
-    }
-
-    private static void applyChildRotations(ModelRenderer parent, float xOffset, float yOffset, float zOffset)
-    {
-        ObjectList<ModelRenderer> childModels = ObfuscationReflectionHelper.getPrivateValue(ModelRenderer.class, parent, "field_78805_m");
-        if (childModels == null || childModels.isEmpty())
-            return;
-
-        for (ModelRenderer child : childModels)
-        {
-            if (parent instanceof BoneModelRenderer && child instanceof BoneModelRenderer)
-            {
-//                BoneModelRenderer parentRenderer = (BoneModelRenderer) parent;
-//                BoneModelRenderer childRenderer = (BoneModelRenderer) child;
-//                childRenderer.setParentOffset(parentRenderer.getBone().getPivotX() + parentRenderer.getParentX(), parentRenderer.getBone().getPivotY() + parentRenderer.getParentY(), parentRenderer.getBone().getPivotZ() + parentRenderer.getParentZ());
-//                applyChildRotations(child, childRenderer.getParentX(), childRenderer.getParentY(), childRenderer.getParentZ());
-            }
-            else
-            {
-                child.rotationPointX -= parent.rotationPointX + xOffset;
-                child.rotationPointY -= parent.rotationPointY + yOffset;
-                child.rotationPointZ -= parent.rotationPointZ + zOffset;
-                applyChildRotations(child, parent.rotationPointX + xOffset, parent.rotationPointY + yOffset, parent.rotationPointZ + zOffset);
-            }
-        }
     }
 
     private static String getPart(@Nullable String part, @Nullable String texture)
@@ -149,33 +119,20 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     @Override
     public void render(MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-        this.render(null, matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
     }
 
     @Override
-    public void render(@Nullable String part, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public void render(String material, GeometryModelTexture texture, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-        if (part == null)
-        {
-            this.modelParts.values().forEach(renderer -> renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha));
-        }
-        else
-        {
-            this.getModelRenderer(part).ifPresent(renderer -> renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha));
-        }
+        this.activeMaterial = material;
+        this.modelParts.values().forEach(renderer -> renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha));
+        this.activeMaterial = "texture";
     }
 
     @Override
-    public void copyAngles(@Nullable String part, ModelRenderer limbRenderer)
+    public void copyAngles(@Nullable String parent, ModelRenderer limbRenderer)
     {
-        if (part == null)
-        {
-            this.modelParts.values().forEach(renderer -> renderer.copyModelAngles(limbRenderer));
-        }
-        else
-        {
-            this.getModelRenderer(part).ifPresent(renderer -> renderer.copyModelAngles(limbRenderer));
-        }
+        this.modelParts.values().stream().filter(part -> parent == null || parent.equals(part.getParent())).forEach(renderer -> renderer.copyModelAngles(limbRenderer));
     }
 
     @Override
@@ -209,14 +166,13 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     }
 
     @Override
-    public String[] getTextureKeys()
+    public String[] getMaterialKeys()
     {
         return textureKeys;
     }
 
-    @Override
-    public RenderType getModelRenderType(ResourceLocation location)
+    public String getActiveMaterial()
     {
-        return super.getRenderType(location);
+        return activeMaterial;
     }
 }

@@ -1,6 +1,7 @@
 {
   "texture": {
     "type": "online",
-    "url": "https://cdn.discordapp.com/attachments/396902837717696523/753414876407398400/owl.png"
+    "layer": "cutout",
+    "texture": "https://cdn.discordapp.com/attachments/396902837717696523/753414876407398400/owl.png"
   }
 }

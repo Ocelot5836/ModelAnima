@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.vector.Matrix3f;
@@ -13,6 +12,7 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class BoneModelRenderer extends ModelRenderer
@@ -20,6 +20,7 @@ public class BoneModelRenderer extends ModelRenderer
     private static final Vector4f TRANSFORM_VECTOR = new Vector4f();
     private static final Vector3f NORMAL_VECTOR = new Vector3f();
 
+    private final BedrockGeometryModel parent;
     private final float textureWidth;
     private final float textureHeight;
     private final GeometryModelData.Bone bone;
@@ -28,9 +29,10 @@ public class BoneModelRenderer extends ModelRenderer
     private float parentY;
     private float parentZ;
 
-    public BoneModelRenderer(Model parent, GeometryModelData.Bone bone)
+    public BoneModelRenderer(BedrockGeometryModel parent, GeometryModelData.Bone bone)
     {
         super(parent, 0, 0);
+        this.parent = parent;
         this.textureWidth = parent.textureWidth;
         this.textureHeight = parent.textureHeight;
         this.bone = bone;
@@ -103,12 +105,12 @@ public class BoneModelRenderer extends ModelRenderer
         Matrix4f matrix4f = entry.getMatrix();
         Matrix3f matrix3f = entry.getNormal();
 
-        this.addFace(cube, matrix4f, matrix3f, x1, -y, z, x, -y, z, x, -y1, z, x1, -y1, z, Direction.NORTH);
-        this.addFace(cube, matrix4f, matrix3f, x1, -y, z1, x1, -y, z, x1, -y1, z, x1, -y1, z1, Direction.EAST);
-        this.addFace(cube, matrix4f, matrix3f, x, -y, z1, x1, -y, z1, x1, -y1, z1, x, -y1, z1, Direction.SOUTH);
-        this.addFace(cube, matrix4f, matrix3f, x, -y, z, x, -y, z1, x, -y1, z1, x, -y1, z, Direction.WEST);
-        this.addFace(cube, matrix4f, matrix3f, x1, -y1, z, x, -y1, z, x, -y1, z1, x1, -y1, z1, Direction.DOWN);
-        this.addFace(cube, matrix4f, matrix3f, x1, -y, z1, x, -y, z1, x, -y, z, x1, -y, z, Direction.UP);
+        this.addFace(cube, matrix4f, matrix3f, x1, -y1, z, x, -y1, z, x, -y, z, x1, -y, z, Direction.NORTH);
+        this.addFace(cube, matrix4f, matrix3f, x1, -y1, z1, x1, -y1, z, x1, -y, z, x1, -y, z1, Direction.EAST);
+        this.addFace(cube, matrix4f, matrix3f, x, -y1, z1, x1, -y1, z1, x1, -y, z1, x, -y, z1, Direction.SOUTH);
+        this.addFace(cube, matrix4f, matrix3f, x, -y1, z, x, -y1, z1, x, -y, z1, x, -y, z, Direction.WEST);
+        this.addFace(cube, matrix4f, matrix3f, x1, -y, z, x, -y, z, x, -y, z1, x1, -y, z1, Direction.DOWN);
+        this.addFace(cube, matrix4f, matrix3f, x1, -y1, z1, x, -y1, z1, x, -y1, z, x1, -y1, z, Direction.UP);
     }
 
     private void addFace(GeometryModelData.Cube cube, Matrix4f matrix4f, Matrix3f matrix3f, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, Direction face)
@@ -117,11 +119,11 @@ public class BoneModelRenderer extends ModelRenderer
         if (uv != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(matrix4f, x0, y0, z0, (uv.getU() + uv.getUSize()) / this.textureWidth, (uv.getV() + uv.getVSize()) / this.textureHeight),
-                    new Vertex(matrix4f, x1, y1, z1, uv.getU() / this.textureWidth, (uv.getV() + uv.getVSize()) / this.textureHeight),
-                    new Vertex(matrix4f, x2, y2, z2, uv.getU() / this.textureWidth, uv.getV() / this.textureHeight),
-                    new Vertex(matrix4f, x3, y3, z3, (uv.getU() + uv.getUSize()) / this.textureWidth, uv.getV() / this.textureHeight)
-            }, matrix3f, cube.isOverrideMirror() ? cube.isMirror() : this.bone.isMirror(), face));
+                    new Vertex(matrix4f, x0, y0, z0, (uv.getU() + uv.getUSize()) / this.textureWidth, uv.getV() / this.textureHeight),
+                    new Vertex(matrix4f, x1, y1, z1, uv.getU() / this.textureWidth, uv.getV() / this.textureHeight),
+                    new Vertex(matrix4f, x2, y2, z2, uv.getU() / this.textureWidth, (uv.getV() + uv.getVSize()) / this.textureHeight),
+                    new Vertex(matrix4f, x3, y3, z3, (uv.getU() + uv.getUSize()) / this.textureWidth, (uv.getV() + uv.getVSize()) / this.textureHeight)
+            }, matrix3f, uv.getMaterialInstance(), cube.isOverrideMirror() ? cube.isMirror() : this.bone.isMirror(), face.getAxis().isVertical() ? face.getOpposite() : face));
         }
     }
 
@@ -130,6 +132,9 @@ public class BoneModelRenderer extends ModelRenderer
         this.rotateAngleX = (float) (Math.PI / 180f) * this.bone.getRotationX();
         this.rotateAngleY = (float) (Math.PI / 180f) * this.bone.getRotationY();
         this.rotateAngleZ = (float) (Math.PI / 180f) * this.bone.getRotationZ();
+        this.rotationPointX = this.bone.getPivotX();
+        this.rotationPointY = -this.bone.getPivotY();
+        this.rotationPointZ = this.bone.getPivotZ();
     }
 
     @Override
@@ -156,6 +161,8 @@ public class BoneModelRenderer extends ModelRenderer
             Matrix3f matrix3f = matrixStack.getLast().getNormal();
             for (Quad quad : this.quads)
             {
+                if (!quad.material.equals(this.parent.getActiveMaterial()))
+                    continue;
                 NORMAL_VECTOR.set(quad.normal.getX(), quad.normal.getY(), quad.normal.getZ());
                 NORMAL_VECTOR.transform(matrix3f);
                 for (Vertex vertex : quad.vertices)
@@ -173,14 +180,20 @@ public class BoneModelRenderer extends ModelRenderer
     @Override
     public void translateRotate(MatrixStack matrixStack)
     {
-        matrixStack.translate(this.bone.getPivotX() / 16.0F, -this.bone.getPivotY() / 16.0F, this.bone.getPivotZ() / 16.0F);
+        matrixStack.translate(this.rotationPointX / 16.0F, this.rotationPointY / 16.0F, this.rotationPointZ / 16.0F);
         if (this.rotateAngleZ != 0)
             matrixStack.rotate(Vector3f.ZP.rotation(this.rotateAngleZ));
         if (this.rotateAngleY != 0)
             matrixStack.rotate(Vector3f.YP.rotation(this.rotateAngleY));
         if (this.rotateAngleX != 0)
             matrixStack.rotate(Vector3f.XP.rotation(this.rotateAngleX));
-        matrixStack.translate(-this.bone.getPivotX() / 16.0F, this.bone.getPivotY() / 16.0F, -this.bone.getPivotZ() / 16.0F);
+        matrixStack.translate(-this.rotationPointX / 16.0F, -this.rotationPointY / 16.0F, -this.rotationPointZ / 16.0F);
+    }
+
+    @Nullable
+    public String getParent()
+    {
+        return this.bone.getParent();
     }
 
     private static class Vertex
@@ -207,10 +220,12 @@ public class BoneModelRenderer extends ModelRenderer
     {
         private final Vertex[] vertices;
         private final Vector3f normal;
+        private final String material;
 
-        public Quad(Vertex[] vertices, Matrix3f normal, boolean mirror, Direction direction)
+        public Quad(Vertex[] vertices, Matrix3f normal, String material, boolean mirror, Direction direction)
         {
             this.vertices = vertices;
+            this.material = material;
             if (mirror)
             {
                 int i = vertices.length;

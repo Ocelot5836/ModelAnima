@@ -1,6 +1,11 @@
 {
   "texture": {
-    "type": "location",
-    "location": "examplemod:textures/entity/owl.png"
+    "type": "online",
+    "texture": "https://cdn.discordapp.com/attachments/396902837717696523/753414876407398400/owl.png"
+  },
+  "texture2": {
+    "type": "online",
+    "texture": "https://cdn.discordapp.com/attachments/396902837717696523/753414876407398400/owl.png",
+	"color": "ff00ff"
   }
 }
