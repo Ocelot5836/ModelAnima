@@ -7,6 +7,7 @@ import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.codec.digest.DigestUtils;
 
+import java.util.Base64;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
@@ -40,7 +41,7 @@ public class GeometryModelTexture
         this.glowing = glowing;
         this.location = type.getLocation(data);
     }
-	
+
     /**
      * @return The type of texture this cosmetic texture is
      */

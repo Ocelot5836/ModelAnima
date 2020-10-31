@@ -108,10 +108,10 @@ public class BoneModelRenderer extends ModelRenderer
         if (northUV != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(x1, -y, z, (northUV.getU() + northUV.getUSize()) / this.textureWidth, northUV.getV() / this.textureHeight),
-                    new Vertex(x, -y, z, northUV.getU() / this.textureWidth, northUV.getV() / this.textureHeight),
-                    new Vertex(x, -y1, z, northUV.getU() / this.textureWidth, (northUV.getV() + northUV.getVSize()) / this.textureHeight),
-                    new Vertex(x1, -y1, z, (northUV.getU() + northUV.getUSize()) / this.textureWidth, (northUV.getV() + northUV.getVSize()) / this.textureHeight)
+                    new Vertex(x1, -y, z, (northUV.getU() + northUV.getUSize()) / this.textureWidth, (northUV.getV() + northUV.getVSize()) / this.textureHeight),
+                    new Vertex(x, -y, z, northUV.getU() / this.textureWidth, (northUV.getV() + northUV.getVSize()) / this.textureHeight),
+                    new Vertex(x, -y1, z, northUV.getU() / this.textureWidth, northUV.getV() / this.textureHeight),
+                    new Vertex(x1, -y1, z, (northUV.getU() + northUV.getUSize()) / this.textureWidth, northUV.getV() / this.textureHeight)
             }, entry, mirror, Direction.NORTH));
         }
 
@@ -119,10 +119,10 @@ public class BoneModelRenderer extends ModelRenderer
         if (eastUV != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(x1, -y, z1, (eastUV.getU() + eastUV.getUSize()) / this.textureWidth, eastUV.getV() / this.textureHeight),
-                    new Vertex(x1, -y, z, eastUV.getU() / this.textureWidth, eastUV.getV() / this.textureHeight),
-                    new Vertex(x1, -y1, z, eastUV.getU() / this.textureWidth, (eastUV.getV() + eastUV.getVSize()) / this.textureHeight),
-                    new Vertex(x1, -y1, z1, (eastUV.getU() + eastUV.getUSize()) / this.textureWidth, (eastUV.getV() + eastUV.getVSize()) / this.textureHeight)
+                    new Vertex(x1, -y, z1, (eastUV.getU() + eastUV.getUSize()) / this.textureWidth, (eastUV.getV() + eastUV.getVSize()) / this.textureHeight),
+                    new Vertex(x1, -y, z, eastUV.getU() / this.textureWidth, (eastUV.getV() + eastUV.getVSize()) / this.textureHeight),
+                    new Vertex(x1, -y1, z, eastUV.getU() / this.textureWidth, eastUV.getV() / this.textureHeight),
+                    new Vertex(x1, -y1, z1, (eastUV.getU() + eastUV.getUSize()) / this.textureWidth, eastUV.getV() / this.textureHeight)
             }, entry, mirror, Direction.EAST));
         }
 
@@ -130,10 +130,10 @@ public class BoneModelRenderer extends ModelRenderer
         if (southUV != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(x, -y, z1, (southUV.getU() + southUV.getUSize()) / this.textureWidth, southUV.getV() / this.textureHeight),
-                    new Vertex(x1, -y, z1, southUV.getU() / this.textureWidth, southUV.getV() / this.textureHeight),
-                    new Vertex(x1, -y1, z1, southUV.getU() / this.textureWidth, (southUV.getV() + southUV.getVSize()) / this.textureHeight),
-                    new Vertex(x, -y1, z1, (southUV.getU() + southUV.getUSize()) / this.textureWidth, (southUV.getV() + southUV.getVSize()) / this.textureHeight)
+                    new Vertex(x, -y, z1, (southUV.getU() + southUV.getUSize()) / this.textureWidth, (southUV.getV() + southUV.getVSize()) / this.textureHeight),
+                    new Vertex(x1, -y, z1, southUV.getU() / this.textureWidth, (southUV.getV() + southUV.getVSize()) / this.textureHeight),
+                    new Vertex(x1, -y1, z1, southUV.getU() / this.textureWidth, southUV.getV() / this.textureHeight),
+                    new Vertex(x, -y1, z1, (southUV.getU() + southUV.getUSize()) / this.textureWidth, southUV.getV() / this.textureHeight)
             }, entry, mirror, Direction.SOUTH));
         }
 
@@ -141,10 +141,10 @@ public class BoneModelRenderer extends ModelRenderer
         if (westUV != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(x, -y, z, (westUV.getU() + westUV.getUSize()) / this.textureWidth, westUV.getV() / this.textureHeight),
-                    new Vertex(x, -y, z1, westUV.getU() / this.textureWidth, westUV.getV() / this.textureHeight),
-                    new Vertex(x, -y1, z1, westUV.getU() / this.textureWidth, (westUV.getV() + westUV.getVSize()) / this.textureHeight),
-                    new Vertex(x, -y1, z, (westUV.getU() + westUV.getUSize()) / this.textureWidth, (westUV.getV() + westUV.getVSize()) / this.textureHeight)
+                    new Vertex(x, -y, z, (westUV.getU() + westUV.getUSize()) / this.textureWidth, (westUV.getV() + westUV.getVSize()) / this.textureHeight),
+                    new Vertex(x, -y, z1, westUV.getU() / this.textureWidth, (westUV.getV() + westUV.getVSize()) / this.textureHeight),
+                    new Vertex(x, -y1, z1, westUV.getU() / this.textureWidth, westUV.getV() / this.textureHeight),
+                    new Vertex(x, -y1, z, (westUV.getU() + westUV.getUSize()) / this.textureWidth, westUV.getV() / this.textureHeight)
             }, entry, mirror, Direction.WEST));
         }
 
@@ -152,10 +152,10 @@ public class BoneModelRenderer extends ModelRenderer
         if (upUV != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(x1, -y1, z, (upUV.getU() + upUV.getUSize()) / this.textureWidth, upUV.getV() / this.textureHeight),
-                    new Vertex(x, -y1, z, upUV.getU() / this.textureWidth, upUV.getV() / this.textureHeight),
-                    new Vertex(x, -y1, z1, upUV.getU() / this.textureWidth, (upUV.getV() + upUV.getVSize()) / this.textureHeight),
-                    new Vertex(x1, -y1, z1, (upUV.getU() + upUV.getUSize()) / this.textureWidth, (upUV.getV() + upUV.getVSize()) / this.textureHeight)
+                    new Vertex(x1, -y1, z, (upUV.getU() + upUV.getUSize()) / this.textureWidth, (upUV.getV() + upUV.getVSize()) / this.textureHeight),
+                    new Vertex(x, -y1, z, upUV.getU() / this.textureWidth, (upUV.getV() + upUV.getVSize()) / this.textureHeight),
+                    new Vertex(x, -y1, z1, upUV.getU() / this.textureWidth, upUV.getV() / this.textureHeight),
+                    new Vertex(x1, -y1, z1, (upUV.getU() + upUV.getUSize()) / this.textureWidth, upUV.getV() / this.textureHeight)
             }, entry, mirror, Direction.DOWN));
         }
 
@@ -163,10 +163,10 @@ public class BoneModelRenderer extends ModelRenderer
         if (downUV != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(x1, -y, z1, (downUV.getU() + downUV.getUSize()) / this.textureWidth, downUV.getV() / this.textureHeight),
-                    new Vertex(x, -y, z1, downUV.getU() / this.textureWidth, downUV.getV() / this.textureHeight),
-                    new Vertex(x, -y, z, downUV.getU() / this.textureWidth, (downUV.getV() + downUV.getVSize()) / this.textureHeight),
-                    new Vertex(x1, -y, z, (downUV.getU() + downUV.getUSize()) / this.textureWidth, (downUV.getV() + downUV.getVSize()) / this.textureHeight)
+                    new Vertex(x1, -y, z1, (downUV.getU() + downUV.getUSize()) / this.textureWidth, (downUV.getV() + downUV.getVSize()) / this.textureHeight),
+                    new Vertex(x, -y, z1, downUV.getU() / this.textureWidth, (downUV.getV() + downUV.getVSize()) / this.textureHeight),
+                    new Vertex(x, -y, z, downUV.getU() / this.textureWidth, downUV.getV() / this.textureHeight),
+                    new Vertex(x1, -y, z, (downUV.getU() + downUV.getUSize()) / this.textureWidth, downUV.getV() / this.textureHeight)
             }, entry, mirror, Direction.UP));
         }
     }
