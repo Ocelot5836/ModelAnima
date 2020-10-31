@@ -60,8 +60,8 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     private Stream<ResourceLocation> getResourceLocations()
     {
         Collection<GeometryModelTexture> textures = Arrays.asList(
-                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, "https://cdn.discordapp.com/attachments/710316430884864003/771937531621146634/unknown.png", -1, false),
-                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, "https://cdn.discordapp.com/attachments/426584849088774187/771936845880885248/Original.PNG", -1, false),
+//                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, "https://cdn.discordapp.com/attachments/710316430884864003/771937531621146634/unknown.png", -1, false),
+//                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, "https://cdn.discordapp.com/attachments/426584849088774187/771936845880885248/Original.PNG", -1, false),
                 new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, "block/stone", -1, false),
                 new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, "block/granite", -1, false),
                 new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, "block/diamond_block", -1, false)
