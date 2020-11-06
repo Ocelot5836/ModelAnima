@@ -159,7 +159,7 @@ public class GeometryModelTexture
     public enum Type
     {
         UNKNOWN(location -> MissingTextureSprite.getLocation()),
-        LOCATION(location -> new ResourceLocation(location + ".png")),
+        LOCATION(ResourceLocation::new),
         ONLINE(location -> new ResourceLocation(ModelAnima.DOMAIN, "base32" + ONLINE_PATTERN.matcher(new Base32().encodeAsString(location.getBytes()).toLowerCase(Locale.ROOT)).replaceAll("_")));
 
         private final Function<String, ResourceLocation> locationGenerator;

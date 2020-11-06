@@ -3,6 +3,7 @@ package io.github.ocelot.modelanima.api.client.texture;
 import com.google.gson.JsonObject;
 import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -51,10 +52,12 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern DESERIALIZE = Pattern.compile("_");
     private final AtlasTexture textureAtlas;
+    private final Set<ResourceLocation> textures;
 
     public GeometryTextureSpriteUploader(TextureManager textureManager, ResourceLocation atlasTextureLocation)
     {
         this.textureAtlas = new AtlasTexture(atlasTextureLocation);
+        this.textures = new HashSet<>();
         textureManager.loadTexture(this.textureAtlas.getTextureLocation(), this.textureAtlas);
     }
 
@@ -72,16 +75,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
     private Stream<ResourceLocation> getResourceLocations()
     {
-        Collection<GeometryModelTexture> textures = Arrays.asList(
-//                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, GeometryModelTexture.TextureLayer.TRANSLUCENT, "https://cdn.discordapp.com/attachments/710316430884864003/771937531621146634/unknown.png", -1, false),
-//                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, GeometryModelTexture.TextureLayer.TRANSLUCENT, "https://cdn.discordapp.com/attachments/426584849088774187/771936845880885248/Original.PNG", -1, false),
-                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, GeometryModelTexture.TextureLayer.CUTOUT, "https://cdn.discordapp.com/attachments/396902837717696523/753414876407398400/owl.png", -1, false),
-                new GeometryModelTexture(GeometryModelTexture.Type.ONLINE, GeometryModelTexture.TextureLayer.CUTOUT, "https://cdn.discordapp.com/attachments/688951388461334528/753450363801305148/coldman.png", -1, false),
-                new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, GeometryModelTexture.TextureLayer.SOLID, "block/stone", -1, false),
-                new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, GeometryModelTexture.TextureLayer.SOLID, "block/granite", -1, false),
-                new GeometryModelTexture(GeometryModelTexture.Type.LOCATION, GeometryModelTexture.TextureLayer.SOLID, "block/diamond_block", -1, false)
-        );
-        return textures.stream().map(GeometryModelTexture::getLocation);
+        return this.textures.stream();
     }
 
     @Override
@@ -109,6 +103,13 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     public void close()
     {
         this.textureAtlas.clear();
+    }
+
+    public GeometryTextureSpriteUploader setTextures(Map<ResourceLocation, GeometryModelTextureTable> textures)
+    {
+        this.textures.clear();
+        textures.values().stream().flatMap(table -> table.getTextures().stream()).map(GeometryModelTexture::getLocation).forEach(this.textures::add);
+        return this;
     }
 
     private static class OnlineResourceManager implements IResourceManager

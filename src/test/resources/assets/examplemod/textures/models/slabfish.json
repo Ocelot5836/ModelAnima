@@ -1,0 +1,12 @@
+{
+  "texture": {
+    "type": "online",
+    "texture": "https://raw.githubusercontent.com/team-abnormals/environmental/master/src/main/resources/assets/environmental/textures/entity/slabfish/type/ghost.png",
+    "layer": "translucent"
+  },
+  "backpack": {
+    "type": "online",
+    "texture": "https://raw.githubusercontent.com/team-abnormals/environmental/master/src/main/resources/assets/environmental/textures/entity/slabfish/type/ghost.png",
+    "layer": "translucent"
+  }
+}

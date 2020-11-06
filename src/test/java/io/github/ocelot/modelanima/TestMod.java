@@ -2,6 +2,9 @@ package io.github.ocelot.modelanima;
 
 import com.mojang.brigadier.CommandDispatcher;
 import io.github.ocelot.modelanima.api.client.geometry.LocalGeometryModelLoader;
+import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
+import io.github.ocelot.modelanima.api.client.texture.LocalTextureTableProvider;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.client.TestLayer;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -24,6 +27,9 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 @SuppressWarnings("deprecation")
 @Mod(TestMod.MOD_ID)
 public class TestMod
@@ -38,7 +44,12 @@ public class TestMod
     public TestMod()
     {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> LocalGeometryModelLoader.init(modBus));
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
+        {
+            LocalGeometryModelLoader.init(modBus);
+            GeometryTextureManager.init(modBus);
+            GeometryTextureManager.addProvider(new LocalTextureTableProvider());
+        });
         BLOCKS.register(modBus);
         TILE_ENTITIES.register(modBus);
         ITEMS.register(modBus);

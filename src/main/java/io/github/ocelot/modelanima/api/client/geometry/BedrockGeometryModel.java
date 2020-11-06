@@ -2,7 +2,6 @@ package io.github.ocelot.modelanima.api.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import cpw.mods.modlauncher.api.INameMappingService;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import net.minecraft.client.renderer.RenderType;
@@ -10,7 +9,6 @@ import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -84,7 +82,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel
             {
                 if (parent.startsWith("parent."))
                 {
-                    parts.put(currentBone, ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, parent.substring("parent.".length())));
+                    parts.put(currentBone, parent.substring("parent.".length()));
                 }
                 else
                 {
@@ -132,7 +130,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     @Override
     public void copyAngles(@Nullable String parent, ModelRenderer limbRenderer)
     {
-        this.modelParts.values().stream().filter(part -> parent == null || parent.equals(part.getParent())).forEach(renderer -> renderer.copyModelAngles(limbRenderer));
+        this.modelParts.values().stream().filter(part -> Objects.equals(part.getParent(), parent)).forEach(renderer -> renderer.copyModelAngles(limbRenderer));
     }
 
     @Override

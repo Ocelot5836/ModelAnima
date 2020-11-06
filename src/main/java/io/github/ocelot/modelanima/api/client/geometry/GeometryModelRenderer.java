@@ -2,18 +2,13 @@ package io.github.ocelot.modelanima.api.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import cpw.mods.modlauncher.api.INameMappingService;
-import io.github.ocelot.modelanima.api.client.texture.GeometryTextureSpriteUploader;
+import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.resources.IReloadableResourceManager;
-import net.minecraft.resources.IResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ColorHandlerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
@@ -33,20 +28,6 @@ import java.util.Map;
 public class GeometryModelRenderer
 {
     private static final Map<Model, Map<String, ModelRenderer>> CACHE = new HashMap<>();
-    private static GeometryTextureSpriteUploader spriteUploader;
-
-    @SubscribeEvent
-    public static void onEvent(ColorHandlerEvent.Block event)
-    {
-        Minecraft minecraft = Minecraft.getInstance();
-        GeometryTextureSpriteUploader spriteUploader = new GeometryTextureSpriteUploader(minecraft.textureManager, GeometryTextureSpriteUploader.ATLAS_LOCATION);
-        IResourceManager resourceManager = minecraft.getResourceManager();
-        if (resourceManager instanceof IReloadableResourceManager)
-        {
-            ((IReloadableResourceManager) resourceManager).addReloadListener(spriteUploader);
-        }
-        GeometryModelRenderer.spriteUploader = spriteUploader;
-    }
 
     /**
      * Renders the specified model on the specified parent model.
@@ -88,7 +69,7 @@ public class GeometryModelRenderer
             {
                 String deobfName = ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, modelKey);
                 if (parentParts.containsKey(deobfName))
-                    model.copyAngles(modelKey, parentParts.get(deobfName));
+                    model.copyAngles("parent." + modelKey, parentParts.get(deobfName));
             }
         }
 
@@ -99,7 +80,7 @@ public class GeometryModelRenderer
                 GeometryModelTexture texture = textures == null ? GeometryModelTexture.MISSING : textures.getTexture(material);
                 if (texture.getLayer() != textureLayer)
                     continue;
-                model.render(material, texture, matrixStack, model.getBuffer(buffer, spriteUploader, texture), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
+                model.render(material, texture, matrixStack, model.getBuffer(buffer, GeometryTextureManager.getAtlas(), texture), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
             }
         });
     }

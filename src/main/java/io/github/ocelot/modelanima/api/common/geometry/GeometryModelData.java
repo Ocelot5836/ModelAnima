@@ -389,31 +389,6 @@ public class GeometryModelData
                     '}';
         }
 
-        //        /**
-//         * Adds the cubes in this model to the specified model renderer.
-//         *
-//         * @param model The model to add a renderer to
-//         * @return The model renderer created
-//         * FIXME rewrite this
-//         */
-//        public ModelRenderer createModelRenderer(Model model)
-//        {
-//            ModelRenderer modelRenderer = new ModelRenderer(model);
-//
-//            modelRenderer.setRotationPoint(this.pivot.getX(), -this.pivot.getY(), this.pivot.getZ());
-//            modelRenderer.rotateAngleX = (float) Math.toRadians(this.rotation.getX());
-//            modelRenderer.rotateAngleY = (float) Math.toRadians(this.rotation.getY());
-//            modelRenderer.rotateAngleZ = (float) Math.toRadians(this.rotation.getZ());
-//
-//            for (Cube cube : this.cubes)
-//            {
-//                modelRenderer.mirror = this.mirror;
-//                modelRenderer.setTextureOffset(cube.u, cube.v);
-//                modelRenderer.addBox(cube.origin.getX() - this.pivot.getX(), -cube.origin.getY() - cube.size.getY() + this.pivot.getY(), cube.origin.getZ() - this.pivot.getZ(), cube.size.getX(), cube.size.getY(), cube.size.getZ(), cube.inflate);
-//            }
-//            return modelRenderer;
-//        }
-
         public static class Deserializer implements JsonDeserializer<Bone>
         {
             @Override
@@ -703,9 +678,6 @@ public class GeometryModelData
 
                 if (cubeJson.get("uv").isJsonArray())
                 {
-                    // size = (8, 4, 2)
-
-                    // FIXME this is supposed to be box uv
                     CubeUV[] uvs = new CubeUV[6];
                     float[] uv = JSONTupleParser.getFloat(cubeJson, "uv", 2, () -> new float[2]);
                     uvs[Direction.NORTH.getIndex()] = new CubeUV(uv[0] + size[2], uv[1] + size[2], size[0], size[1], "texture");

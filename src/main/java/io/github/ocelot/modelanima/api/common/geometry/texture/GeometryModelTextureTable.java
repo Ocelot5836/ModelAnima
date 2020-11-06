@@ -3,6 +3,8 @@ package io.github.ocelot.modelanima.api.common.geometry.texture;
 import com.google.gson.*;
 import com.mojang.serialization.JsonOps;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
@@ -19,6 +21,7 @@ import java.util.Objects;
  */
 public class GeometryModelTextureTable
 {
+    private static final Logger LOGGER = LogManager.getLogger();
     public static GeometryModelTextureTable EMPTY = new GeometryModelTextureTable(new HashMap<>());
 
     private final Map<String, GeometryModelTexture> textures;
@@ -84,9 +87,7 @@ public class GeometryModelTextureTable
             Map<String, GeometryModelTexture> textures = new HashMap<>();
             for (Map.Entry<String, JsonElement> entry : texturesObject.entrySet())
             {
-                textures.put(entry.getKey(), GeometryModelTexture.CODEC.parse(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, e ->
-                {
-                }));
+                textures.put(entry.getKey(), GeometryModelTexture.CODEC.parse(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, LOGGER::error));
             }
             return new GeometryModelTextureTable(textures);
         }

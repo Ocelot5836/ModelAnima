@@ -28,6 +28,8 @@ public class BoneModelRenderer extends ModelRenderer
     private float parentX;
     private float parentY;
     private float parentZ;
+    private Matrix4f copyMatrix;
+    private Matrix3f copyNormal;
 
     public BoneModelRenderer(BedrockGeometryModel parent, GeometryModelData.Bone bone)
     {
@@ -37,6 +39,8 @@ public class BoneModelRenderer extends ModelRenderer
         this.textureHeight = parent.textureHeight;
         this.bone = bone;
         this.quads = new ObjectArrayList<>();
+        this.copyMatrix = new Matrix4f();
+        this.copyNormal = new Matrix3f();
         this.resetTransform();
         Arrays.stream(bone.getCubes()).forEach(this::addCube);
     }
@@ -135,6 +139,8 @@ public class BoneModelRenderer extends ModelRenderer
         this.rotationPointX = this.bone.getPivotX();
         this.rotationPointY = -this.bone.getPivotY();
         this.rotationPointZ = this.bone.getPivotZ();
+        this.copyMatrix.setIdentity();
+        this.copyNormal.setIdentity();
     }
 
     @Override
@@ -178,6 +184,17 @@ public class BoneModelRenderer extends ModelRenderer
     }
 
     @Override
+    public void copyModelAngles(ModelRenderer modelRendererIn)
+    {
+        this.copyMatrix.setIdentity();
+        this.copyNormal.setIdentity();
+        MatrixStack stack = new MatrixStack();
+        modelRendererIn.translateRotate(stack);
+        this.copyMatrix.mul(stack.getLast().getMatrix());
+        this.copyNormal.mul(stack.getLast().getNormal());
+    }
+
+    @Override
     public void translateRotate(MatrixStack matrixStack)
     {
         matrixStack.translate(this.rotationPointX / 16.0F, this.rotationPointY / 16.0F, this.rotationPointZ / 16.0F);
@@ -188,6 +205,8 @@ public class BoneModelRenderer extends ModelRenderer
         if (this.rotateAngleX != 0)
             matrixStack.rotate(Vector3f.XP.rotation(this.rotateAngleX));
         matrixStack.translate(-this.rotationPointX / 16.0F, -this.rotationPointY / 16.0F, -this.rotationPointZ / 16.0F);
+        matrixStack.getLast().getMatrix().mul(this.copyMatrix);
+        matrixStack.getLast().getNormal().mul(this.copyNormal);
     }
 
     @Nullable
