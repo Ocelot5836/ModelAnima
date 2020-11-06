@@ -103,6 +103,16 @@ jar {
     }
 }
 
+task apiJar(type: Jar) {
+    classifier = "api"
+    from sourceSets.main.output
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives apiJar
+}
+
 // Example configuration to allow publishing using the maven-publish task
 // This is the preferred method to reobfuscate your jar file
 jar.finalizedBy('reobfJar')
