@@ -46,8 +46,6 @@ public class GeometryModelRenderer
      */
     public static void render(@Nullable Model parent, GeometryModel model, @Nullable GeometryModelTextureTable textures, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-        // TODO use an atlas instead of unique textures
-
 //        Map<String, ModelRenderer> parentParts = parent == null ? Collections.emptyMap() : CACHE.computeIfAbsent(parent, key -> mapRenderers(parent));
 //        for (String textureKey : model.getTextureKeys())
 //        {
