@@ -1,0 +1,7 @@
+{
+  "texture": {
+    "type": "online",
+    "texture": "http://api.battlefieldsmc.net/api/server/cosmetic/texture/sombrero/default.png",
+    "layer": "cutout"
+  }
+}

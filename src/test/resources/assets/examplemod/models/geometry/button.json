@@ -6,9 +6,9 @@
 				"identifier": "geometry.button",
 				"texture_width": 32,
 				"texture_height": 32,
-				"visible_bounds_width": 9,
-				"visible_bounds_height": 8,
-				"visible_bounds_offset": [0, 3, 0]
+				"visible_bounds_width": 4,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
 			},
 			"bones": [
 				{
@@ -23,6 +23,7 @@
 								"east": {"uv": [0, 16], "uv_size": [6, 3]},
 								"south": {"uv": [0, 16], "uv_size": [6, 3]},
 								"west": {"uv": [0, 16], "uv_size": [6, 3]},
+								"up": {"uv": [12, 22], "uv_size": [-6, -6]},
 								"down": {"uv": [6, 25], "uv_size": [-6, -6]}
 							}
 						},
@@ -30,7 +31,7 @@
 							"origin": [-5, 0.6, 5],
 							"size": [10, 10, 6],
 							"pivot": [0, 0.6, 5],
-							"rotation": [22.5, 0, 0],
+							"rotation": [90, 0, 0],
 							"uv": {
 								"north": {"uv": [16, 16], "uv_size": [10, 10]},
 								"east": {"uv": [16, 0], "uv_size": [10, 6]},
@@ -53,24 +54,6 @@
 							}
 						}
 					]
-				},
-				{
-					"name": "bone2",
-					"parent": "bone",
-					"pivot": [8, 5, 17],
-					"rotation": [50.02409, -77.14064, 72.82234]
-				},
-				{
-					"name": "bone3",
-					"parent": "bone2",
-					"pivot": [8, 5, 17],
-					"rotation": [0, -45, 0]
-				},
-				{
-					"name": "bone4",
-					"parent": "bone3",
-					"pivot": [5, 5, 30],
-					"rotation": [0, -45, 0]
 				}
 			]
 		}
