@@ -6,8 +6,15 @@ import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.MissingTextureSprite;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.util.INBTSerializable;
 import org.apache.commons.codec.binary.Base32;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -47,6 +54,25 @@ public class GeometryModelTexture
         this.color = color;
         this.glowing = glowing;
         this.location = type.getLocation(data);
+    }
+
+    public GeometryModelTexture(PacketBuffer buf)
+    {
+        this(buf.readEnumValue(Type.class), buf.readEnumValue(TextureLayer.class), buf.readString(), buf.readInt(), buf.readBoolean());
+    }
+
+    /**
+     * Writes the data of this texture into the provided buffer.
+     *
+     * @param buf The buffer to write into
+     */
+    public void write(PacketBuffer buf)
+    {
+        buf.writeEnumValue(this.type);
+        buf.writeEnumValue(this.layer);
+        buf.writeString(this.data);
+        buf.writeInt(this.color);
+        buf.writeBoolean(this.glowing);
     }
 
     /**
@@ -196,7 +222,7 @@ public class GeometryModelTexture
     }
 
     /**
-     * <p>Supported types of</p>
+     * <p>Supported render types for textures.</p>
      *
      * @author Ocelot
      */

@@ -3,6 +3,12 @@ package io.github.ocelot.modelanima.api.common.geometry.texture;
 import com.google.gson.*;
 import com.mojang.serialization.JsonOps;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.common.util.Constants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,6 +35,59 @@ public class GeometryModelTextureTable
     public GeometryModelTextureTable(Map<String, GeometryModelTexture> textures)
     {
         this.textures = textures;
+    }
+
+    public GeometryModelTextureTable(PacketBuffer buf)
+    {
+        this.textures = new HashMap<>();
+        for (int i = 0; i < buf.readVarInt(); i++)
+            this.textures.put(buf.readString(), new GeometryModelTexture(buf));
+    }
+
+    public GeometryModelTextureTable(CompoundNBT nbt)
+    {
+        this.textures = new HashMap<>();
+
+        ListNBT texturesNbt = nbt.getList("Textures", Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < texturesNbt.size(); i++)
+        {
+            CompoundNBT textureNbt = texturesNbt.getCompound(i);
+            String key = textureNbt.getString("Key");
+            INBT value = textureNbt.get("Value");
+            GeometryModelTexture.CODEC.parse(NBTDynamicOps.INSTANCE, value).get().ifLeft(texture -> this.textures.put(key, texture));
+        }
+    }
+
+    /**
+     * Writes the data of this texture table into the provided buffer.
+     *
+     * @param buf The buffer to write into
+     */
+    public void write(PacketBuffer buf)
+    {
+        buf.writeVarInt(this.textures.size());
+        this.textures.forEach((key, texture) ->
+        {
+            buf.writeString(key);
+            texture.write(buf);
+        });
+    }
+
+    public CompoundNBT serializeNBT()
+    {
+        CompoundNBT nbt = new CompoundNBT();
+
+        ListNBT texturesNbt = new ListNBT();
+        this.textures.forEach((key, texture) -> GeometryModelTexture.CODEC.encodeStart(NBTDynamicOps.INSTANCE, texture).get().ifLeft(textureValueNbt ->
+        {
+            CompoundNBT textureNbt = new CompoundNBT();
+            textureNbt.putString("Key", key);
+            textureNbt.put("Value", textureValueNbt);
+            texturesNbt.add(textureNbt);
+        }));
+        nbt.put("Textures", texturesNbt);
+
+        return nbt;
     }
 
     /**
