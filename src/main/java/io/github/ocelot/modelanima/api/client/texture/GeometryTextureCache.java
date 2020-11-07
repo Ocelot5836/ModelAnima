@@ -29,14 +29,14 @@ public class GeometryTextureCache
     private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDir.toURI()).resolve(ModelAnima.DOMAIN + "-geometry-texture-cache");
 
     @Nullable
-    private static InputStream readFile(String url, String hash, Path imageFile)
+    private static InputStream readFile(String url, @Nullable String hash, Path imageFile)
     {
         if (Files.exists(imageFile))
         {
             try (InputStream stream = new FileInputStream(imageFile.toFile()))
             {
                 byte[] model = IOUtils.toByteArray(stream);
-                if (hash.equalsIgnoreCase(DigestUtils.md5Hex(model)))
+                if (hash == null || hash.equalsIgnoreCase(DigestUtils.md5Hex(model)))
                     return new ByteArrayInputStream(model);
             }
             catch (Exception e)
@@ -56,7 +56,7 @@ public class GeometryTextureCache
      * @return The texture by that name
      */
     @Nullable
-    public static InputStream getStream(String url, String hash, Function<String, InputStream> fetcher)
+    public static InputStream getStream(String url, @Nullable String hash, Function<String, InputStream> fetcher)
     {
         Path imageFile = CACHE_FOLDER.resolve(DigestUtils.md5Hex(url + ".png"));
 

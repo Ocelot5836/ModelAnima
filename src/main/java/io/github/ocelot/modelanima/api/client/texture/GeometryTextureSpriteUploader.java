@@ -129,7 +129,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         {
             String[] parts = location.getPath().split("/");
             if (parts[parts.length - 1].startsWith("base32"))
-                return new String(new Base32().decode(parts[parts.length - 1].substring(6, parts[parts.length - 1].length() - 4).toUpperCase(Locale.ROOT).replaceAll("_", "=")));
+                return new String(new Base32().decode(parts[parts.length - 1].substring(6).toUpperCase(Locale.ROOT).replaceAll("_", "=")));
             return null;
         }
 
@@ -142,7 +142,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         @Override
         public IResource getResource(ResourceLocation resourceLocation) throws IOException
         {
-            String url = getUrl(resourceLocation);
+            String url = getUrl(new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().substring(9, resourceLocation.getPath().length() - 4)));
             if (url != null)
             {
                 CompletableFuture<JsonObject> metadataStream = CompletableFuture.supplyAsync(() ->
@@ -180,14 +180,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 try
                 {
                     String hash = !this.hashes.containsKey(resourceLocation) ? null : this.hashes.get(resourceLocation).get(1, TimeUnit.MINUTES);
-                    if (hash != null)
-                    {
-                        textureStream = GeometryTextureCache.getStream(url, hash, OnlineResourceManager::getTextureStream);
-                    }
-                    else
-                    {
-                        textureStream = getTextureStream(url);
-                    }
+                    textureStream = GeometryTextureCache.getStream(url, hash, OnlineResourceManager::getTextureStream);
                 }
                 catch (Exception e)
                 {
