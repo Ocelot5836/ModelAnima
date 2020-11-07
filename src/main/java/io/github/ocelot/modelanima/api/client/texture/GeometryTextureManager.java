@@ -84,7 +84,8 @@ public class GeometryTextureManager
     public static void addProvider(TextureTableProvider provider)
     {
         PROVIDERS.add(provider);
-        dirty = true;
+        if (spriteUploader != null)
+            dirty = true;
     }
 
     /**

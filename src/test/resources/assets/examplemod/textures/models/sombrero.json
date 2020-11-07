@@ -2,6 +2,7 @@
   "texture": {
     "type": "online",
     "texture": "http://api.battlefieldsmc.net/api/server/cosmetic/texture/sombrero/default.png",
+	"hash": "7B4B1884FAC30F82BC6849FE6C3E35E6",
     "layer": "cutout"
   }
 }
