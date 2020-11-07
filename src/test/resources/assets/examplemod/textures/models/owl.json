@@ -2,7 +2,6 @@
   "texture": {
     "type": "online",
     "texture": "https://cdn.discordapp.com/attachments/396902837717696523/753414876407398400/owl.png",
-	"hash": "0361614A605C8EA6036E689EC37C87D3",
     "layer": "cutout"
   }
 }

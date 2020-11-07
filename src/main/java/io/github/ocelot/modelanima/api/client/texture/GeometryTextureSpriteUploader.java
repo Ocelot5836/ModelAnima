@@ -112,12 +112,14 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     private static class OnlineResourceManager implements IResourceManager
     {
         private final IResourceManager parent;
-        private final Map<ResourceLocation, CompletableFuture<String>> hashes;
+        private final Set<String> uncached;
+        private final Map<String, CompletableFuture<String>> hashes;
 
         private OnlineResourceManager(IResourceManager parent, Set<GeometryModelTexture> textures)
         {
             this.parent = parent;
-            this.hashes = textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toMap(texture -> new ResourceLocation(texture.getLocation().getNamespace(), "textures/" + texture.getLocation().getPath() + ".png"), texture -> CompletableFuture.supplyAsync(() ->
+            this.uncached = textures.stream().filter(texture -> !texture.canCache()).map(GeometryModelTexture::getData).collect(Collectors.toSet());
+            this.hashes = textures.stream().filter(texture -> texture.canCache() && texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toMap(GeometryModelTexture::getData, texture -> CompletableFuture.supplyAsync(() ->
             {
                 String url = getUrl(texture.getLocation());
                 return url == null ? null : getHash(url);
@@ -177,14 +179,21 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 }, Util.getServerExecutor());
 
                 InputStream textureStream;
-                try
+                if (!this.uncached.contains(url))
                 {
-                    String hash = !this.hashes.containsKey(resourceLocation) ? null : this.hashes.get(resourceLocation).get(1, TimeUnit.MINUTES);
-                    textureStream = GeometryTextureCache.getStream(url, hash, OnlineResourceManager::getTextureStream);
+                    try
+                    {
+                        String hash = !this.hashes.containsKey(url) ? null : this.hashes.get(url).get(1, TimeUnit.MINUTES);
+                        textureStream = GeometryTextureCache.getStream(url, hash, OnlineResourceManager::getTextureStream);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new IOException("Took too long to fetch texture data from '" + url + "'");
+                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    throw new IOException("Took too long to fetch texture data from '" + url + "'");
+                    textureStream = getTextureStream(url);
                 }
 
                 if (textureStream == null)

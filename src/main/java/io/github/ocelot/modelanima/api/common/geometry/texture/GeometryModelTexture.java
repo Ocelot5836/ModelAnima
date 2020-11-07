@@ -10,7 +10,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.codec.binary.Base32;
 
-import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
@@ -24,11 +23,12 @@ import java.util.regex.Pattern;
  */
 public class GeometryModelTexture
 {
-    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", -1, false);
+    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", false, -1, false);
     public static final Codec<GeometryModelTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Type::byName, type -> type.name().toLowerCase(Locale.ROOT)).fieldOf("type").forGetter(GeometryModelTexture::getType),
             Codec.STRING.xmap(TextureLayer::byName, type -> type.name().toLowerCase(Locale.ROOT)).optionalFieldOf("layer", TextureLayer.SOLID).forGetter(GeometryModelTexture::getLayer),
             Codec.STRING.fieldOf("texture").forGetter(GeometryModelTexture::getData),
+            Codec.BOOL.optionalFieldOf("cache", true).forGetter(GeometryModelTexture::canCache),
             Codec.INT.optionalFieldOf("color", -1).forGetter(GeometryModelTexture::getColor),
             Codec.BOOL.optionalFieldOf("glowing", false).forGetter(GeometryModelTexture::isGlowing)
     ).apply(instance, GeometryModelTexture::new));
@@ -37,23 +37,25 @@ public class GeometryModelTexture
     private final Type type;
     private final TextureLayer layer;
     private final String data;
+    private final boolean cache;
     private final int color;
     private final boolean glowing;
     private final ResourceLocation location;
 
-    public GeometryModelTexture(Type type, TextureLayer layer, String data, int color, boolean glowing)
+    public GeometryModelTexture(Type type, TextureLayer layer, String data, boolean cache, int color, boolean glowing)
     {
         this.type = type;
         this.layer = layer;
         this.data = data;
+        this.cache = cache;
         this.color = color;
         this.glowing = glowing;
-        this.location = type.getLocation(data);
+        this.location = type.createLocation(data);
     }
 
     public GeometryModelTexture(PacketBuffer buf)
     {
-        this(buf.readEnumValue(Type.class), buf.readEnumValue(TextureLayer.class), buf.readString(), buf.readInt(), buf.readBoolean());
+        this(buf.readEnumValue(Type.class), buf.readEnumValue(TextureLayer.class), buf.readString(), buf.readBoolean(), buf.readInt(), buf.readBoolean());
     }
 
     /**
@@ -66,6 +68,7 @@ public class GeometryModelTexture
         buf.writeEnumValue(this.type);
         buf.writeEnumValue(this.layer);
         buf.writeString(this.data);
+        buf.writeBoolean(this.cache);
         buf.writeInt(this.color);
         buf.writeBoolean(this.glowing);
     }
@@ -92,6 +95,14 @@ public class GeometryModelTexture
     public String getData()
     {
         return data;
+    }
+
+    /**
+     * @return Whether or not caching this texture value is allowed
+     */
+    public boolean canCache()
+    {
+        return cache;
     }
 
     /**
@@ -148,16 +159,13 @@ public class GeometryModelTexture
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GeometryModelTexture that = (GeometryModelTexture) o;
-        return color == that.color &&
-                glowing == that.glowing &&
-                type == that.type &&
-                data.equals(that.data);
+        return cache == that.cache && color == that.color && glowing == that.glowing && type == that.type && layer == that.layer && data.equals(that.data);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(type, data, color, glowing);
+        return Objects.hash(type, layer, data, cache, color, glowing);
     }
 
     @Override
@@ -165,7 +173,9 @@ public class GeometryModelTexture
     {
         return "GeometryModelTexture{" +
                 "type=" + type +
+                ", layer=" + layer +
                 ", data='" + data + '\'' +
+                ", cache=" + cache +
                 ", color=" + color +
                 ", glowing=" + glowing +
                 ", location=" + location +
@@ -196,7 +206,7 @@ public class GeometryModelTexture
          * @param data The data to convert
          * @return The new location for that data
          */
-        public ResourceLocation getLocation(String data)
+        public ResourceLocation createLocation(String data)
         {
             return this.locationGenerator.apply(data);
         }

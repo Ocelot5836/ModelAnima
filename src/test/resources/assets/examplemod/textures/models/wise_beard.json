@@ -2,7 +2,6 @@
   "texture": {
     "type": "online",
     "texture": "http://api.battlefieldsmc.net/api/server/cosmetic/texture/wise_beard/default.png",
-	"hash": "D9662BCC4F6D10A15EC2901705931DC0",
     "layer": "cutout"
   }
 }
