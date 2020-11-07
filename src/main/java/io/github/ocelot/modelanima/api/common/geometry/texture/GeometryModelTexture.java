@@ -24,12 +24,11 @@ import java.util.regex.Pattern;
  */
 public class GeometryModelTexture
 {
-    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", null, -1, false);
+    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", -1, false);
     public static final Codec<GeometryModelTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Type::byName, type -> type.name().toLowerCase(Locale.ROOT)).fieldOf("type").forGetter(GeometryModelTexture::getType),
             Codec.STRING.xmap(TextureLayer::byName, type -> type.name().toLowerCase(Locale.ROOT)).optionalFieldOf("layer", TextureLayer.SOLID).forGetter(GeometryModelTexture::getLayer),
             Codec.STRING.fieldOf("texture").forGetter(GeometryModelTexture::getData),
-            Codec.STRING.optionalFieldOf("hash", "null").forGetter(GeometryModelTexture::getHash),
             Codec.INT.optionalFieldOf("color", -1).forGetter(GeometryModelTexture::getColor),
             Codec.BOOL.optionalFieldOf("glowing", false).forGetter(GeometryModelTexture::isGlowing)
     ).apply(instance, GeometryModelTexture::new));
@@ -38,17 +37,15 @@ public class GeometryModelTexture
     private final Type type;
     private final TextureLayer layer;
     private final String data;
-    private final String hash;
     private final int color;
     private final boolean glowing;
     private final ResourceLocation location;
 
-    public GeometryModelTexture(Type type, TextureLayer layer, String data, @Nullable String hash, int color, boolean glowing)
+    public GeometryModelTexture(Type type, TextureLayer layer, String data, int color, boolean glowing)
     {
         this.type = type;
         this.layer = layer;
         this.data = data;
-        this.hash = String.valueOf(hash).equals("null") ? null : hash;
         this.color = color;
         this.glowing = glowing;
         this.location = type.getLocation(data);
@@ -56,7 +53,7 @@ public class GeometryModelTexture
 
     public GeometryModelTexture(PacketBuffer buf)
     {
-        this(buf.readEnumValue(Type.class), buf.readEnumValue(TextureLayer.class), buf.readString(), buf.readBoolean() ? buf.readString() : null, buf.readInt(), buf.readBoolean());
+        this(buf.readEnumValue(Type.class), buf.readEnumValue(TextureLayer.class), buf.readString(), buf.readInt(), buf.readBoolean());
     }
 
     /**
@@ -69,9 +66,6 @@ public class GeometryModelTexture
         buf.writeEnumValue(this.type);
         buf.writeEnumValue(this.layer);
         buf.writeString(this.data);
-        buf.writeBoolean(this.hash != null);
-        if (this.hash != null)
-            buf.writeString(this.hash);
         buf.writeInt(this.color);
         buf.writeBoolean(this.glowing);
     }
@@ -98,15 +92,6 @@ public class GeometryModelTexture
     public String getData()
     {
         return data;
-    }
-
-    /**
-     * @return An md5 hash of the texture data
-     */
-    @Nullable
-    public String getHash()
-    {
-        return hash;
     }
 
     /**
