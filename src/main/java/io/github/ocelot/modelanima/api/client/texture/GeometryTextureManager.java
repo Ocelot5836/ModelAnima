@@ -137,6 +137,14 @@ public class GeometryTextureManager
         }, Minecraft.getInstance());
     }
 
+    /**
+     * @return Whether or not a reload is currently happening
+     */
+    public static boolean isReloading()
+    {
+        return asyncReloader != null;
+    }
+
     private static class Reloader implements IFutureReloadListener
     {
         @Override
