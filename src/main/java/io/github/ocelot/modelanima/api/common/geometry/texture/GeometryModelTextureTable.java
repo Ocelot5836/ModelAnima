@@ -40,7 +40,8 @@ public class GeometryModelTextureTable
     public GeometryModelTextureTable(PacketBuffer buf)
     {
         this.textures = new HashMap<>();
-        for (int i = 0; i < buf.readVarInt(); i++)
+        int count = buf.readVarInt();
+        for (int i = 0; i < count; i++)
             this.textures.put(buf.readString(), new GeometryModelTexture(buf));
     }
 
