@@ -8,6 +8,7 @@ import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelText
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -32,33 +33,21 @@ public class GeometryModelRenderer
     /**
      * Renders the specified model on the specified parent model.
      *
-     * @param parent        The parent model to attach parts to or <code>null</code> to skip
-     * @param model         The model to render
-     * @param textures      The textures to apply to the model or <code>null</code> to use a missing texture
-     * @param matrixStack   The current stack of transformations
-     * @param buffer        The buffer to get the builder from
-     * @param packedLight   The packed uv into the light texture the parts should be rendered at
-     * @param packedOverlay The packed uv into the overlay texture the parts should be rendered at
-     * @param red           The red factor for color
-     * @param green         The green factor for color
-     * @param blue          The blue factor for color
-     * @param alpha         The alpha factor for color
+     * @param parent          The parent model to attach parts to or <code>null</code> to skip
+     * @param model           The model to render
+     * @param textureLocation The textures to apply to the model or <code>null</code> to use a missing texture
+     * @param matrixStack     The current stack of transformations
+     * @param buffer          The buffer to get the builder from
+     * @param packedLight     The packed uv into the light texture the parts should be rendered at
+     * @param packedOverlay   The packed uv into the overlay texture the parts should be rendered at
+     * @param red             The red factor for color
+     * @param green           The green factor for color
+     * @param blue            The blue factor for color
+     * @param alpha           The alpha factor for color
      */
-    public static void render(@Nullable Model parent, GeometryModel model, @Nullable GeometryModelTextureTable textures, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public static void render(@Nullable Model parent, GeometryModel model, @Nullable ResourceLocation textureLocation, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-//        Map<String, ModelRenderer> parentParts = parent == null ? Collections.emptyMap() : CACHE.computeIfAbsent(parent, key -> mapRenderers(parent));
-//        for (String textureKey : model.getTextureKeys())
-//        {
-//            GeometryModelTexture texture = textures == null ? GeometryModelTexture.MISSING : textures.getTexture(textureKey);
-//            model.render(null, textureKey, matrixStack, buffer.getBuffer(model.getModelRenderType(texture.getLocation())), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
-//            for (String modelKey : model.getModelKeys())
-//            {
-//                String deobfName = ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, modelKey);
-//                if (parentParts.containsKey(deobfName))
-//                    model.copyAngles(modelKey, textureKey, parentParts.get(deobfName));
-//                model.render(modelKey, textureKey, matrixStack, buffer.getBuffer(model.getModelRenderType(texture.getLocation())), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
-//            }
-//        }
+        GeometryModelTextureTable textures = textureLocation == null ? GeometryModelTextureTable.EMPTY : GeometryTextureManager.get(textureLocation);
 
         if (parent != null)
         {

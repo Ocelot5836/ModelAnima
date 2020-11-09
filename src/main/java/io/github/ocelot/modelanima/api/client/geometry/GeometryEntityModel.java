@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashSet;
@@ -23,11 +24,11 @@ import java.util.function.Supplier;
 public class GeometryEntityModel<T extends Entity> extends EntityModel<T>
 {
     private final Supplier<GeometryModel> model;
-    private final Function<T, GeometryModelTextureTable> textureFunction;
+    private final Function<T, ResourceLocation> textureFunction;
     private final Set<Pair<String, BoneTransformer<T>>> transforms;
-    private GeometryModelTextureTable texture;
+    private ResourceLocation texture;
 
-    public GeometryEntityModel(Supplier<GeometryModel> model, Function<T, GeometryModelTextureTable> textureFunction)
+    public GeometryEntityModel(Supplier<GeometryModel> model, Function<T, ResourceLocation> textureFunction)
     {
         this.model = model;
         this.textureFunction = textureFunction;
