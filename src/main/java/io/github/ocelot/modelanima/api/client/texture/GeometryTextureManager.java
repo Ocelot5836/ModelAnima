@@ -133,7 +133,7 @@ public class GeometryTextureManager
         return asyncReloader.onceDone().thenRunAsync(() ->
         {
             asyncReloader = null;
-            LOGGER.debug("Reloaded cosmetics in " + stopwatch);
+            LOGGER.debug("Reloaded geometry textures in " + stopwatch);
         }, Minecraft.getInstance());
     }
 

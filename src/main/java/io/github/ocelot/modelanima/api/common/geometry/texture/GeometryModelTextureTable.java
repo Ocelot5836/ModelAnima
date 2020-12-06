@@ -3,6 +3,7 @@ package io.github.ocelot.modelanima.api.common.geometry.texture;
 import com.google.gson.*;
 import com.mojang.serialization.JsonOps;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
+import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * <p>A table of textures to be used for {@link GeometryModel} rendering.</p>
+ * <p>A table of textures to be used for {@link GeometryModel} rendering. Texture tables must be made from {@link GeometryTextureManager}.</p>
  *
  * @author Ocelot
  * @since 1.0.0
