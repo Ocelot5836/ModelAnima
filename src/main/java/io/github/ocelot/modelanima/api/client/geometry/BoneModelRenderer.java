@@ -110,10 +110,10 @@ public class BoneModelRenderer extends ModelRenderer
         Matrix3f matrix3f = entry.getNormal();
 
         this.addFace(cube, matrix4f, matrix3f, x1, -y1, z, x, -y1, z, x, -y, z, x1, -y, z, Direction.NORTH);
-        this.addFace(cube, matrix4f, matrix3f, x1, -y1, z1, x1, -y1, z, x1, -y, z, x1, -y, z1, Direction.EAST);
+        this.addFace(cube, matrix4f, matrix3f, x1, -y1, z, x1, -y1, z1, x1, -y, z1, x1, -y, z, Direction.EAST);
         this.addFace(cube, matrix4f, matrix3f, x, -y1, z1, x1, -y1, z1, x1, -y, z1, x, -y, z1, Direction.SOUTH);
-        this.addFace(cube, matrix4f, matrix3f, x, -y1, z, x, -y1, z1, x, -y, z1, x, -y, z, Direction.WEST);
-        this.addFace(cube, matrix4f, matrix3f, x1, -y, z, x, -y, z, x, -y, z1, x1, -y, z1, Direction.DOWN);
+        this.addFace(cube, matrix4f, matrix3f, x, -y1, z1, x, -y1, z, x, -y, z, x, -y, z1, Direction.WEST);
+        this.addFace(cube, matrix4f, matrix3f, x1, -y, z1, x, -y, z1, x, -y, z, x1, -y, z, Direction.DOWN);
         this.addFace(cube, matrix4f, matrix3f, x1, -y1, z1, x, -y1, z1, x, -y1, z, x1, -y1, z, Direction.UP);
     }
 
