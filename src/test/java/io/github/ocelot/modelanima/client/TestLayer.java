@@ -29,8 +29,8 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        GeometryModel model = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "button"));
-        ResourceLocation texture = new ResourceLocation(TestMod.MOD_ID, "button");
+        GeometryModel model = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/hoodie"));
+        ResourceLocation texture = new ResourceLocation(TestMod.MOD_ID, "red_hoodie");
 //        GeometryModelTextureTable backpack = GeometryTextureManager.get(new ResourceLocation(TestMod.MOD_ID, "slabfish_backpack"));
 //        GeometryModelTextureTable sweater = GeometryTextureManager.get(new ResourceLocation(TestMod.MOD_ID, "slabfish_sweater"));
         GeometryModelRenderer.render(this.getEntityModel(), model, texture, matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);

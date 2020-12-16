@@ -29,7 +29,7 @@ public class GeometryModelTexture
             Codec.STRING.xmap(TextureLayer::byName, type -> type.name().toLowerCase(Locale.ROOT)).optionalFieldOf("layer", TextureLayer.SOLID).forGetter(GeometryModelTexture::getLayer),
             Codec.STRING.fieldOf("texture").forGetter(GeometryModelTexture::getData),
             Codec.BOOL.optionalFieldOf("cache", true).forGetter(GeometryModelTexture::canCache),
-            Codec.INT.optionalFieldOf("color", -1).forGetter(GeometryModelTexture::getColor),
+            Codec.STRING.optionalFieldOf("color", "FFFFFF").xmap(hex->Integer.parseInt(hex, 16), color->Integer.toHexString(color).toUpperCase(Locale.ROOT)).forGetter(GeometryModelTexture::getColor),
             Codec.BOOL.optionalFieldOf("glowing", false).forGetter(GeometryModelTexture::isGlowing)
     ).apply(instance, GeometryModelTexture::new));
     private static final Pattern ONLINE_PATTERN = Pattern.compile("=");
