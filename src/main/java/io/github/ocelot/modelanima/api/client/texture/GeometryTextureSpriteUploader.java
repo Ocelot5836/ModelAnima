@@ -1,6 +1,5 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
-import com.google.common.base.Charsets;
 import com.google.gson.JsonObject;
 import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
@@ -19,11 +18,15 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
+import org.apache.http.conn.EofSensorInputStream;
+import org.apache.http.conn.EofSensorWatcher;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
@@ -31,11 +34,10 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.plexus.util.FileUtils;
 
 import javax.annotation.Nullable;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +54,7 @@ import java.util.stream.Stream;
 public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.SheetData> implements GeometryAtlasTexture, AutoCloseable
 {
     public static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(ModelAnima.DOMAIN, "textures/atlas/geometry.png");
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11";
     private static final Logger LOGGER = LogManager.getLogger();
     private final AtlasTexture textureAtlas;
     private final Set<GeometryModelTexture> textures;
@@ -114,6 +117,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         private final IResourceManager parent;
         private final Set<String> uncached;
         private final Map<String, CompletableFuture<String>> hashes;
+        private final Map<String, Pair<CompletableFuture<Path>, CompletableFuture<Path>>> localLocations;
 
         private OnlineResourceManager(IResourceManager parent, Set<GeometryModelTexture> textures)
         {
@@ -121,18 +125,80 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
             this.uncached = textures.stream().filter(texture -> !texture.canCache()).map(GeometryModelTexture::getData).collect(Collectors.toSet());
             this.hashes = textures.stream().filter(texture -> texture.canCache() && texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toMap(GeometryModelTexture::getData, texture -> CompletableFuture.supplyAsync(() ->
             {
-                String url = getUrl(texture.getLocation());
+                String url = parseUrl(texture.getLocation());
                 return url == null ? null : getHash(url);
             }, Util.getServerExecutor())));
+            this.localLocations = textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getData).collect(Collectors.toMap(url -> url, this::updateCache));
+        }
+
+        private Pair<CompletableFuture<Path>, CompletableFuture<Path>> updateCache(String url)
+        {
+            String metadataUrl;
+            String extension = FileUtils.extension(url);
+            String[] urlParts = url.split("." + extension);
+            if (urlParts.length <= 1)
+            {
+                metadataUrl = url + ".mcmeta";
+            }
+            else
+            {
+                metadataUrl = urlParts[0] + extension + ".mcmeta" + urlParts[1];
+            }
+
+            CompletableFuture<Path> texturePath = write(url, this.hashes.getOrDefault(url, CompletableFuture.completedFuture(null)), !this.uncached.contains(url), false);
+            CompletableFuture<Path> metadataPath = write(metadataUrl, CompletableFuture.completedFuture(null), false, true);
+            return Pair.of(texturePath, metadataPath);
+        }
+
+        private static CompletableFuture<Path> write(String url, CompletableFuture<String> hashFuture, boolean cache, boolean ignoreErrors)
+        {
+            return CompletableFuture.supplyAsync(() ->
+            {
+                try
+                {
+                    if (cache)
+                    {
+                        try
+                        {
+                            return GeometryTextureCache.getPath(url, hashFuture.get(1, TimeUnit.MINUTES), s -> tryGet(s, ignoreErrors));
+                        }
+                        catch (Exception e)
+                        {
+                            throw new IOException("Took too long to fetch texture data");
+                        }
+                    }
+                    else
+                    {
+                        Path tempFile = Files.createTempFile(DigestUtils.md5Hex(url), null);
+                        try (InputStreamReader reader = new InputStreamReader(get(url)); FileOutputStream os = new FileOutputStream(tempFile.toFile()))
+                        {
+                            IOUtils.copy(reader, os, StandardCharsets.UTF_8);
+                        }
+                        return tempFile;
+                    }
+                }
+                catch (Exception e)
+                {
+                    if (!ignoreErrors)
+                        LOGGER.error("Failed to download image from '" + url + "'", e);
+                    return null;
+                }
+            }, Util.getServerExecutor());
         }
 
         @Nullable
-        private static String getUrl(ResourceLocation location)
+        private static InputStream read(CompletableFuture<Path> pathFuture)
         {
-            String[] parts = location.getPath().split("/");
-            if (parts[parts.length - 1].startsWith("base32"))
-                return new String(new Base32().decode(parts[parts.length - 1].substring(6).toUpperCase(Locale.ROOT).replaceAll("_", "=")));
-            return null;
+            try
+            {
+                Path path = pathFuture.get(1, TimeUnit.MINUTES);
+                return path == null ? null : new FileInputStream(path.toFile());
+            }
+            catch (Exception e)
+            {
+                LOGGER.error("Took too long to fetch texture data", e);
+                return null;
+            }
         }
 
         @Override
@@ -144,25 +210,16 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         @Override
         public IResource getResource(ResourceLocation resourceLocation) throws IOException
         {
-            String url = getUrl(new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().substring(9, resourceLocation.getPath().length() - 4)));
+            String url = parseUrl(new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().substring(9, resourceLocation.getPath().length() - 4)));
             if (url != null)
             {
-                CompletableFuture<JsonObject> metadataStream = CompletableFuture.supplyAsync(() ->
+                if (!this.localLocations.containsKey(url))
+                    throw new IOException("Failed to fetch texture data from '" + url + "'");
+
+                Pair<CompletableFuture<Path>, CompletableFuture<Path>> files = this.localLocations.get(url);
+                CompletableFuture<JsonObject> metadata = CompletableFuture.supplyAsync(() ->
                 {
-                    try
-                    {
-                        String extension = FileUtils.extension(url);
-                        String[] urlParts = url.split("." + extension);
-                        if (urlParts.length == 1)
-                            return get(url + ".mcmeta");
-                        return get(urlParts[0] + extension + ".mcmeta" + urlParts[1]);
-                    }
-                    catch (Exception ignored)
-                    {
-                        return null;
-                    }
-                }, Util.getServerExecutor()).thenApplyAsync(stream ->
-                {
+                    InputStream stream = read(files.getRight());
                     if (stream == null)
                         return null;
 
@@ -178,34 +235,18 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                     return null;
                 }, Util.getServerExecutor());
 
-                InputStream textureStream;
-                if (!this.uncached.contains(url))
-                {
-                    try
-                    {
-                        String hash = !this.hashes.containsKey(url) ? null : this.hashes.get(url).get(1, TimeUnit.MINUTES);
-                        textureStream = GeometryTextureCache.getStream(url, hash, OnlineResourceManager::getTextureStream);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new IOException("Took too long to fetch texture data from '" + url + "'");
-                    }
-                }
-                else
-                {
-                    textureStream = getTextureStream(url);
-                }
-
+                InputStream textureStream = read(files.getLeft());
                 if (textureStream == null)
                     throw new IOException("Failed to fetch texture data from '" + url + "'");
 
                 try
                 {
-                    return new OnlineResource(resourceLocation, textureStream, metadataStream.get(1, TimeUnit.MINUTES));
+                    return new OnlineResource(resourceLocation, textureStream, metadata.get(1, TimeUnit.SECONDS));
                 }
                 catch (Exception e)
                 {
-                    throw new IOException("Failed to fetch texture metadata from '" + url + "'", e);
+                    LOGGER.error("Failed to fetch texture metadata for '" + url + "'");
+                    return new OnlineResource(resourceLocation, textureStream, null);
                 }
             }
             return this.parent.getResource(resourceLocation);
@@ -242,6 +283,15 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         }
 
         @Nullable
+        private static String parseUrl(ResourceLocation location)
+        {
+            String[] parts = location.getPath().split("/");
+            if (parts[parts.length - 1].startsWith("base32"))
+                return new String(new Base32().decode(parts[parts.length - 1].substring(6).toUpperCase(Locale.ROOT).replaceAll("_", "=")));
+            return null;
+        }
+
+        @Nullable
         private static String getHash(String url)
         {
             String extension = FileUtils.extension(url);
@@ -253,13 +303,14 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 {
                     try
                     {
-                        String hashUrl = urlParts.length == 1 ? url + ".md5" : urlParts[0] + extension + ".md5" + urlParts[1];
-                        if (!canGet(hashUrl))
+                        String hashUrl = urlParts.length <= 1 ? url + ".md5" : urlParts[0] + extension + ".md5" + urlParts[1];
+                        if (getStatus(hashUrl) != 200)
                             return null;
-                        return IOUtils.toString(get(hashUrl), Charsets.UTF_8);
+                        return IOUtils.toString(get(hashUrl), StandardCharsets.UTF_8);
                     }
-                    catch (Exception ignored)
+                    catch (Exception e)
                     {
+                        e.printStackTrace();
                         return null;
                     }
                 }, Util.getServerExecutor()).get(1, TimeUnit.MINUTES);
@@ -272,108 +323,114 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         }
 
         @Nullable
-        private static InputStream getTextureStream(String url)
+        private static InputStream tryGet(String url, boolean ignoreErrors)
         {
             try
             {
-                return CompletableFuture.supplyAsync(() ->
-                {
-                    try
-                    {
-                        return canGet(url) ? get(url) : null;
-                    }
-                    catch (Exception e)
-                    {
-                        LOGGER.error("Failed to load online texture from '" + url + "'", e);
-                        return null;
-                    }
-                }, Util.getServerExecutor()).get(1, TimeUnit.MINUTES);
+                return getStatus(url) == 200 ? IOUtils.toBufferedInputStream(get(url)) : null;
             }
             catch (Exception e)
             {
-                LOGGER.error("Failed to load online texture from '" + url + "'", e);
+                if (!ignoreErrors)
+                    LOGGER.error("Failed to load online data from '" + url + "'", e);
+                return null;
             }
-            return null;
         }
 
-        private static boolean canGet(String url) throws IOException
+        private static int getStatus(String url) throws IOException
         {
-            try (CloseableHttpClient client = HttpClients.custom().setUserAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11").build())
+            try (CloseableHttpClient client = HttpClients.custom().setUserAgent(USER_AGENT).build())
             {
                 HttpHead head = new HttpHead(url);
                 try (CloseableHttpResponse response = client.execute(head))
                 {
-                    return response.getStatusLine().getStatusCode() == 200;
+                    return response.getStatusLine().getStatusCode();
                 }
             }
         }
 
         private static InputStream get(String url) throws IOException
         {
-            try (CloseableHttpClient client = HttpClients.custom().setUserAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11").build())
+            HttpGet get = new HttpGet(url);
+            CloseableHttpClient client = HttpClients.custom().setUserAgent(USER_AGENT).build();
+            CloseableHttpResponse response = client.execute(get);
+            StatusLine statusLine = response.getStatusLine();
+            if (statusLine.getStatusCode() != 200)
             {
-                HttpGet get = new HttpGet(url);
-                try (CloseableHttpResponse response = client.execute(get))
+                client.close();
+                response.close();
+                throw new IOException("Failed to connect to '" + url + "'. " + statusLine.getStatusCode() + " " + statusLine.getReasonPhrase());
+            }
+            return new EofSensorInputStream(response.getEntity().getContent(), new EofSensorWatcher()
+            {
+                @Override
+                public boolean eofDetected(InputStream wrapped)
                 {
-                    StatusLine statusLine = response.getStatusLine();
-                    if (statusLine.getStatusCode() != 200)
-                        throw new IOException("Failed to connect to '" + url + "'. " + statusLine.getStatusCode() + " " + statusLine.getReasonPhrase());
-                    return IOUtils.toBufferedInputStream(response.getEntity().getContent());
+                    return true;
                 }
-            }
-        }
-    }
 
-    private static class OnlineResource implements IResource
-    {
-        private final ResourceLocation textureLocation;
-        private final InputStream stream;
-        private final JsonObject metadataJson;
+                @Override
+                public boolean streamClosed(InputStream wrapped) throws IOException
+                {
+                    response.close();
+                    return true;
+                }
 
-        private OnlineResource(ResourceLocation textureLocation, InputStream stream, @Nullable JsonObject metadataJson)
-        {
-            this.textureLocation = textureLocation;
-            this.stream = stream;
-            this.metadataJson = metadataJson;
-        }
-
-        @Override
-        public ResourceLocation getLocation()
-        {
-            return textureLocation;
+                @Override
+                public boolean streamAbort(InputStream wrapped) throws IOException
+                {
+                    response.close();
+                    return true;
+                }
+            });
         }
 
-        @Override
-        public InputStream getInputStream()
+        private static class OnlineResource implements IResource
         {
-            return stream;
-        }
+            private final ResourceLocation textureLocation;
+            private final InputStream stream;
+            private final JsonObject metadataJson;
 
-        @Nullable
-        @Override
-        public <T> T getMetadata(IMetadataSectionSerializer<T> serializer)
-        {
-            if (this.metadataJson == null)
+            private OnlineResource(ResourceLocation textureLocation, InputStream stream, @Nullable JsonObject metadataJson)
             {
-                return null;
+                this.textureLocation = textureLocation;
+                this.stream = stream;
+                this.metadataJson = metadataJson;
             }
-            else
+
+            @Override
+            public ResourceLocation getLocation()
             {
+                return textureLocation;
+            }
+
+            @Override
+            public InputStream getInputStream()
+            {
+                return stream;
+            }
+
+            @Nullable
+            @Override
+            public <T> T getMetadata(IMetadataSectionSerializer<T> serializer)
+            {
+                if (this.metadataJson == null)
+                    return null;
                 String s = serializer.getSectionName();
                 return this.metadataJson.has(s) ? serializer.deserialize(JSONUtils.getJsonObject(this.metadataJson, s)) : null;
             }
-        }
 
-        @Override
-        public String getPackName()
-        {
-            return ModelAnima.DOMAIN + "_online";
-        }
+            @Override
+            public String getPackName()
+            {
+                return ModelAnima.DOMAIN + "_online";
+            }
 
-        @Override
-        public void close() throws IOException
-        {
-            this.stream.close();
+            @Override
+            public void close() throws IOException
+            {
+                this.stream.close();
+            }
         }
     }
 }

@@ -8,13 +8,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.function.Function;
 
 /**
@@ -28,23 +27,21 @@ public class GeometryTextureCache
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDir.toURI()).resolve(ModelAnima.DOMAIN + "-geometry-texture-cache");
 
-    @Nullable
-    private static InputStream readFile(String url, @Nullable String hash, Path imageFile)
+    private static boolean isCached(String url, @Nullable String hash, Path imageFile)
     {
         if (Files.exists(imageFile))
         {
             try (InputStream stream = new FileInputStream(imageFile.toFile()))
             {
-                byte[] model = IOUtils.toByteArray(stream);
-                if (hash == null || hash.equalsIgnoreCase(DigestUtils.md5Hex(model)))
-                    return new ByteArrayInputStream(model);
+                if (hash == null || hash.equalsIgnoreCase(DigestUtils.md5Hex(stream)))
+                    return true;
             }
             catch (Exception e)
             {
                 LOGGER.error("Failed to read image '" + url + "'", e);
             }
         }
-        return null;
+        return false;
     }
 
     /**
@@ -53,41 +50,32 @@ public class GeometryTextureCache
      * @param url     The name of the texture to fetch
      * @param hash    The hash of the texture
      * @param fetcher The function providing a new stream
-     * @return The texture by that name
+     * @return The location of a file that can be opened with the data
      */
     @Nullable
-    public static InputStream getStream(String url, @Nullable String hash, Function<String, InputStream> fetcher)
+    public static Path getPath(String url, @Nullable String hash, Function<String, InputStream> fetcher)
     {
-        Path imageFile = CACHE_FOLDER.resolve(DigestUtils.md5Hex(url + ".png"));
+        Path imageFile = CACHE_FOLDER.resolve(DigestUtils.md5Hex(url));
 
-        InputStream fetchedStream = readFile(url, hash, imageFile);
-        if (fetchedStream != null)
-            return fetchedStream;
+        if (isCached(url, hash, imageFile))
+            return imageFile;
 
-        fetchedStream = fetcher.apply(url);
+        InputStream fetchedStream = fetcher.apply(url);
         if (fetchedStream == null)
             return null;
 
         try
         {
-            byte[] copy = IOUtils.toByteArray(fetchedStream);
-            fetchedStream.close();
-
             if (!Files.exists(CACHE_FOLDER))
                 Files.createDirectory(CACHE_FOLDER);
-            if (!Files.exists(imageFile))
-                Files.createFile(imageFile);
-
-            try (FileOutputStream os = new FileOutputStream(imageFile.toFile()))
-            {
-                IOUtils.write(copy, os);
-            }
+            Files.copy(fetchedStream, imageFile, StandardCopyOption.REPLACE_EXISTING);
+            return imageFile;
         }
         catch (Exception e)
         {
             LOGGER.error("Failed to write image '" + url + "'", e);
         }
 
-        return readFile(url, hash, imageFile);
+        return null;
     }
 }
