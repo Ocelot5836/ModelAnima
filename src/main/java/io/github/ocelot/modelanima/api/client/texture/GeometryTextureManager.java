@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
-import com.google.common.base.Stopwatch;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ResourceLoadProgressGui;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.*;
 import net.minecraft.util.ResourceLocation;
@@ -119,22 +119,22 @@ public class GeometryTextureManager
         return TEXTURES.values();
     }
 
-    public static CompletableFuture<Void> reload()
+    /**
+     * <p>Reloads all textures and opens the loading gui.</p>
+     *
+     * @return A future for when the reload is complete
+     */
+    public static CompletableFuture<Unit> reload()
     {
         if (asyncReloader != null)
-        {
-            LOGGER.warn("Already reloading!");
-            return CompletableFuture.completedFuture(null);
-        }
-
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        LOGGER.debug("Reloading");
+            return asyncReloader.onceDone();
         asyncReloader = AsyncReloader.create(Minecraft.getInstance().getResourceManager(), Collections.singletonList(RELOADER), Util.getServerExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE));
-        return asyncReloader.onceDone().thenRunAsync(() ->
+        Minecraft.getInstance().setLoadingGui(new ResourceLoadProgressGui(Minecraft.getInstance(), asyncReloader, error -> error.ifPresent(LOGGER::error), true));
+        return asyncReloader.onceDone().thenApplyAsync(unit ->
         {
             asyncReloader = null;
-            LOGGER.debug("Reloaded geometry textures in " + stopwatch);
-        }, Minecraft.getInstance());
+            return unit;
+        });
     }
 
     /**
