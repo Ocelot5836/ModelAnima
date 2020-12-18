@@ -124,7 +124,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
             this.parent = parent;
             this.uncached = onlineTextures.stream().filter(texture -> !texture.canCache()).map(GeometryModelTexture::getData).collect(Collectors.toSet());
             this.hashes = onlineTextures.stream().filter(GeometryModelTexture::canCache).map(GeometryModelTexture::getData).distinct().collect(Collectors.toMap(url -> url, url -> CompletableFuture.supplyAsync(() -> getHash(url), Util.getServerExecutor())));
-            this.localLocations = onlineTextures.stream().map(GeometryModelTexture::getData).collect(Collectors.toMap(url -> url, this::updateCache));
+            this.localLocations = onlineTextures.stream().map(GeometryModelTexture::getData).distinct().collect(Collectors.toMap(url -> url, this::updateCache));
         }
 
         private Pair<CompletableFuture<Path>, CompletableFuture<Path>> updateCache(String url)
