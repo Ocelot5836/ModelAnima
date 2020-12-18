@@ -6,6 +6,7 @@ import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.client.texture.LocalTextureTableProvider;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.client.TestLayer;
+import io.github.ocelot.modelanima.client.TestTextureTableProvider;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
@@ -49,6 +50,7 @@ public class TestMod
             LocalGeometryModelLoader.init(modBus);
             GeometryTextureManager.init(modBus);
             GeometryTextureManager.addProvider(new LocalTextureTableProvider());
+            GeometryTextureManager.addProvider(new TestTextureTableProvider());
         });
         BLOCKS.register(modBus);
         TILE_ENTITIES.register(modBus);

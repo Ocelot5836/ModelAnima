@@ -139,8 +139,19 @@ public class GeometryModelTextureTable
      *
      * @author Ocelot
      */
-    public static class Deserializer implements JsonDeserializer<GeometryModelTextureTable>
+    public static class Serializer implements JsonSerializer<GeometryModelTextureTable>, JsonDeserializer<GeometryModelTextureTable>
     {
+        @Override
+        public JsonElement serialize(GeometryModelTextureTable src, Type typeOfSrc, JsonSerializationContext context)
+        {
+            JsonObject texturesObject = new JsonObject();
+            for (Map.Entry<String, GeometryModelTexture> entry : src.textures.entrySet())
+            {
+                texturesObject.add(entry.getKey(), GeometryModelTexture.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, LOGGER::error));
+            }
+            return texturesObject;
+        }
+
         @Override
         public GeometryModelTextureTable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
         {
