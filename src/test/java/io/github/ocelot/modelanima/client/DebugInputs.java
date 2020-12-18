@@ -7,6 +7,7 @@ import net.minecraft.util.Util;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
@@ -20,11 +21,13 @@ import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.stb.STBImageWrite.stbi_write_png;
 
 @Mod.EventBusSubscriber(modid = TestMod.MOD_ID)
-public class CommonEvents
+public class DebugInputs
 {
     @SubscribeEvent
     public static void onEvent(InputEvent.KeyInputEvent event)
     {
+        if (FMLLoader.isProduction())
+            return;
         if (event.getKey() == GLFW.GLFW_KEY_P)
         {
             try

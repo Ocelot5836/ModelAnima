@@ -131,12 +131,12 @@ public class GeometryTextureManager
             return asyncReloader.onceDone();
         asyncReloader = AsyncReloader.create(Minecraft.getInstance().getResourceManager(), Collections.singletonList(RELOADER), Util.getServerExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE));
         if (showLoadingScreen)
-            Minecraft.getInstance().setLoadingGui(new ResourceLoadProgressGui(Minecraft.getInstance(), asyncReloader, error -> error.ifPresent(LOGGER::error), true));
-        return asyncReloader.onceDone().thenApplyAsync(unit ->
-        {
-            asyncReloader = null;
-            return unit;
-        });
+            Minecraft.getInstance().setLoadingGui(new ResourceLoadProgressGui(Minecraft.getInstance(), asyncReloader, error ->
+            {
+                asyncReloader = null;
+                error.ifPresent(LOGGER::error);
+            }, true));
+        return asyncReloader.onceDone();
     }
 
     /**
