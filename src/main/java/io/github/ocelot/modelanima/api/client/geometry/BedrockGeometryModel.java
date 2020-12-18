@@ -121,6 +121,12 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     }
 
     @Override
+    public void resetTransformation()
+    {
+        this.modelParts.values().forEach(renderer -> renderer.resetTransform(true));
+    }
+
+    @Override
     public void copyAngles(@Nullable String parent, ModelRenderer limbRenderer)
     {
         this.modelParts.values().stream().filter(part -> Objects.equals(part.getParent(), parent)).forEach(renderer -> renderer.copyModelAngles(limbRenderer));

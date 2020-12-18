@@ -43,7 +43,7 @@ public class BoneModelRenderer extends ModelRenderer
         this.quads = new ObjectArrayList<>();
         this.copyPosition = new Matrix4f();
         this.copyNormal = new Matrix3f();
-        this.resetTransform();
+        this.resetTransform(false);
         Arrays.stream(bone.getCubes()).forEach(this::addCube);
     }
 
@@ -131,7 +131,12 @@ public class BoneModelRenderer extends ModelRenderer
         this.children.forEach(boneModelRenderer -> boneModelRenderer.setCopyVanilla(copyVanilla));
     }
 
-    public void resetTransform()
+    /**
+     * Resets the transformation of this part.
+     *
+     * @param resetChildren Whether or not to reset the transformations of all child parts
+     */
+    public void resetTransform(boolean resetChildren)
     {
         this.rotateAngleX = (float) (Math.PI / 180f) * this.bone.getRotationX();
         this.rotateAngleY = (float) (Math.PI / 180f) * this.bone.getRotationY();
@@ -141,6 +146,8 @@ public class BoneModelRenderer extends ModelRenderer
         this.rotationPointZ = this.bone.getPivotZ();
         this.copyPosition.setIdentity();
         this.copyNormal.setIdentity();
+        if (resetChildren)
+            this.children.forEach(boneModelRenderer -> boneModelRenderer.resetTransform(true));
         this.setCopyVanilla(false);
     }
 

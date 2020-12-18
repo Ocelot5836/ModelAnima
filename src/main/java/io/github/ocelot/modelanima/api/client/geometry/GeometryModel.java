@@ -41,9 +41,14 @@ public interface GeometryModel
     void render(String material, GeometryModelTexture texture, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
 
     /**
+     * Resets all model angles to the default transformation.
+     */
+    void resetTransformation();
+
+    /**
      * Copies the model angles to the currently selected part.
      *
-     * @param parent        The parent model part being copied or <code>null</code> to copy to all model parts
+     * @param parent        The parent model part being copied
      * @param modelRenderer The renderer to copy angles of
      */
     void copyAngles(@Nullable String parent, ModelRenderer modelRenderer);
