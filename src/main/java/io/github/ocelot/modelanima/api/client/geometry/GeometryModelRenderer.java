@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,7 +29,7 @@ import java.util.Map;
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class GeometryModelRenderer
 {
-    private static final Map<Model, Map<String, ModelRenderer>> CACHE = new HashMap<>();
+    private static final Map<Model, Map<String, ModelRenderer>> MODEL_PARTS = new HashMap<>();
 
     /**
      * Renders the specified model on the specified parent model.
@@ -51,8 +52,8 @@ public class GeometryModelRenderer
 
         if (parent != null)
         {
-            Map<String, ModelRenderer> parentParts = CACHE.computeIfAbsent(parent, key -> mapRenderers(parent));
-            for (String modelKey : model.getModelKeys())
+            Map<String, ModelRenderer> parentParts = MODEL_PARTS.computeIfAbsent(parent, key -> mapRenderers(parent));
+            for (String modelKey : model.getParentModelKeys())
             {
                 String deobfName = ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, modelKey);
                 if (parentParts.containsKey(deobfName))

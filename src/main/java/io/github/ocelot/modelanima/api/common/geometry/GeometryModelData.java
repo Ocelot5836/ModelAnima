@@ -789,6 +789,7 @@ public class GeometryModelData
      *
      * @author Ocelot
      * @since 1.0.0
+     * TODO redo when animations are added
      */
     public static class Locator
     {

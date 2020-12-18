@@ -25,8 +25,6 @@ import java.util.stream.Stream;
  */
 public class BedrockGeometryModel extends Model implements GeometryModel
 {
-    public static final String ALL = "all";
-
     private final Map<String, BoneModelRenderer> modelParts;
     private final Map<String, GeometryModelData.Locator> locators;
     private final String[] modelKeys;
@@ -109,11 +107,6 @@ public class BedrockGeometryModel extends Model implements GeometryModel
         this.modelKeys = parts.values().toArray(new String[0]);
     }
 
-    private static String getPart(@Nullable String part, @Nullable String texture)
-    {
-        return (texture != null ? texture : "texture") + "_" + (part != null ? part : ALL).toLowerCase(Locale.ROOT);
-    }
-
     @Override
     public void render(MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
@@ -158,7 +151,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     }
 
     @Override
-    public String[] getModelKeys()
+    public String[] getParentModelKeys()
     {
         return modelKeys;
     }

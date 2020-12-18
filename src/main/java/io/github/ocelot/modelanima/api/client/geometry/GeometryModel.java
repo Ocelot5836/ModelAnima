@@ -77,7 +77,7 @@ public interface GeometryModel
     /**
      * @return An array of all used part keys
      */
-    String[] getModelKeys();
+    String[] getParentModelKeys();
 
     /**
      * @return An array of all used material keys

@@ -2,11 +2,8 @@ package io.github.ocelot.modelanima.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.TestMod;
-import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.client.geometry.LocalGeometryModelLoader;
-import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
@@ -17,10 +14,6 @@ import net.minecraft.util.ResourceLocation;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {
-    private static final ResourceLocation MODEL_LOCATION = new ResourceLocation(TestMod.MOD_ID, "button");
-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation(TestMod.MOD_ID, "owl");
-    private static final ResourceLocation ANIMATION_LOCATION = new ResourceLocation(TestMod.MOD_ID, "owl");
-
     public TestLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer)
     {
         super(entityRenderer);
@@ -29,12 +22,8 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        GeometryModel model = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/hoodie"));
-        ResourceLocation texture = new ResourceLocation(TestMod.MOD_ID, "red_hoodie");
-//        GeometryModelTextureTable backpack = GeometryTextureManager.get(new ResourceLocation(TestMod.MOD_ID, "slabfish_backpack"));
-//        GeometryModelTextureTable sweater = GeometryTextureManager.get(new ResourceLocation(TestMod.MOD_ID, "slabfish_sweater"));
-        GeometryModelRenderer.render(this.getEntityModel(), model, texture, matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
-//        GeometryModelRenderer.render(this.getEntityModel(), model, backpack, matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
-//        GeometryModelRenderer.render(this.getEntityModel(), model, sweater, matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/hoodie")), new ResourceLocation(TestMod.MOD_ID, "discord_hoodie"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/jungle_mask")), new ResourceLocation(TestMod.MOD_ID, "jungle_mask"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/sombrero")), new ResourceLocation(TestMod.MOD_ID, "sombrero"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }

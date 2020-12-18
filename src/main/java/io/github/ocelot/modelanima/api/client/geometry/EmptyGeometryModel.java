@@ -54,7 +54,7 @@ public class EmptyGeometryModel implements GeometryModel
     }
 
     @Override
-    public String[] getModelKeys()
+    public String[] getParentModelKeys()
     {
         return new String[0];
     }
