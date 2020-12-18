@@ -83,7 +83,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     {
         profiler.startTick();
         profiler.startSection("stitching");
-        AtlasTexture.SheetData sheetData = this.textureAtlas.stitch(new OnlineResourceManager(resourceManager, this.textures), this.textures.stream().map(GeometryModelTexture::getLocation), profiler, Minecraft.getInstance().gameSettings.mipmapLevels);
+        AtlasTexture.SheetData sheetData = this.textureAtlas.stitch(new OnlineResourceManager(resourceManager, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().gameSettings.mipmapLevels);
         profiler.endSection();
         profiler.endTick();
         return sheetData;
@@ -119,12 +119,12 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         private final Map<String, CompletableFuture<String>> hashes;
         private final Map<String, Pair<CompletableFuture<Path>, CompletableFuture<Path>>> localLocations;
 
-        private OnlineResourceManager(IResourceManager parent, Set<GeometryModelTexture> textures)
+        private OnlineResourceManager(IResourceManager parent, Set<GeometryModelTexture> onlineTextures)
         {
             this.parent = parent;
-            this.uncached = textures.stream().filter(texture -> !texture.canCache()).map(GeometryModelTexture::getData).collect(Collectors.toSet());
-            this.hashes = textures.stream().filter(texture -> texture.canCache() && texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getData).distinct().collect(Collectors.toMap(url -> url, url -> CompletableFuture.supplyAsync(() -> getHash(url), Util.getServerExecutor())));
-            this.localLocations = textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getData).collect(Collectors.toMap(url -> url, this::updateCache));
+            this.uncached = onlineTextures.stream().filter(texture -> !texture.canCache()).map(GeometryModelTexture::getData).collect(Collectors.toSet());
+            this.hashes = onlineTextures.stream().filter(GeometryModelTexture::canCache).map(GeometryModelTexture::getData).distinct().collect(Collectors.toMap(url -> url, url -> CompletableFuture.supplyAsync(() -> getHash(url), Util.getServerExecutor())));
+            this.localLocations = onlineTextures.stream().map(GeometryModelTexture::getData).collect(Collectors.toMap(url -> url, this::updateCache));
         }
 
         private Pair<CompletableFuture<Path>, CompletableFuture<Path>> updateCache(String url)
