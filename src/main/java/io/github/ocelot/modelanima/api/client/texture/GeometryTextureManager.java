@@ -120,16 +120,18 @@ public class GeometryTextureManager
     }
 
     /**
-     * <p>Reloads all textures and opens the loading gui.</p>
+     * <p>Reloads all textures and opens the loading gui if specified.</p>
      *
+     * @param showLoadingScreen Whether or not to show the loading screen during the reload
      * @return A future for when the reload is complete
      */
-    public static CompletableFuture<Unit> reload()
+    public static CompletableFuture<Unit> reload(boolean showLoadingScreen)
     {
         if (asyncReloader != null)
             return asyncReloader.onceDone();
         asyncReloader = AsyncReloader.create(Minecraft.getInstance().getResourceManager(), Collections.singletonList(RELOADER), Util.getServerExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE));
-        Minecraft.getInstance().setLoadingGui(new ResourceLoadProgressGui(Minecraft.getInstance(), asyncReloader, error -> error.ifPresent(LOGGER::error), true));
+        if (showLoadingScreen)
+            Minecraft.getInstance().setLoadingGui(new ResourceLoadProgressGui(Minecraft.getInstance(), asyncReloader, error -> error.ifPresent(LOGGER::error), true));
         return asyncReloader.onceDone().thenApplyAsync(unit ->
         {
             asyncReloader = null;
