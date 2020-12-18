@@ -63,7 +63,7 @@ public class CommonEvents
         }
         if (event.getKey() == GLFW.GLFW_KEY_O)
         {
-            GeometryTextureManager.reload();
+            GeometryTextureManager.reload(true);
         }
     }
 }
