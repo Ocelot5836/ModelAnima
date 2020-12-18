@@ -14,6 +14,8 @@ import net.minecraft.util.math.vector.Vector4f;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BoneModelRenderer extends ModelRenderer
 {
@@ -24,9 +26,11 @@ public class BoneModelRenderer extends ModelRenderer
     private final float textureWidth;
     private final float textureHeight;
     private final GeometryModelData.Bone bone;
+    private final Set<BoneModelRenderer> children;
     private final ObjectList<Quad> quads;
     private final Matrix4f copyPosition;
     private final Matrix3f copyNormal;
+    private boolean copyVanilla;
 
     public BoneModelRenderer(BedrockGeometryModel parent, GeometryModelData.Bone bone)
     {
@@ -35,6 +39,7 @@ public class BoneModelRenderer extends ModelRenderer
         this.textureWidth = parent.textureWidth;
         this.textureHeight = parent.textureHeight;
         this.bone = bone;
+        this.children = new HashSet<>();
         this.quads = new ObjectArrayList<>();
         this.copyPosition = new Matrix4f();
         this.copyNormal = new Matrix3f();
@@ -120,6 +125,12 @@ public class BoneModelRenderer extends ModelRenderer
         }
     }
 
+    private void setCopyVanilla(boolean copyVanilla)
+    {
+        this.copyVanilla = copyVanilla;
+        this.children.forEach(boneModelRenderer -> boneModelRenderer.setCopyVanilla(copyVanilla));
+    }
+
     public void resetTransform()
     {
         this.rotateAngleX = (float) (Math.PI / 180f) * this.bone.getRotationX();
@@ -130,6 +141,15 @@ public class BoneModelRenderer extends ModelRenderer
         this.rotationPointZ = this.bone.getPivotZ();
         this.copyPosition.setIdentity();
         this.copyNormal.setIdentity();
+        this.setCopyVanilla(false);
+    }
+
+    @Override
+    public void addChild(ModelRenderer renderer)
+    {
+        super.addChild(renderer);
+        if (renderer instanceof BoneModelRenderer)
+            this.children.add((BoneModelRenderer) renderer);
     }
 
     @Override
@@ -152,7 +172,9 @@ public class BoneModelRenderer extends ModelRenderer
                 NORMAL_VECTOR.transform(matrix3f);
                 for (Vertex vertex : quad.vertices)
                 {
-                    TRANSFORM_VECTOR.set(vertex.x - this.rotationPointX / 16.0F, vertex.y - this.rotationPointY / 16.0F, vertex.z - this.rotationPointZ / 16.0F, 1);
+                    TRANSFORM_VECTOR.set(vertex.x, vertex.y, vertex.z, 1);
+                    if (this.copyVanilla)
+                        TRANSFORM_VECTOR.set(TRANSFORM_VECTOR.getX() - this.rotationPointX / 16.0F, TRANSFORM_VECTOR.getY() - this.rotationPointY / 16.0F, TRANSFORM_VECTOR.getZ() - this.rotationPointZ / 16.0F, 1);
                     TRANSFORM_VECTOR.transform(matrix4f);
                     builder.addVertex(TRANSFORM_VECTOR.getX(), TRANSFORM_VECTOR.getY(), TRANSFORM_VECTOR.getZ(), red, green, blue, alpha, vertex.u, vertex.v, packedOverlay, packedLight, NORMAL_VECTOR.getX(), NORMAL_VECTOR.getY(), NORMAL_VECTOR.getZ());
                 }
@@ -171,6 +193,7 @@ public class BoneModelRenderer extends ModelRenderer
         modelRenderer.translateRotate(matrixStack);
         this.copyPosition.mul(matrixStack.getLast().getMatrix());
         this.copyNormal.mul(matrixStack.getLast().getNormal());
+        this.setCopyVanilla(modelRenderer.getClass() == ModelRenderer.class);
     }
 
     @Override
