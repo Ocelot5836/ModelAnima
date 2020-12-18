@@ -152,7 +152,7 @@ public class BoneModelRenderer extends ModelRenderer
                 NORMAL_VECTOR.transform(matrix3f);
                 for (Vertex vertex : quad.vertices)
                 {
-                    TRANSFORM_VECTOR.set(vertex.x - this.rotationPointX / 16.0F, vertex.y - this.rotationPointY / 16.0F, vertex.z + this.rotationPointZ / 16.0F, 1);
+                    TRANSFORM_VECTOR.set(vertex.x - this.rotationPointX / 16.0F, vertex.y - this.rotationPointY / 16.0F, vertex.z - this.rotationPointZ / 16.0F, 1);
                     TRANSFORM_VECTOR.transform(matrix4f);
                     builder.addVertex(TRANSFORM_VECTOR.getX(), TRANSFORM_VECTOR.getY(), TRANSFORM_VECTOR.getZ(), red, green, blue, alpha, vertex.u, vertex.v, packedOverlay, packedLight, NORMAL_VECTOR.getX(), NORMAL_VECTOR.getY(), NORMAL_VECTOR.getZ());
                 }
