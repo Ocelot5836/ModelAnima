@@ -128,7 +128,7 @@ public class BoneModelRenderer extends ModelRenderer
     private void setCopyVanilla(boolean copyVanilla)
     {
         this.copyVanilla = copyVanilla;
-        this.children.forEach(boneModelRenderer -> boneModelRenderer.setCopyVanilla(copyVanilla));
+//        this.children.forEach(boneModelRenderer -> boneModelRenderer.setCopyVanilla(copyVanilla));
     }
 
     /**
@@ -154,9 +154,14 @@ public class BoneModelRenderer extends ModelRenderer
     @Override
     public void addChild(ModelRenderer renderer)
     {
-        super.addChild(renderer);
         if (renderer instanceof BoneModelRenderer)
+        {
             this.children.add((BoneModelRenderer) renderer);
+        }
+        else
+        {
+            super.addChild(renderer);
+        }
     }
 
     @Override
@@ -164,10 +169,13 @@ public class BoneModelRenderer extends ModelRenderer
     {
         super.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
 
-        if (this.showModel && !this.quads.isEmpty())
+        if (this.showModel && (!this.quads.isEmpty() || !this.children.isEmpty()))
         {
             matrixStack.push();
             this.translateRotate(matrixStack);
+
+            if (this.copyVanilla)
+                matrixStack.translate(-this.rotationPointX / 16.0F, -this.rotationPointY / 16.0F, -this.rotationPointZ / 16.0F);
 
             Matrix4f matrix4f = matrixStack.getLast().getMatrix();
             Matrix3f matrix3f = matrixStack.getLast().getNormal();
@@ -180,12 +188,14 @@ public class BoneModelRenderer extends ModelRenderer
                 for (Vertex vertex : quad.vertices)
                 {
                     TRANSFORM_VECTOR.set(vertex.x, vertex.y, vertex.z, 1);
-                    if (this.copyVanilla)
-                        TRANSFORM_VECTOR.set(TRANSFORM_VECTOR.getX() - this.rotationPointX / 16.0F, TRANSFORM_VECTOR.getY() - this.rotationPointY / 16.0F, TRANSFORM_VECTOR.getZ() - this.rotationPointZ / 16.0F, 1);
+//                    if (this.copyVanilla)
+//                        TRANSFORM_VECTOR.set(TRANSFORM_VECTOR.getX() - this.rotationPointX / 16.0F, TRANSFORM_VECTOR.getY() - this.rotationPointY / 16.0F, TRANSFORM_VECTOR.getZ() - this.rotationPointZ / 16.0F, 1);
                     TRANSFORM_VECTOR.transform(matrix4f);
                     builder.addVertex(TRANSFORM_VECTOR.getX(), TRANSFORM_VECTOR.getY(), TRANSFORM_VECTOR.getZ(), red, green, blue, alpha, vertex.u, vertex.v, packedOverlay, packedLight, NORMAL_VECTOR.getX(), NORMAL_VECTOR.getY(), NORMAL_VECTOR.getZ());
                 }
             }
+
+            this.children.forEach(renderer -> renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha));
 
             matrixStack.pop();
         }
