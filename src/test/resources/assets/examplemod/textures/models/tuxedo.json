@@ -1,0 +1,7 @@
+{
+  "texture": {
+    "type": "online",
+    "texture": "https://api.battlefieldsmc.net/api/server/cosmetic/texture/tuxedo/default.png",
+    "layer": "cutout"
+  }
+}
