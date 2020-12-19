@@ -67,4 +67,16 @@ public class EmptyGeometryModel implements GeometryModel
     {
         return new String[0];
     }
+
+    @Override
+    public float getTextureWidth()
+    {
+        return 16;
+    }
+
+    @Override
+    public float getTextureHeight()
+    {
+        return 16;
+    }
 }

@@ -23,8 +23,6 @@ public class BoneModelRenderer extends ModelRenderer
     private static final Vector3f NORMAL_VECTOR = new Vector3f();
 
     private final BedrockGeometryModel parent;
-    private final float textureWidth;
-    private final float textureHeight;
     private final GeometryModelData.Bone bone;
     private final Set<BoneModelRenderer> children;
     private final ObjectList<Quad> quads;
@@ -36,8 +34,6 @@ public class BoneModelRenderer extends ModelRenderer
     {
         super(parent, 0, 0);
         this.parent = parent;
-        this.textureWidth = parent.textureWidth;
-        this.textureHeight = parent.textureHeight;
         this.bone = bone;
         this.children = new HashSet<>();
         this.quads = new ObjectArrayList<>();
@@ -117,10 +113,10 @@ public class BoneModelRenderer extends ModelRenderer
         if (uv != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(matrix4f, x0, -y0, z0, (uv.getU() + uv.getUSize()) / this.textureWidth, uv.getV() / this.textureHeight),
-                    new Vertex(matrix4f, x1, -y1, z1, uv.getU() / this.textureWidth, uv.getV() / this.textureHeight),
-                    new Vertex(matrix4f, x2, -y2, z2, uv.getU() / this.textureWidth, (uv.getV() + uv.getVSize()) / this.textureHeight),
-                    new Vertex(matrix4f, x3, -y3, z3, (uv.getU() + uv.getUSize()) / this.textureWidth, (uv.getV() + uv.getVSize()) / this.textureHeight)
+                    new Vertex(matrix4f, x0, -y0, z0, (uv.getU() + uv.getUSize()) / this.parent.getTextureWidth(), uv.getV() / this.parent.getTextureHeight()),
+                    new Vertex(matrix4f, x1, -y1, z1, uv.getU() / this.parent.getTextureWidth(), uv.getV() / this.parent.getTextureHeight()),
+                    new Vertex(matrix4f, x2, -y2, z2, uv.getU() / this.parent.getTextureWidth(), (uv.getV() + uv.getVSize()) / this.parent.getTextureHeight()),
+                    new Vertex(matrix4f, x3, -y3, z3, (uv.getU() + uv.getUSize()) / this.parent.getTextureWidth(), (uv.getV() + uv.getVSize()) / this.parent.getTextureHeight())
             }, matrix3f, uv.getMaterialInstance(), cube.isOverrideMirror() ? cube.isMirror() : this.bone.isMirror(), face.getAxis().isVertical() ? face.getOpposite() : face));
         }
     }

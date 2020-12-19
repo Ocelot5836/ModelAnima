@@ -168,6 +168,18 @@ public class BedrockGeometryModel extends Model implements GeometryModel
         return textureKeys;
     }
 
+    @Override
+    public float getTextureWidth()
+    {
+        return textureWidth;
+    }
+
+    @Override
+    public float getTextureHeight()
+    {
+        return textureHeight;
+    }
+
     public String getActiveMaterial()
     {
         return activeMaterial;

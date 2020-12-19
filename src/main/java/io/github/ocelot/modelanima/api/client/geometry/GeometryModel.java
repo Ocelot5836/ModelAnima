@@ -90,6 +90,16 @@ public interface GeometryModel
     String[] getMaterialKeys();
 
     /**
+     * @return The width of the texture in pixels
+     */
+    float getTextureWidth();
+
+    /**
+     * @return The height of the texture in pixels
+     */
+    float getTextureHeight();
+
+    /**
      * Fetches an {@link IVertexBuilder} for the specified texture.
      *
      * @param buffer  The render type buffers
