@@ -1,0 +1,13 @@
+{
+  "texture": {
+    "type": "online",
+    "texture": "https://api.battlefieldsmc.net/api/server/cosmetic/texture/cap/cap.png",
+    "layer": "cutout",
+    "color": "B200FF"
+  },
+  "logo": {
+    "type": "online",
+    "texture": "https://api.battlefieldsmc.net/api/server/cosmetic/texture/cap/v_logo.png",
+    "layer": "cutout"
+  }
+}
