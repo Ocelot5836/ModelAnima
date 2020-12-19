@@ -103,24 +103,24 @@ public class BoneModelRenderer extends ModelRenderer
         Matrix4f matrix4f = entry.getMatrix();
         Matrix3f matrix3f = entry.getNormal();
 
-        this.addFace(cube, matrix4f, matrix3f, x1, y1, z, x, y1, z, x, y, z, x1, y, z, Direction.NORTH, false);
-        this.addFace(cube, matrix4f, matrix3f, x, y1, z, x, y1, z1, x, y, z1, x, y, z, Direction.EAST, false);
-        this.addFace(cube, matrix4f, matrix3f, x, y1, z1, x1, y1, z1, x1, y, z1, x, y, z1, Direction.SOUTH, false);
-        this.addFace(cube, matrix4f, matrix3f, x1, y1, z1, x1, y1, z, x1, y, z, x1, y, z1, Direction.WEST, false);
-        this.addFace(cube, matrix4f, matrix3f, x1, y, z, x, y, z, x, y, z1, x1, y, z1, Direction.DOWN, true);
-        this.addFace(cube, matrix4f, matrix3f, x1, y1, z1, x, y1, z1, x, y1, z, x1, y1, z, Direction.UP, true);
+        this.addFace(cube, matrix4f, matrix3f, x1, y1, z, x, y1, z, x, y, z, x1, y, z, Direction.NORTH);
+        this.addFace(cube, matrix4f, matrix3f, x, y1, z, x, y1, z1, x, y, z1, x, y, z, Direction.EAST);
+        this.addFace(cube, matrix4f, matrix3f, x, y1, z1, x1, y1, z1, x1, y, z1, x, y, z1, Direction.SOUTH);
+        this.addFace(cube, matrix4f, matrix3f, x1, y1, z1, x1, y1, z, x1, y, z, x1, y, z1, Direction.WEST);
+        this.addFace(cube, matrix4f, matrix3f, x1, y, z, x, y, z, x, y, z1, x1, y, z1, Direction.DOWN);
+        this.addFace(cube, matrix4f, matrix3f, x1, y1, z1, x, y1, z1, x, y1, z, x1, y1, z, Direction.UP);
     }
 
-    private void addFace(GeometryModelData.Cube cube, Matrix4f matrix4f, Matrix3f matrix3f, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, Direction face, boolean mirrorY)
+    private void addFace(GeometryModelData.Cube cube, Matrix4f matrix4f, Matrix3f matrix3f, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, Direction face)
     {
         GeometryModelData.CubeUV uv = cube.getUV(face);
         if (uv != null)
         {
             this.quads.add(new Quad(new Vertex[]{
-                    new Vertex(matrix4f, x0, -y0, z0, (uv.getU() + uv.getUSize()) / this.textureWidth, (uv.getV() + (mirrorY ? uv.getVSize() : 0)) / this.textureHeight),
-                    new Vertex(matrix4f, x1, -y1, z1, uv.getU() / this.textureWidth, (uv.getV() + (mirrorY ? uv.getVSize() : 0)) / this.textureHeight),
-                    new Vertex(matrix4f, x2, -y2, z2, uv.getU() / this.textureWidth, (uv.getV() + (!mirrorY ? uv.getVSize() : 0)) / this.textureHeight),
-                    new Vertex(matrix4f, x3, -y3, z3, (uv.getU() + uv.getUSize()) / this.textureWidth, (uv.getV() + (!mirrorY ? uv.getVSize() : 0)) / this.textureHeight)
+                    new Vertex(matrix4f, x0, -y0, z0, (uv.getU() + uv.getUSize()) / this.textureWidth, uv.getV() / this.textureHeight),
+                    new Vertex(matrix4f, x1, -y1, z1, uv.getU() / this.textureWidth, uv.getV() / this.textureHeight),
+                    new Vertex(matrix4f, x2, -y2, z2, uv.getU() / this.textureWidth, (uv.getV() + uv.getVSize()) / this.textureHeight),
+                    new Vertex(matrix4f, x3, -y3, z3, (uv.getU() + uv.getUSize()) / this.textureWidth, (uv.getV() + uv.getVSize()) / this.textureHeight)
             }, matrix3f, uv.getMaterialInstance(), cube.isOverrideMirror() ? cube.isMirror() : this.bone.isMirror(), face.getAxis().isVertical() ? face.getOpposite() : face));
         }
     }
