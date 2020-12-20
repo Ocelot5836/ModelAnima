@@ -235,7 +235,9 @@ public class GeometryModelTexture
     {
         SOLID(RenderType::getEntitySolid),
         CUTOUT(RenderType::getEntityCutoutNoCull),
-        TRANSLUCENT(RenderType::getEntityTranslucent);
+        CUTOUT_CULL(RenderType::getEntityCutout),
+        TRANSLUCENT(RenderType::getEntityTranslucent),
+        TRANSLUCENT_CULL(RenderType::getEntityTranslucentCull);
 
         private final Function<ResourceLocation, RenderType> renderTypeGetter;
 
