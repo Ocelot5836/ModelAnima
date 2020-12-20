@@ -136,7 +136,11 @@ public class GeometryTextureManager
                 asyncReloader = null;
                 error.ifPresent(LOGGER::error);
             }, true));
-        return asyncReloader.onceDone();
+        return asyncReloader.onceDone().thenApplyAsync(unit ->
+        {
+            asyncReloader = null;
+            return unit;
+        });
     }
 
     /**
