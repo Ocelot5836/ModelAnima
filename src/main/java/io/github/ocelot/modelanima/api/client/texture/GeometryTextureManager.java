@@ -61,7 +61,7 @@ public class GeometryTextureManager
         if (dirty)
         {
             dirty = false;
-            reload(true);
+            reload(false);
         }
     }
 

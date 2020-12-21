@@ -1,5 +1,6 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.JsonObject;
 import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
@@ -9,6 +10,7 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.ReloadListener;
+import net.minecraft.crash.ReportedException;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
@@ -16,7 +18,8 @@ import net.minecraft.resources.IResourcePack;
 import net.minecraft.resources.data.IMetadataSectionSerializer;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Bootstrap;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -39,9 +42,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -81,11 +85,26 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     @Override
     protected AtlasTexture.SheetData prepare(IResourceManager resourceManager, IProfiler profiler)
     {
+        AtomicInteger nextId = new AtomicInteger(1);
+        ExecutorService onlineWorker = createOnlineWorker(nextId::getAndIncrement);
+
         profiler.startTick();
         profiler.startSection("stitching");
-        AtlasTexture.SheetData sheetData = this.textureAtlas.stitch(new OnlineResourceManager(resourceManager, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().gameSettings.mipmapLevels);
+        AtlasTexture.SheetData sheetData = this.textureAtlas.stitch(new OnlineResourceManager(resourceManager, onlineWorker, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().gameSettings.mipmapLevels);
+        profiler.endStartSection("join");
+        onlineWorker.shutdown();
+        try
+        {
+            if (!onlineWorker.awaitTermination(10, TimeUnit.SECONDS))
+                LOGGER.warn("Took more than 10 seconds to terminate online worker");
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Failed to terminate online worker", e);
+        }
         profiler.endSection();
         profiler.endTick();
+
         return sheetData;
     }
 
@@ -105,6 +124,54 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         this.textureAtlas.clear();
     }
 
+    private static ExecutorService createOnlineWorker(Supplier<Integer> idGenerator)
+    {
+        int i = MathHelper.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 7);
+        ExecutorService executorservice;
+        if (i <= 0)
+        {
+            executorservice = MoreExecutors.newDirectExecutorService();
+        }
+        else
+        {
+            executorservice = new ForkJoinPool(i, pool ->
+            {
+                ForkJoinWorkerThread forkjoinworkerthread = new ForkJoinWorkerThread(pool)
+                {
+                    protected void onTermination(Throwable t)
+                    {
+                        if (t != null)
+                        {
+                            LOGGER.warn("{} died", this.getName(), t);
+                        }
+                        else
+                        {
+                            LOGGER.debug("{} shutdown", this.getName());
+                        }
+
+                        super.onTermination(t);
+                    }
+                };
+                forkjoinworkerthread.setName("Worker-Geometry Online Fetcher-" + idGenerator.get());
+                return forkjoinworkerthread;
+            }, (thread, throwable) ->
+            {
+                if (throwable instanceof CompletionException)
+                    throwable = throwable.getCause();
+
+                if (throwable instanceof ReportedException)
+                {
+                    Bootstrap.printToSYSOUT(((ReportedException) throwable).getCrashReport().getCompleteReport());
+                    System.exit(-1);
+                }
+
+                LOGGER.error("Caught exception in thread " + thread, throwable);
+            }, true);
+        }
+
+        return executorservice;
+    }
+
     public GeometryTextureSpriteUploader setTextures(Map<ResourceLocation, GeometryModelTextureTable> textures)
     {
         this.textures.clear();
@@ -115,15 +182,17 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     private static class OnlineResourceManager implements IResourceManager
     {
         private final IResourceManager parent;
+        private final Executor onlineWorker;
         private final Set<String> uncached;
         private final Map<String, CompletableFuture<String>> hashes;
         private final Map<String, Pair<CompletableFuture<Path>, CompletableFuture<Path>>> localLocations;
 
-        private OnlineResourceManager(IResourceManager parent, Set<GeometryModelTexture> onlineTextures)
+        private OnlineResourceManager(IResourceManager parent, Executor onlineWorker, Set<GeometryModelTexture> onlineTextures)
         {
             this.parent = parent;
+            this.onlineWorker = onlineWorker;
             this.uncached = onlineTextures.stream().filter(texture -> !texture.canCache()).map(GeometryModelTexture::getData).collect(Collectors.toSet());
-            this.hashes = onlineTextures.stream().filter(GeometryModelTexture::canCache).map(GeometryModelTexture::getData).distinct().collect(Collectors.toMap(url -> url, url -> CompletableFuture.supplyAsync(() -> getHash(url), Util.getServerExecutor())));
+            this.hashes = onlineTextures.stream().filter(GeometryModelTexture::canCache).map(GeometryModelTexture::getData).distinct().collect(Collectors.toMap(url -> url, url -> getHash(onlineWorker, url)));
             this.localLocations = onlineTextures.stream().map(GeometryModelTexture::getData).distinct().collect(Collectors.toMap(url -> url, this::updateCache));
         }
 
@@ -141,12 +210,12 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 metadataUrl = urlParts[0] + extension + ".mcmeta" + urlParts[1];
             }
 
-            CompletableFuture<Path> texturePath = write(url, this.hashes.getOrDefault(url, CompletableFuture.completedFuture(null)), !this.uncached.contains(url), false);
-            CompletableFuture<Path> metadataPath = write(metadataUrl, CompletableFuture.completedFuture(null), false, true);
+            CompletableFuture<Path> texturePath = write(this.onlineWorker, url, this.hashes.getOrDefault(url, CompletableFuture.completedFuture(null)), !this.uncached.contains(url), false);
+            CompletableFuture<Path> metadataPath = write(this.onlineWorker, metadataUrl, CompletableFuture.completedFuture(null), false, true);
             return Pair.of(texturePath, metadataPath);
         }
 
-        private static CompletableFuture<Path> write(String url, CompletableFuture<String> hashFuture, boolean cache, boolean ignoreErrors)
+        private static CompletableFuture<Path> write(Executor onlineWorker, String url, CompletableFuture<String> hashFuture, boolean cache, boolean ignoreErrors)
         {
             return CompletableFuture.supplyAsync(() ->
             {
@@ -179,7 +248,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                         LOGGER.error("Failed to download image from '" + url + "'", e);
                     return null;
                 }
-            }, Util.getServerExecutor());
+            }, onlineWorker);
         }
 
         @Nullable
@@ -229,7 +298,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                     }
 
                     return null;
-                }, Util.getServerExecutor());
+                }, this.onlineWorker);
 
                 InputStream textureStream = read(files.getLeft());
                 if (textureStream == null)
@@ -287,8 +356,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
             return null;
         }
 
-        @Nullable
-        private static String getHash(String url)
+        private static CompletableFuture<String> getHash(Executor onlineWorker, String url)
         {
             String extension = FileUtils.extension(url);
             String[] urlParts = url.split("." + extension);
@@ -309,13 +377,13 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                         e.printStackTrace();
                         return null;
                     }
-                }, Util.getServerExecutor()).get(1, TimeUnit.MINUTES);
+                }, onlineWorker);
             }
             catch (Exception e)
             {
                 LOGGER.error("Failed to load online hash from '" + url + "'", e);
             }
-            return null;
+            return CompletableFuture.completedFuture(null);
         }
 
         @Nullable

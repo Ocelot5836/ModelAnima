@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.TestMod;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.client.geometry.LocalGeometryModelLoader;
+import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
@@ -22,6 +23,9 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
+        if (GeometryTextureManager.isReloading())
+            return;
+
         GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/hoodie")), new ResourceLocation(TestMod.MOD_ID, "discord_hoodie"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/cap")), new ResourceLocation(TestMod.MOD_ID, "v_cap"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
 //        GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/jungle_mask")), new ResourceLocation(TestMod.MOD_ID, "jungle_mask"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);

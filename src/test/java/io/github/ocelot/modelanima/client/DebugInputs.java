@@ -66,7 +66,7 @@ public class DebugInputs
         }
         if (event.getKey() == GLFW.GLFW_KEY_O)
         {
-            GeometryTextureManager.reload(true);
+            GeometryTextureManager.reload(false);
         }
     }
 }
