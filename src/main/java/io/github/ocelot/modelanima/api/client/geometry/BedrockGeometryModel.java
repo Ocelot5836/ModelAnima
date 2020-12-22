@@ -98,7 +98,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel
         for (Pair<GeometryModelData.Bone, BoneModelRenderer> pair : boneLookup.values())
         {
             GeometryModelData.Bone currentBone = pair.getLeft();
-            if (currentBone.getParent() != null && !currentBone.getParent().startsWith("parent."))
+            if (!parts.isEmpty() && currentBone.getParent() != null && !currentBone.getParent().startsWith("parent."))
                 continue;
 
             this.modelParts.put(currentBone.getName(), pair.getRight());
