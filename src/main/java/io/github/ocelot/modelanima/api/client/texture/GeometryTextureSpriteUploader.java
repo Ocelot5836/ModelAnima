@@ -86,7 +86,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     protected AtlasTexture.SheetData prepare(IResourceManager resourceManager, IProfiler profiler)
     {
         AtomicInteger nextId = new AtomicInteger(1);
-        ExecutorService onlineWorker = new ThreadPoolExecutor(0, MathHelper.clamp(Runtime.getRuntime().availableProcessors(), 0, 8), 5, TimeUnit.SECONDS, new SynchronousQueue<>(), task -> new Thread(task, "Worker-Geometry Online Fetcher-" + nextId.getAndIncrement()));
+        ExecutorService onlineWorker = createOnlineWorker(nextId::getAndIncrement);
 
         profiler.startTick();
         profiler.startSection("stitching");
