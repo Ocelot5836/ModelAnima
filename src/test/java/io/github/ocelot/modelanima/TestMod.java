@@ -5,11 +5,9 @@ import io.github.ocelot.modelanima.api.client.geometry.LocalGeometryModelLoader;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.client.texture.LocalTextureTableProvider;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
-import io.github.ocelot.modelanima.client.TestLayer;
+import io.github.ocelot.modelanima.client.ClientInit;
 import io.github.ocelot.modelanima.client.TestTextureTableProvider;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -19,17 +17,12 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DeferredWorkQueue;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-
-import java.util.Arrays;
-import java.util.Collection;
 
 @SuppressWarnings("deprecation")
 @Mod(TestMod.MOD_ID)
@@ -51,29 +44,19 @@ public class TestMod
             GeometryTextureManager.init(modBus);
             GeometryTextureManager.addProvider(new LocalTextureTableProvider());
             GeometryTextureManager.addProvider(new TestTextureTableProvider());
+            modBus.addListener(ClientInit::initClient);
         });
         BLOCKS.register(modBus);
         TILE_ENTITIES.register(modBus);
         ITEMS.register(modBus);
         ENTITIES.register(modBus);
         modBus.addListener(this::init);
-        modBus.addListener(this::initClient);
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void init(FMLCommonSetupEvent event)
     {
-    }
-
-    private void initClient(FMLClientSetupEvent event)
-    {
-        DeferredWorkQueue.runLater(() ->
-        {
-            for (PlayerRenderer renderer : Minecraft.getInstance().getRenderManager().getSkinMap().values())
-            {
-                renderer.addLayer(new TestLayer(renderer));
-            }
-        });
+        System.out.println(GeometryModelTexture.MISSING);
     }
 
     @SubscribeEvent

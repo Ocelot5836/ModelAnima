@@ -5,14 +5,16 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.codec.binary.Base32;
 
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
@@ -29,7 +31,7 @@ public class GeometryModelTexture
             Codec.STRING.xmap(TextureLayer::byName, type -> type.name().toLowerCase(Locale.ROOT)).optionalFieldOf("layer", TextureLayer.SOLID).forGetter(GeometryModelTexture::getLayer),
             Codec.STRING.fieldOf("texture").forGetter(GeometryModelTexture::getData),
             Codec.BOOL.optionalFieldOf("cache", true).forGetter(GeometryModelTexture::canCache),
-            Codec.STRING.optionalFieldOf("color", "FFFFFF").xmap(hex->Integer.parseInt(hex, 16), color->Integer.toHexString(color).toUpperCase(Locale.ROOT)).forGetter(GeometryModelTexture::getColor),
+            Codec.STRING.optionalFieldOf("color", "FFFFFF").xmap(hex -> Integer.parseInt(hex, 16), color -> Integer.toHexString(color).toUpperCase(Locale.ROOT)).forGetter(GeometryModelTexture::getColor),
             Codec.BOOL.optionalFieldOf("glowing", false).forGetter(GeometryModelTexture::isGlowing)
     ).apply(instance, GeometryModelTexture::new));
     private static final Pattern ONLINE_PATTERN = Pattern.compile("=");
@@ -189,7 +191,7 @@ public class GeometryModelTexture
      */
     public enum Type
     {
-        UNKNOWN(location -> MissingTextureSprite.getLocation()),
+        UNKNOWN(location -> new ResourceLocation("missingno")),
         LOCATION(ResourceLocation::new),
         ONLINE(location -> new ResourceLocation(ModelAnima.DOMAIN, "base32" + ONLINE_PATTERN.matcher(new Base32().encodeAsString(location.getBytes()).toLowerCase(Locale.ROOT)).replaceAll("_")));
 
@@ -233,15 +235,15 @@ public class GeometryModelTexture
      */
     public enum TextureLayer
     {
-        SOLID(RenderType::getEntitySolid),
-        CUTOUT(RenderType::getEntityCutoutNoCull),
-        CUTOUT_CULL(RenderType::getEntityCutout),
-        TRANSLUCENT(RenderType::getEntityTranslucent),
-        TRANSLUCENT_CULL(RenderType::getEntityTranslucentCull);
+        SOLID(() -> RenderType::getEntitySolid),
+        CUTOUT(() -> RenderType::getEntityCutoutNoCull),
+        CUTOUT_CULL(() -> RenderType::getEntityCutout),
+        TRANSLUCENT(() -> RenderType::getEntityTranslucent),
+        TRANSLUCENT_CULL(() -> RenderType::getEntityTranslucentCull);
 
-        private final Function<ResourceLocation, RenderType> renderTypeGetter;
+        private final Supplier<Function<ResourceLocation, RenderType>> renderTypeGetter;
 
-        TextureLayer(Function<ResourceLocation, RenderType> renderTypeGetter)
+        TextureLayer(Supplier<Function<ResourceLocation, RenderType>> renderTypeGetter)
         {
             this.renderTypeGetter = renderTypeGetter;
         }
@@ -252,9 +254,10 @@ public class GeometryModelTexture
          * @param location The texture to use in the render type
          * @return The render type for this layer
          */
+        @OnlyIn(Dist.CLIENT)
         public RenderType getRenderType(ResourceLocation location)
         {
-            return this.renderTypeGetter.apply(location);
+            return this.renderTypeGetter.get().apply(location);
         }
 
         /**
