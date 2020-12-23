@@ -75,6 +75,10 @@ public class GeometryTextureCache
         {
             LOGGER.error("Failed to write image '" + url + "'", e);
         }
+        finally
+        {
+            IOUtils.closeQuietly(fetchedStream);
+        }
 
         return null;
     }

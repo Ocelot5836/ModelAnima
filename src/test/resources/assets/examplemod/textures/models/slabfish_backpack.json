@@ -2,6 +2,7 @@
   "texture": {
     "type": "online",
     "texture": "https://raw.githubusercontent.com/team-abnormals/environmental/master/src/main/resources/assets/environmental/textures/entity/slabfish/backpack/pink.png",
-    "layer": "cutout"
+    "layer": "cutout",
+    "cache": false
   }
 }

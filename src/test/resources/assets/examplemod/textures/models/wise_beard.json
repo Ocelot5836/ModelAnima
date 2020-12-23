@@ -1,7 +1,7 @@
 {
   "texture": {
     "type": "online",
-    "texture": "http://api.battlefieldsmc.net/api/server/cosmetic/texture/wise_beard/default.png",
+    "texture": "http://api.battlefieldsmc.net/api/server/cosmetic/texture/beard/default.png",
     "layer": "cutout"
   }
 }
