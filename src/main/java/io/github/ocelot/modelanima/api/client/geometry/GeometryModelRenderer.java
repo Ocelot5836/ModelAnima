@@ -17,7 +17,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,6 +58,10 @@ public class GeometryModelRenderer
                 if (parentParts.containsKey(deobfName))
                     model.copyAngles("parent." + modelKey, parentParts.get(deobfName));
             }
+        }
+        else
+        {
+            model.resetTransformation();
         }
 
         Arrays.stream(model.getMaterialKeys()).map(material -> textures == null ? GeometryModelTexture.MISSING.getLayer() : textures.getTexture(material).getLayer()).sorted().forEach(textureLayer ->
