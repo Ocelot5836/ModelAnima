@@ -139,6 +139,12 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     }
 
     @Override
+    public ModelRenderer[] getChildRenderers(String part)
+    {
+        return this.modelParts.values().stream().filter(boneModelRenderer -> part.equals(boneModelRenderer.getParent())).toArray(ModelRenderer[]::new);
+    }
+
+    @Override
     public Optional<GeometryModelData.Locator> getLocator(String name)
     {
         return Optional.ofNullable(this.locators.get(name));

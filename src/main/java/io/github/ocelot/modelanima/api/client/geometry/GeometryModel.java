@@ -62,6 +62,14 @@ public interface GeometryModel
     Optional<ModelRenderer> getModelRenderer(String part);
 
     /**
+     * Fetches all model parts that are a child to the provided parent part.
+     *
+     * @param part The name of the part to get children from
+     * @return All model renderers copying angles from that part
+     */
+    ModelRenderer[] getChildRenderers(String part);
+
+    /**
      * Fetches a specific locator by name.
      *
      * @param name The name of the locator to fetch

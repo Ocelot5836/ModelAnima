@@ -39,6 +39,12 @@ public class EmptyGeometryModel implements GeometryModel
     }
 
     @Override
+    public ModelRenderer[] getChildRenderers(String part)
+    {
+        return new ModelRenderer[0];
+    }
+
+    @Override
     public ModelRenderer[] getModelRenderers()
     {
         return new ModelRenderer[0];
