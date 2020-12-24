@@ -12,7 +12,6 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -224,10 +223,12 @@ public class BoneModelRenderer extends ModelRenderer
         matrixStack.getLast().getNormal().mul(this.copyNormal);
     }
 
-    @Nullable
-    public String getParent()
+    /**
+     * @return The bone this model renderer is rendering
+     */
+    public GeometryModelData.Bone getBone()
     {
-        return this.bone.getParent();
+        return this.bone;
     }
 
     private static class Vertex

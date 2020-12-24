@@ -129,7 +129,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     @Override
     public void copyAngles(@Nullable String parent, ModelRenderer limbRenderer)
     {
-        this.modelParts.values().stream().filter(part -> Objects.equals(part.getParent(), parent)).forEach(renderer -> renderer.copyModelAngles(limbRenderer));
+        this.modelParts.values().stream().filter(part -> Objects.equals(part.getBone().getParent(), parent)).forEach(renderer -> renderer.copyModelAngles(limbRenderer));
     }
 
     @Override
@@ -141,7 +141,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     @Override
     public ModelRenderer[] getChildRenderers(String part)
     {
-        return this.modelParts.values().stream().filter(boneModelRenderer -> part.equals(boneModelRenderer.getParent())).toArray(ModelRenderer[]::new);
+        return this.modelParts.values().stream().filter(boneModelRenderer -> part.equals(boneModelRenderer.getBone().getParent())).toArray(ModelRenderer[]::new);
     }
 
     @Override
