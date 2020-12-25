@@ -15,7 +15,14 @@ import java.io.Reader;
 public class GeometryModelLoader
 {
     private static final String VERSION = "1.12.0";
-    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(GeometryModelData.Description.class, new GeometryModelData.Description.Deserializer()).registerTypeAdapter(GeometryModelData.Bone.class, new GeometryModelData.Bone.Deserializer()).registerTypeAdapter(GeometryModelData.Cube.class, new GeometryModelData.Cube.Deserializer()).registerTypeAdapter(GeometryModelTextureTable.class, new GeometryModelTextureTable.Serializer()).create();
+    private static final Gson GSON = new GsonBuilder().
+            registerTypeAdapter(GeometryModelData.Description.class, new GeometryModelData.Description.Deserializer()).
+            registerTypeAdapter(GeometryModelData.Bone.class, new GeometryModelData.Bone.Deserializer()).
+            registerTypeAdapter(GeometryModelData.Cube.class, new GeometryModelData.Cube.Deserializer()).
+            registerTypeAdapter(GeometryModelData.Poly.class, new GeometryModelData.Poly.Deserializer()).
+            registerTypeAdapter(GeometryModelData.PolyMesh.class, new GeometryModelData.PolyMesh.Deserializer()).
+            registerTypeAdapter(GeometryModelTextureTable.class, new GeometryModelTextureTable.Serializer()).
+            create();
 
     /**
      * Creates a new geometry model from the specified reader.

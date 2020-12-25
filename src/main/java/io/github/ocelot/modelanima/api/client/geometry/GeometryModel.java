@@ -119,4 +119,8 @@ public interface GeometryModel
     {
         return atlas.getSprite(texture.getLocation()).wrapBuffer(buffer.getBuffer(texture.getLayer().getRenderType(atlas.getAtlasLocation())));
     }
+
+    default IVertexBuilder getBuffer(IRenderTypeBuffer buffer, GeometryAtlasTexture atlas, GeometryModelTexture texture, GeometryModelData.PolyMesh polyMesh){
+        return atlas.getSprite(texture.getLocation()).wrapBuffer(buffer.getBuffer(texture.getLayer().getRenderType(atlas.getAtlasLocation())));
+    }
 }

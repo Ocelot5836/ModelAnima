@@ -57,6 +57,8 @@ public class BedrockGeometryModel extends Model implements GeometryModel
                     textures.add(uv.getMaterialInstance());
                 }
             }
+            if (bone.getPolyMesh() != null)
+                textures.add("poly_mesh.texture");
         }
         this.textureKeys = textures.toArray(new String[0]);
 
