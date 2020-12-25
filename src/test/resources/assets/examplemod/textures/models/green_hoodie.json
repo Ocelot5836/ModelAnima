@@ -2,7 +2,7 @@
   "texture": {
     "type": "online",
     "texture": "https://api.battlefieldsmc.net/api/server/cosmetic/texture/hoodie/default.png",
-    "color": "A12722",
+    "color": "0xA12722",
     "layer": "cutout"
   }
 }
