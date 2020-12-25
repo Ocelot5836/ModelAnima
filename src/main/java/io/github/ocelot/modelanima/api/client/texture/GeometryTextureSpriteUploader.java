@@ -90,7 +90,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         {
             profiler.startTick();
             profiler.startSection("stitching");
-            AtlasTexture.SheetData sheetData = this.textureAtlas.stitch(new OnlineResourceManager(resourceManager, onlineRepository, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().gameSettings.mipmapLevels);
+            AtlasTexture.SheetData sheetData = this.textureAtlas.stitch(new OnlineResourceManager(resourceManager, onlineRepository, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.LOCATION || texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().gameSettings.mipmapLevels);
             profiler.endSection();
             profiler.endTick();
             return sheetData;

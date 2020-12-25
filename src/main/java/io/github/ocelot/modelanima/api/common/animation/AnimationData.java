@@ -389,7 +389,7 @@ public class AnimationData
             public Loop deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
             {
                 if (!json.isJsonPrimitive())
-                    throw new JsonSyntaxException("Expected '' to be a Boolean or String, was " + JSONUtils.toString(json));
+                    throw new JsonSyntaxException("Expected Boolean or String, was " + JSONUtils.toString(json));
                 if (json.getAsJsonPrimitive().isBoolean())
                     return json.getAsBoolean() ? LOOP : NONE;
                 if (json.getAsJsonPrimitive().isString())

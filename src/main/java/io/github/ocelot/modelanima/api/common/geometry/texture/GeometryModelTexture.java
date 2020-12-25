@@ -192,6 +192,7 @@ public class GeometryModelTexture
     public enum Type
     {
         UNKNOWN(location -> new ResourceLocation("missingno")),
+        INVISIBLE(location -> new ResourceLocation("missingno")),
         LOCATION(ResourceLocation::new),
         ONLINE(location -> new ResourceLocation(ModelAnima.DOMAIN, "base32" + ONLINE_PATTERN.matcher(new Base32().encodeAsString(location.getBytes()).toLowerCase(Locale.ROOT)).replaceAll("_")));
 
