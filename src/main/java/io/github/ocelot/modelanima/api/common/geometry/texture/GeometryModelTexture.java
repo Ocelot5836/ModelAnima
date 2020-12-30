@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 public class GeometryModelTexture
 {
     public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", false, -1, false);
+    public static final GeometryModelTexture INVISIBLE = new GeometryModelTexture(Type.INVISIBLE, TextureLayer.SOLID, "missingno", false, -1, false);
     public static final Codec<GeometryModelTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Type::byName, type -> type.name().toLowerCase(Locale.ROOT)).fieldOf("type").forGetter(GeometryModelTexture::getType),
             Codec.STRING.xmap(TextureLayer::byName, type -> type.name().toLowerCase(Locale.ROOT)).optionalFieldOf("layer", TextureLayer.SOLID).forGetter(GeometryModelTexture::getLayer),
