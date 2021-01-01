@@ -23,6 +23,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Bootstrap;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.StatusLine;
@@ -137,14 +138,15 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         private Pair<CompletableFuture<Path>, CompletableFuture<JsonObject>> updateCache(String url)
         {
             String metadataUrl;
-            String[] urlParts = url.split("\\.");
+            String extension = FilenameUtils.getExtension(url);
+            String[] urlParts = url.split("." + extension);
             if (urlParts.length <= 1)
             {
                 metadataUrl = url + ".mcmeta";
             }
             else
             {
-                metadataUrl = urlParts[0] + ".mcmeta" + urlParts[1];
+                metadataUrl = urlParts[0] + extension + ".mcmeta" + urlParts[1];
             }
 
             CompletableFuture<Path> texturePath = this.repository.requestResource(url, !this.uncached.contains(url), false);
