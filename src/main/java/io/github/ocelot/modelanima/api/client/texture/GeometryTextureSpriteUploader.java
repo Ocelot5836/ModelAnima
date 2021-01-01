@@ -34,7 +34,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.plexus.util.FileUtils;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -138,15 +137,14 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         private Pair<CompletableFuture<Path>, CompletableFuture<JsonObject>> updateCache(String url)
         {
             String metadataUrl;
-            String extension = FileUtils.extension(url);
-            String[] urlParts = url.split("." + extension);
+            String[] urlParts = url.split("\\.");
             if (urlParts.length <= 1)
             {
                 metadataUrl = url + ".mcmeta";
             }
             else
             {
-                metadataUrl = urlParts[0] + extension + ".mcmeta" + urlParts[1];
+                metadataUrl = urlParts[0] + ".mcmeta" + urlParts[1];
             }
 
             CompletableFuture<Path> texturePath = this.repository.requestResource(url, !this.uncached.contains(url), false);
