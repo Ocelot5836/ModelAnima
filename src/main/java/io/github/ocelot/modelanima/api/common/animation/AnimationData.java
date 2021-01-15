@@ -399,7 +399,7 @@ public class AnimationData
                             return loop;
                     throw new JsonSyntaxException("Unsupported loop: " + json.getAsString() + ". Supported loops: " + Arrays.toString(Arrays.stream(values()).map(loop -> loop.name().toLowerCase(Locale.ROOT)).toArray(String[]::new)));
                 }
-                throw new JsonSyntaxException("Expected '' to be a Boolean or String, was " + JSONUtils.toString(json));
+                throw new JsonSyntaxException("Expected Boolean or String, was " + JSONUtils.toString(json));
             }
         }
     }
