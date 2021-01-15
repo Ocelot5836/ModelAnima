@@ -159,7 +159,14 @@ public class GeometryModelTextureTable
             Map<String, GeometryModelTexture> textures = new HashMap<>();
             for (Map.Entry<String, JsonElement> entry : texturesObject.entrySet())
             {
-                textures.put(entry.getKey(), GeometryModelTexture.CODEC.parse(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, LOGGER::error));
+                try
+                {
+                    textures.put(entry.getKey(), GeometryModelTexture.CODEC.parse(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, LOGGER::error));
+                }
+                catch (Exception e)
+                {
+                    throw new JsonParseException("Failed to load texture '" + entry.getKey() + "'", e);
+                }
             }
             return new GeometryModelTextureTable(textures);
         }

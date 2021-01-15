@@ -23,6 +23,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Bootstrap;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.StatusLine;
@@ -34,7 +35,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.plexus.util.FileUtils;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -138,7 +138,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         private Pair<CompletableFuture<Path>, CompletableFuture<JsonObject>> updateCache(String url)
         {
             String metadataUrl;
-            String extension = FileUtils.extension(url);
+            String extension = FilenameUtils.getExtension(url);
             String[] urlParts = url.split("." + extension);
             if (urlParts.length <= 1)
             {

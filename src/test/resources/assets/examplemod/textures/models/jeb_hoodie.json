@@ -1,0 +1,7 @@
+{
+  "texture": {
+    "type": "online",
+    "layer": "cutout",
+    "texture": "https://api.battlefieldsmc.net/api/server/cosmetic/texture/hoodie/jeb.png"
+  }
+}

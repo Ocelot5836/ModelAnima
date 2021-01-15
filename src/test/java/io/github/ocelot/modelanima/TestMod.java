@@ -6,7 +6,6 @@ import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.client.texture.LocalTextureTableProvider;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.client.ClientInit;
-import io.github.ocelot.modelanima.client.TestTextureTableProvider;
 import net.minecraft.block.Block;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
@@ -24,7 +23,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
-@SuppressWarnings("deprecation")
 @Mod(TestMod.MOD_ID)
 public class TestMod
 {
@@ -43,7 +41,6 @@ public class TestMod
             LocalGeometryModelLoader.init(modBus);
             GeometryTextureManager.init(modBus);
             GeometryTextureManager.addProvider(new LocalTextureTableProvider());
-            GeometryTextureManager.addProvider(new TestTextureTableProvider());
             modBus.addListener(ClientInit::initClient);
         });
         BLOCKS.register(modBus);
@@ -56,7 +53,6 @@ public class TestMod
 
     private void init(FMLCommonSetupEvent event)
     {
-        System.out.println(GeometryModelTexture.MISSING);
     }
 
     @SubscribeEvent

@@ -10,6 +10,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -26,12 +27,13 @@ import java.util.regex.Pattern;
 public class GeometryModelTexture
 {
     public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", false, -1, false);
+    public static final GeometryModelTexture INVISIBLE = new GeometryModelTexture(Type.INVISIBLE, TextureLayer.SOLID, "missingno", false, -1, false);
     public static final Codec<GeometryModelTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Type::byName, type -> type.name().toLowerCase(Locale.ROOT)).fieldOf("type").forGetter(GeometryModelTexture::getType),
             Codec.STRING.xmap(TextureLayer::byName, type -> type.name().toLowerCase(Locale.ROOT)).optionalFieldOf("layer", TextureLayer.SOLID).forGetter(GeometryModelTexture::getLayer),
             Codec.STRING.fieldOf("texture").forGetter(GeometryModelTexture::getData),
             Codec.BOOL.optionalFieldOf("cache", true).forGetter(GeometryModelTexture::canCache),
-            Codec.STRING.optionalFieldOf("color", "FFFFFF").xmap(hex -> Integer.parseInt(hex, 16), color -> Integer.toHexString(color).toUpperCase(Locale.ROOT)).forGetter(GeometryModelTexture::getColor),
+            Codec.STRING.optionalFieldOf("color", "0xFFFFFF").xmap(NumberUtils::createInteger, color -> "0x" + Integer.toHexString(color & 0xFFFFFF).toUpperCase(Locale.ROOT)).forGetter(GeometryModelTexture::getColor),
             Codec.BOOL.optionalFieldOf("glowing", false).forGetter(GeometryModelTexture::isGlowing)
     ).apply(instance, GeometryModelTexture::new));
     private static final Pattern ONLINE_PATTERN = Pattern.compile("=");
