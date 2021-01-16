@@ -1,0 +1,6 @@
+{
+  "poly_mesh.texture": {
+    "type": "online",
+    "texture": "https://raw.githubusercontent.com/Hopson97/ThinMatrix-OpenGL-Engine/master/Data/Textures/stall.png"
+  }
+}

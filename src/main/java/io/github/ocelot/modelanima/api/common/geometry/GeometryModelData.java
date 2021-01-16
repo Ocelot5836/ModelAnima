@@ -873,6 +873,19 @@ public class GeometryModelData
             return polyType;
         }
 
+        @Override
+        public String toString()
+        {
+            return "PolyMesh{" +
+                    "normalizedUvs=" + normalizedUvs +
+                    ", positions=" + Arrays.toString(positions) +
+                    ", normals=" + Arrays.toString(normals) +
+                    ", uvs=" + Arrays.toString(uvs) +
+                    ", polys=" + Arrays.toString(polys) +
+                    ", polyType=" + polyType +
+                    '}';
+        }
+
         public static class Deserializer implements JsonDeserializer<PolyMesh>
         {
             @Override
@@ -950,6 +963,11 @@ public class GeometryModelData
         }
     }
 
+    /**
+     * <p>An indexed polygon in a {@link PolyMesh}.</p>
+     * @author Ocelot
+     * @since 1.0.0
+     */
     public static class Poly
     {
         private final int[] positions;
@@ -987,15 +1005,34 @@ public class GeometryModelData
             return uvs;
         }
 
+        @Override
+        public String toString()
+        {
+            return "Poly{" +
+                    "positions=" + Arrays.toString(positions) +
+                    ", normals=" + Arrays.toString(normals) +
+                    ", uvs=" + Arrays.toString(uvs) +
+                    '}';
+        }
+
         public static class Deserializer implements JsonDeserializer<Poly>
         {
             @Override
             public Poly deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
             {
                 JsonArray jsonArray = json.getAsJsonArray();
-                if (jsonArray.size() != 4)
-                    throw new JsonSyntaxException("Expected 4 index values, was " + jsonArray.size());
-                return new Poly(parseVertex(jsonArray.get(0)), parseVertex(jsonArray.get(1)), parseVertex(jsonArray.get(2)));
+                if (jsonArray.size() != 3 && jsonArray.size() != 4)
+                    throw new JsonSyntaxException("Expected 3 or 4 index values, was " + jsonArray.size());
+
+                int[] array1 = parseVertex(jsonArray.get(0));
+                int[] array2 = parseVertex(jsonArray.get(1));
+                int[] array3 = parseVertex(jsonArray.get(2));
+                if (jsonArray.size() == 4)
+                {
+                    int[] array4 = parseVertex(jsonArray.get(3));
+                    return new Poly(new int[]{array1[0], array2[0], array3[0], array4[0]}, new int[]{array1[1], array2[1], array3[1], array4[1]}, new int[]{array1[2], array2[2], array3[2], array4[2]});
+                }
+                return new Poly(new int[]{array1[0], array2[0], array3[0]}, new int[]{array1[1], array2[1], array3[1]}, new int[]{array1[2], array2[2], array3[2]});
             }
 
             private static int[] parseVertex(JsonElement element) throws JsonParseException
@@ -1003,11 +1040,9 @@ public class GeometryModelData
                 if (!element.isJsonArray())
                     throw new JsonSyntaxException("Expected vertex to be a JsonArray, was " + JSONUtils.toString(element));
                 JsonArray array = element.getAsJsonArray();
-                if (array.size() == 3)
-                    return new int[]{array.get(0).getAsInt(), array.get(1).getAsInt(), array.get(2).getAsInt()};
-                if (array.size() == 4)
-                    return new int[]{array.get(0).getAsInt(), array.get(1).getAsInt(), array.get(2).getAsInt(), array.get(3).getAsInt()};
-                throw new JsonParseException("Expected 3 or 4 vertex values, was " + array.size());
+                if (array.size() != 3)
+                    throw new JsonParseException("Expected 3 vertex values, was " + array.size());
+                return new int[]{array.get(0).getAsInt(), array.get(1).getAsInt(), array.get(2).getAsInt()};
             }
         }
     }

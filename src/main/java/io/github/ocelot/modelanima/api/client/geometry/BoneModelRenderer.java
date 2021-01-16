@@ -7,10 +7,8 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Matrix3f;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -25,6 +23,7 @@ public class BoneModelRenderer extends ModelRenderer
     private final GeometryModelData.Bone bone;
     private final Set<BoneModelRenderer> children;
     private final ObjectList<Quad> quads;
+    private final ObjectList<Polygon> polygons;
     private final Matrix4f copyPosition;
     private final Matrix3f copyNormal;
     private boolean copyVanilla;
@@ -36,10 +35,14 @@ public class BoneModelRenderer extends ModelRenderer
         this.bone = bone;
         this.children = new HashSet<>();
         this.quads = new ObjectArrayList<>();
+        this.polygons = new ObjectArrayList<>();
         this.copyPosition = new Matrix4f();
         this.copyNormal = new Matrix3f();
         this.resetTransform(false);
         Arrays.stream(bone.getCubes()).forEach(this::addCube);
+        GeometryModelData.PolyMesh polyMesh = bone.getPolyMesh();
+        if (polyMesh != null)
+            this.addPolyMesh(polyMesh);
     }
 
     private void addCube(GeometryModelData.Cube cube)
@@ -106,6 +109,31 @@ public class BoneModelRenderer extends ModelRenderer
         this.addFace(cube, matrix4f, matrix3f, x1, y1, z1, x, y1, z1, x, y1, z, x1, y1, z, Direction.UP);
     }
 
+    private void addPolyMesh(GeometryModelData.PolyMesh polyMesh)
+    {
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.setIdentity();
+        for (GeometryModelData.Poly poly : polyMesh.getPolys())
+        {
+            Vertex[] vertices = new Vertex[polyMesh.getPolyType().getVertices()];
+            Vector3f[] normals = new Vector3f[polyMesh.getPolyType().getVertices()];
+            for (int i = 0; i < vertices.length; i++)
+            {
+                vertices[i] = this.getVertex(polyMesh, poly, matrix4f, i);
+                normals[i] = polyMesh.getNormals()[poly.getNormals()[i]].copy();
+                normals[i].mul(1, -1, 1);
+            }
+            this.polygons.add(new Polygon(vertices, normals));
+        }
+    }
+
+    private Vertex getVertex(GeometryModelData.PolyMesh polyMesh, GeometryModelData.Poly poly, Matrix4f matrix4f, int index)
+    {
+        Vector3f position = polyMesh.getPositions()[poly.getPositions()[index]];
+        Vector2f uv = polyMesh.getUvs()[poly.getUVs()[index]];
+        return new Vertex(matrix4f, position.getX(), -position.getY(), position.getZ(), polyMesh.isNormalizedUvs() ? uv.x : uv.x / this.parent.getTextureWidth(), 1 - (polyMesh.isNormalizedUvs() ? uv.y : uv.y / this.parent.getTextureHeight()));
+    }
+
     private void addFace(GeometryModelData.Cube cube, Matrix4f matrix4f, Matrix3f matrix3f, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, Direction face)
     {
         GeometryModelData.CubeUV uv = cube.getUV(face);
@@ -118,12 +146,6 @@ public class BoneModelRenderer extends ModelRenderer
                     new Vertex(matrix4f, x3, -y3, z3, (uv.getU() + uv.getUSize()) / this.parent.getTextureWidth(), (uv.getV() + uv.getVSize()) / this.parent.getTextureHeight())
             }, matrix3f, uv.getMaterialInstance(), cube.isOverrideMirror() ? cube.isMirror() : this.bone.isMirror(), face.getAxis().isVertical() ? face.getOpposite() : face));
         }
-    }
-
-    private void setCopyVanilla(boolean copyVanilla)
-    {
-        this.copyVanilla = copyVanilla;
-//        this.children.forEach(boneModelRenderer -> boneModelRenderer.setCopyVanilla(copyVanilla));
     }
 
     /**
@@ -143,7 +165,7 @@ public class BoneModelRenderer extends ModelRenderer
         this.copyNormal.setIdentity();
         if (resetChildren)
             this.children.forEach(boneModelRenderer -> boneModelRenderer.resetTransform(true));
-        this.setCopyVanilla(false);
+        this.copyVanilla = false;
     }
 
     @Override
@@ -164,7 +186,7 @@ public class BoneModelRenderer extends ModelRenderer
     {
         super.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
 
-        if (this.showModel && (!this.quads.isEmpty() || !this.children.isEmpty()))
+        if (this.showModel && (!this.quads.isEmpty() || !this.polygons.isEmpty() || !this.children.isEmpty()))
         {
             matrixStack.push();
             this.translateRotate(matrixStack);
@@ -182,11 +204,21 @@ public class BoneModelRenderer extends ModelRenderer
                 NORMAL_VECTOR.transform(matrix3f);
                 for (Vertex vertex : quad.vertices)
                 {
-                    TRANSFORM_VECTOR.set(vertex.x, vertex.y, vertex.z, 1);
-//                    if (this.copyVanilla)
-//                        TRANSFORM_VECTOR.set(TRANSFORM_VECTOR.getX() - this.rotationPointX / 16.0F, TRANSFORM_VECTOR.getY() - this.rotationPointY / 16.0F, TRANSFORM_VECTOR.getZ() - this.rotationPointZ / 16.0F, 1);
-                    TRANSFORM_VECTOR.transform(matrix4f);
-                    builder.addVertex(TRANSFORM_VECTOR.getX(), TRANSFORM_VECTOR.getY(), TRANSFORM_VECTOR.getZ(), red, green, blue, alpha, vertex.u, vertex.v, packedOverlay, packedLight, NORMAL_VECTOR.getX(), NORMAL_VECTOR.getY(), NORMAL_VECTOR.getZ());
+                    addVertex(builder, packedLight, packedOverlay, red, green, blue, alpha, matrix4f, vertex);
+                }
+            }
+            for (Polygon polygon : this.polygons)
+            {
+                if (!"poly_mesh.texture".equals(this.parent.getActiveMaterial()))
+                    continue;
+                for (int i = 0; i < 4; i++)
+                {
+                    int index = MathHelper.clamp(i, 0, polygon.vertices.length - 1);
+                    Vertex vertex = polygon.vertices[index];
+                    Vector3f normal = polygon.normals[index];
+                    NORMAL_VECTOR.set(normal.getX(), normal.getY(), normal.getZ());
+                    NORMAL_VECTOR.transform(matrix3f);
+                    addVertex(builder, packedLight, packedOverlay, red, green, blue, alpha, matrix4f, vertex);
                 }
             }
 
@@ -194,6 +226,13 @@ public class BoneModelRenderer extends ModelRenderer
 
             matrixStack.pop();
         }
+    }
+
+    private static void addVertex(IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, Matrix4f matrix4f, Vertex vertex)
+    {
+        TRANSFORM_VECTOR.set(vertex.x, vertex.y, vertex.z, 1);
+        TRANSFORM_VECTOR.transform(matrix4f);
+        builder.addVertex(TRANSFORM_VECTOR.getX(), TRANSFORM_VECTOR.getY(), TRANSFORM_VECTOR.getZ(), red, green, blue, alpha, vertex.u, vertex.v, packedOverlay, packedLight, NORMAL_VECTOR.getX(), NORMAL_VECTOR.getY(), NORMAL_VECTOR.getZ());
     }
 
     @Override
@@ -205,7 +244,7 @@ public class BoneModelRenderer extends ModelRenderer
         modelRenderer.translateRotate(matrixStack);
         this.copyPosition.mul(matrixStack.getLast().getMatrix());
         this.copyNormal.mul(matrixStack.getLast().getNormal());
-        this.setCopyVanilla(modelRenderer.getClass() == ModelRenderer.class);
+        this.copyVanilla = modelRenderer.getClass() == ModelRenderer.class;
     }
 
     @Override
@@ -279,6 +318,18 @@ public class BoneModelRenderer extends ModelRenderer
                 this.normal.mul(-1.0F, 1.0F, 1.0F);
             }
             this.normal.transform(normal);
+        }
+    }
+
+    private static class Polygon
+    {
+        private final Vertex[] vertices;
+        private final Vector3f[] normals;
+
+        public Polygon(Vertex[] vertices, Vector3f[] normals)
+        {
+            this.vertices = vertices;
+            this.normals = normals;
         }
     }
 }
