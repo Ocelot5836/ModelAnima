@@ -187,11 +187,11 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
                 try
                 {
-                    return new OnlineResource(url, resourceLocation, textureStream, files.getRight().get(1, TimeUnit.SECONDS));
+                    return new OnlineResource(url, resourceLocation, textureStream, files.getRight().get(5, TimeUnit.MINUTES));
                 }
                 catch (Exception e)
                 {
-                    LOGGER.error("Took too long to parse texture metadata for '" + url + "'");
+                    LOGGER.error("Took too long to parse texture metadata for '" + url + "'", e);
                     return new OnlineResource(url, resourceLocation, textureStream, null);
                 }
             }
@@ -242,7 +242,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         {
             try
             {
-                Path path = pathFuture.get(1, TimeUnit.MINUTES);
+                Path path = pathFuture.get(5, TimeUnit.MINUTES);
                 return path == null ? null : new FileInputStream(path.toFile());
             }
             catch (Exception e)
