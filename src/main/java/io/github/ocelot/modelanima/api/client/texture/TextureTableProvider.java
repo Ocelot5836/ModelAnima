@@ -5,6 +5,7 @@ import net.minecraft.resources.IFutureReloadListener;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * <p>Reloads and uploads textures to {@link GeometryTextureManager}.</p>
@@ -20,4 +21,11 @@ public interface TextureTableProvider extends IFutureReloadListener
      * @param textureConsumer The consumer for textures
      */
     void addTextures(BiConsumer<ResourceLocation, GeometryModelTextureTable> textureConsumer);
+
+    /**
+     * Adds all hash tables to the provided consumer.
+     *
+     * @param hashTableConsumer The consumer for hash tables
+     */
+    void addHashTables(Consumer<String> hashTableConsumer);
 }

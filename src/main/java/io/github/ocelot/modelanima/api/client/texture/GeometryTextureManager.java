@@ -13,9 +13,11 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -32,6 +34,7 @@ public class GeometryTextureManager
     private static final Reloader RELOADER = new Reloader();
     private static final Set<TextureTableProvider> PROVIDERS = new HashSet<>();
     private static final Map<ResourceLocation, GeometryModelTextureTable> TEXTURES = new HashMap<>();
+    private static final Set<String> HASH_TABLES = new HashSet<>();
     private static GeometryTextureSpriteUploader spriteUploader;
 
     private static boolean dirty;
@@ -68,12 +71,13 @@ public class GeometryTextureManager
     /**
      * Adds the specified texture under the specified location. This will not ever change or be unloaded.
      *
-     * @param location The location to upload under
-     * @param texture  The texture table to load
+     * @param location  The location to upload under
+     * @param texture   The texture table to load
+     * @param hashTable The table to load hashes from or <code>null</code> for no hashes
      */
-    public static void addTexture(ResourceLocation location, GeometryModelTextureTable texture)
+    public static void addTexture(ResourceLocation location, GeometryModelTextureTable texture, @Nullable String hashTable)
     {
-        addProvider(new StaticTextureTableProvider(location, texture));
+        addProvider(new StaticTextureTableProvider(location, texture, hashTable));
     }
 
     /**
@@ -159,16 +163,18 @@ public class GeometryTextureManager
             return CompletableFuture.allOf(PROVIDERS.stream().map(provider -> provider.reload(stage, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor)).toArray(CompletableFuture[]::new)).thenApplyAsync(a ->
             {
                 Map<ResourceLocation, GeometryModelTextureTable> textures = new HashMap<>();
+                Set<String> hashTables = new HashSet<>();
                 PROVIDERS.forEach(provider -> provider.addTextures((location, texture) ->
                 {
                     if (textures.containsKey(location))
                         LOGGER.warn("Texture at location '" + location + "' already exists and is being overridden.");
                     textures.put(location, texture);
                 }));
-                return textures;
+                PROVIDERS.forEach(provider -> provider.addHashTables(hashTables::add));
+                return Pair.of(textures, hashTables.toArray(new String[0]));
             }, backgroundExecutor)
-                    .thenCompose((textures) -> spriteUploader.setTextures(textures).reload(stage, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor))
-                    .thenCompose(stage::markCompleteAwaitingOthers).thenRunAsync(() ->
+                    .thenCompose(pair -> spriteUploader.setTextures(pair.getLeft(), pair.getRight()).reload(stage, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor))
+                    .thenCompose(stage::markCompleteAwaitingOthers).thenAcceptAsync(textures ->
                     {
                         TEXTURES.clear();
                         PROVIDERS.forEach(provider -> provider.addTextures((location, texture) ->

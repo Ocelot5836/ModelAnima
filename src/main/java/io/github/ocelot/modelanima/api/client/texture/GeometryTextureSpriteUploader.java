@@ -3,6 +3,9 @@ package io.github.ocelot.modelanima.api.client.texture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.JsonObject;
 import io.github.ocelot.modelanima.ModelAnima;
+import io.github.ocelot.modelanima.api.client.cache.FileCache;
+import io.github.ocelot.modelanima.api.client.cache.HashedTextureCache;
+import io.github.ocelot.modelanima.api.client.cache.TimedTextureCache;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
@@ -22,26 +25,15 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Bootstrap;
 import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.EofSensorInputStream;
-import org.apache.http.conn.EofSensorWatcher;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,11 +55,13 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     private static final Logger LOGGER = LogManager.getLogger();
     private final AtlasTexture textureAtlas;
     private final Set<GeometryModelTexture> textures;
+    private String[] hashTables;
 
     public GeometryTextureSpriteUploader(TextureManager textureManager, ResourceLocation atlasTextureLocation)
     {
         this.textureAtlas = new AtlasTexture(atlasTextureLocation);
         this.textures = new HashSet<>();
+        this.hashTables = new String[0];
         textureManager.loadTexture(this.textureAtlas.getTextureLocation(), this.textureAtlas);
     }
 
@@ -86,7 +80,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     @Override
     protected AtlasTexture.SheetData prepare(IResourceManager resourceManager, IProfiler profiler)
     {
-        try (OnlineRepository onlineRepository = new OnlineRepository())
+        try (OnlineRepository onlineRepository = new OnlineRepository(this.hashTables))
         {
             profiler.startTick();
             profiler.startSection("stitching");
@@ -113,10 +107,11 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         this.textureAtlas.clear();
     }
 
-    public GeometryTextureSpriteUploader setTextures(Map<ResourceLocation, GeometryModelTextureTable> textures)
+    public GeometryTextureSpriteUploader setTextures(Map<ResourceLocation, GeometryModelTextureTable> textures, String[] hashTables)
     {
         this.textures.clear();
         this.textures.addAll(textures.values().stream().flatMap(table -> table.getTextures().stream()).collect(Collectors.toSet()));
+        this.hashTables = hashTables;
         return this;
     }
 
@@ -320,127 +315,22 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     private static class OnlineRepository implements AutoCloseable
     {
         private final ExecutorService executor;
-        private final Map<String, CompletableFuture<String>> hashes;
+        private final FileCache hashedCache;
+        private final FileCache cache;
         private final Map<String, CompletableFuture<Path>> resources;
 
-        private OnlineRepository()
+        private OnlineRepository(String[] hashTableUrls)
         {
             AtomicInteger idGenerator = new AtomicInteger();
             this.executor = createOnlineWorker(idGenerator::getAndIncrement);
-            this.hashes = new HashMap<>();
+            this.hashedCache = new HashedTextureCache(this.executor, hashTableUrls);
+            this.cache = new TimedTextureCache(this.executor, 30, TimeUnit.MINUTES);
             this.resources = new HashMap<>();
-        }
-
-        public CompletableFuture<String> requestHash(String url)
-        {
-            return this.hashes.computeIfAbsent(url, key -> CompletableFuture.supplyAsync(() ->
-            {
-                try (InputStream stream = get(url))
-                {
-                    return IOUtils.toString(stream, StandardCharsets.UTF_8);
-                }
-                catch (IOException e)
-                {
-                    LOGGER.error("Failed to fetch hash from '" + url + "'", e);
-                    return null;
-                }
-            }, this.executor));
         }
 
         public CompletableFuture<Path> requestResource(String url, boolean cache, boolean ignoreMissing)
         {
-            if (cache)
-            {
-                return this.resources.computeIfAbsent(url, key -> this.requestHash(url + ".md5").thenApplyAsync(hash ->
-                {
-                    try
-                    {
-                        try
-                        {
-                            return GeometryTextureCache.getPath(url, hash, s ->
-                            {
-                                try
-                                {
-                                    return get(url);
-                                }
-                                catch (IOException e)
-                                {
-                                    if (!ignoreMissing)
-                                        LOGGER.error("Failed to read data from '" + url + "'");
-                                    return null;
-                                }
-                            });
-                        }
-                        catch (Exception e)
-                        {
-                            throw new IOException("Took too long to fetch texture data");
-                        }
-                    }
-                    catch (IOException e)
-                    {
-                        if (!ignoreMissing)
-                            LOGGER.error("Failed to fetch resource from '" + url + "'", e);
-                        return null;
-                    }
-                }, this.executor));
-            }
-            else
-            {
-                return this.resources.computeIfAbsent(url, key -> CompletableFuture.supplyAsync(() ->
-                {
-                    try
-                    {
-                        Path tempFile = Files.createTempFile(DigestUtils.md5Hex(url), null);
-                        try (InputStream stream = get(url))
-                        {
-                            Files.copy(stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
-                        }
-                        return tempFile;
-                    }
-                    catch (IOException e)
-                    {
-                        if (!ignoreMissing)
-                            LOGGER.error("Failed to fetch resource from '" + url + "'", e);
-                        return null;
-                    }
-                }, this.executor));
-            }
-        }
-
-        private static InputStream get(String url) throws IOException
-        {
-            HttpGet get = new HttpGet(url);
-            CloseableHttpClient client = HttpClients.custom().setUserAgent(USER_AGENT).build();
-            CloseableHttpResponse response = client.execute(get);
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != 200)
-            {
-                client.close();
-                response.close();
-                throw new IOException("Failed to connect to '" + url + "'. " + statusLine.getStatusCode() + " " + statusLine.getReasonPhrase());
-            }
-            return new EofSensorInputStream(response.getEntity().getContent(), new EofSensorWatcher()
-            {
-                @Override
-                public boolean eofDetected(InputStream wrapped)
-                {
-                    return true;
-                }
-
-                @Override
-                public boolean streamClosed(InputStream wrapped) throws IOException
-                {
-                    response.close();
-                    return true;
-                }
-
-                @Override
-                public boolean streamAbort(InputStream wrapped) throws IOException
-                {
-                    response.close();
-                    return true;
-                }
-            });
+            return this.resources.computeIfAbsent(url, key -> cache ? this.hashedCache.requestResource(url, ignoreMissing) : this.cache.requestResource(url, ignoreMissing));
         }
 
         private static ExecutorService createOnlineWorker(Supplier<Integer> idGenerator)
