@@ -1,0 +1,6 @@
+{
+  "poly_mesh.texture": {
+    "type": "location",
+    "texture": "examplemod:entity/rosalina"
+  }
+}
