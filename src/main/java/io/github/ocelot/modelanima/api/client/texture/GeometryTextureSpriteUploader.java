@@ -51,7 +51,6 @@ import java.util.stream.Stream;
 public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.SheetData> implements GeometryAtlasTexture, AutoCloseable
 {
     public static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(ModelAnima.DOMAIN, "textures/atlas/geometry.png");
-    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11";
     private static final Logger LOGGER = LogManager.getLogger();
     private final AtlasTexture textureAtlas;
     private final Set<GeometryModelTexture> textures;
@@ -187,7 +186,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
                 try
                 {
-                    return new OnlineResource(url, resourceLocation, textureStream, files.getRight().get(5, TimeUnit.MINUTES));
+                    return new OnlineResource(url, resourceLocation, textureStream, files.getRight().join());
                 }
                 catch (Exception e)
                 {
@@ -242,7 +241,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         {
             try
             {
-                Path path = pathFuture.get(5, TimeUnit.MINUTES);
+                Path path = pathFuture.join();
                 return path == null ? null : new FileInputStream(path.toFile());
             }
             catch (Exception e)
