@@ -25,7 +25,7 @@ public class GeometryModelData
     /**
      * A completely empty model definition.
      */
-    public static final GeometryModelData EMPTY = new GeometryModelData(new Description("empty", 0, 0, 0, 0, 0, 256, 256, false), new Bone[0]);
+    public static final GeometryModelData EMPTY = new GeometryModelData(new Description("empty", 0, 0, new Vector3f(), 256, 256, false), new Bone[0]);
 
     private final Description description;
     private final Bone[] bones;
@@ -72,21 +72,17 @@ public class GeometryModelData
         private final String identifier;
         private final float visibleBoundsWidth;
         private final float visibleBoundsHeight;
-        private final float visibleBoundsOffsetX;
-        private final float visibleBoundsOffsetY;
-        private final float visibleBoundsOffsetZ;
+        private final Vector3f visibleBoundsOffset;
         private final int textureWidth;
         private final int textureHeight;
         private final boolean preserveModelPose2588;
 
-        public Description(String identifier, float visibleBoundsWidth, float visibleBoundsHeight, float visibleBoundsOffsetX, float visibleBoundsOffsetY, float visibleBoundsOffsetZ, int textureWidth, int textureHeight, boolean preserveModelPose2588)
+        public Description(String identifier, float visibleBoundsWidth, float visibleBoundsHeight, Vector3f visibleBoundsOffset, int textureWidth, int textureHeight, boolean preserveModelPose2588)
         {
             this.identifier = identifier;
             this.visibleBoundsWidth = visibleBoundsWidth;
             this.visibleBoundsHeight = visibleBoundsHeight;
-            this.visibleBoundsOffsetX = visibleBoundsOffsetX;
-            this.visibleBoundsOffsetY = visibleBoundsOffsetY;
-            this.visibleBoundsOffsetZ = visibleBoundsOffsetZ;
+            this.visibleBoundsOffset = visibleBoundsOffset;
             this.textureWidth = textureWidth;
             this.textureHeight = textureHeight;
             this.preserveModelPose2588 = preserveModelPose2588;
@@ -117,27 +113,11 @@ public class GeometryModelData
         }
 
         /**
-         * @return The offset of the visibility bounding box from the origin in the x axis
+         * @return The offset of the visibility bounding box from the origin
          */
-        public float getVisibleBoundsOffsetX()
+        public Vector3f getVisibleBoundsOffset()
         {
-            return visibleBoundsOffsetX;
-        }
-
-        /**
-         * @return The offset of the visibility bounding box from the origin in the y axis
-         */
-        public float getVisibleBoundsOffsetY()
-        {
-            return visibleBoundsOffsetY;
-        }
-
-        /**
-         * @return The offset of the visibility bounding box from the origin in the z axis
-         */
-        public float getVisibleBoundsOffsetZ()
-        {
-            return visibleBoundsOffsetZ;
+            return visibleBoundsOffset;
         }
 
         /**
@@ -168,7 +148,7 @@ public class GeometryModelData
                     "identifier='" + identifier + '\'' +
                     ", visibleBoundsWidth=" + visibleBoundsWidth +
                     ", visibleBoundsHeight=" + visibleBoundsHeight +
-                    ", visibleBoundsOffset=(" + visibleBoundsOffsetX + ", " + visibleBoundsOffsetY + ", " + visibleBoundsOffsetZ + ")" +
+                    ", visibleBoundsOffset=" + visibleBoundsOffset +
                     ", textureWidth=" + textureWidth +
                     ", textureHeight=" + textureHeight +
                     ", preserveModelPose2588=" + preserveModelPose2588 +
@@ -192,7 +172,7 @@ public class GeometryModelData
                     throw new JsonSyntaxException("Texture width must not be zero");
                 if (textureHeight == 0)
                     throw new JsonSyntaxException("Texture height must not be zero");
-                return new Description(identifier, visibleBoundsWidth, visibleBoundsHeight, visibleBoundsOffset[0], visibleBoundsOffset[1], visibleBoundsOffset[2], textureWidth, textureHeight, preserveModelPose2588);
+                return new Description(identifier, visibleBoundsWidth, visibleBoundsHeight, new Vector3f(visibleBoundsOffset), textureWidth, textureHeight, preserveModelPose2588);
             }
         }
     }
@@ -209,15 +189,9 @@ public class GeometryModelData
         private final boolean reset2588;
         private final boolean neverRender2588;
         private final String parent;
-        private final float pivotX;
-        private final float pivotY;
-        private final float pivotZ;
-        private final float rotationX;
-        private final float rotationY;
-        private final float rotationZ;
-        private final float bindPoseRotation2588X;
-        private final float bindPoseRotation2588Y;
-        private final float bindPoseRotation2588Z;
+        private final Vector3f pivot;
+        private final Vector3f rotation;
+        private final Vector3f bindPoseRotation2588;
         private final boolean mirror;
         private final float inflate;
         private final boolean debug;
@@ -225,21 +199,15 @@ public class GeometryModelData
         private final Locator[] locators;
         private final PolyMesh polyMesh;
 
-        public Bone(String name, boolean reset2588, boolean neverRender2588, @Nullable String parent, float pivotX, float pivotY, float pivotZ, float rotationX, float rotationY, float rotationZ, float bindPoseRotation2588X, float bindPoseRotation2588Y, float bindPoseRotation2588Z, boolean mirror, float inflate, boolean debug, Cube[] cubes, Locator[] locators, @Nullable PolyMesh polyMesh)
+        public Bone(String name, boolean reset2588, boolean neverRender2588, @Nullable String parent, Vector3f pivot, Vector3f rotation, Vector3f bindPoseRotation2588, boolean mirror, float inflate, boolean debug, Cube[] cubes, Locator[] locators, @Nullable PolyMesh polyMesh)
         {
             this.name = name;
             this.reset2588 = reset2588;
             this.neverRender2588 = neverRender2588;
             this.parent = parent;
-            this.pivotX = pivotX;
-            this.pivotY = pivotY;
-            this.pivotZ = pivotZ;
-            this.rotationX = rotationX;
-            this.rotationY = rotationY;
-            this.rotationZ = rotationZ;
-            this.bindPoseRotation2588X = bindPoseRotation2588X;
-            this.bindPoseRotation2588Y = bindPoseRotation2588Y;
-            this.bindPoseRotation2588Z = bindPoseRotation2588Z;
+            this.pivot = pivot;
+            this.rotation = rotation;
+            this.bindPoseRotation2588 = bindPoseRotation2588;
             this.mirror = mirror;
             this.inflate = inflate;
             this.debug = debug;
@@ -276,66 +244,24 @@ public class GeometryModelData
         }
 
         /**
-         * @return The position this bone pivots around in the x-axis
+         * @return The position this bone pivots around
          */
-        public float getPivotX()
+        public Vector3f getPivot()
         {
-            return pivotX;
+            return pivot;
         }
 
         /**
-         * @return The position this bone pivots around in the y-axis
+         * @return The initial rotation of this bone in degrees
          */
-        public float getPivotY()
+        public Vector3f getRotation()
         {
-            return pivotY;
+            return rotation;
         }
 
-        /**
-         * @return The position this bone pivots around in the z-axis
-         */
-        public float getPivotZ()
+        public Vector3f getBindPoseRotation2588()
         {
-            return pivotZ;
-        }
-
-        /**
-         * @return The initial rotation of this bone in degrees in the x-axis
-         */
-        public float getRotationX()
-        {
-            return rotationX;
-        }
-
-        /**
-         * @return The initial rotation of this bone in degrees in the y-axis
-         */
-        public float getRotationY()
-        {
-            return rotationY;
-        }
-
-        /**
-         * @return The initial rotation of this bone in degrees in the z-axis
-         */
-        public float getRotationZ()
-        {
-            return rotationZ;
-        }
-
-        public float getBindPoseRotation2588X()
-        {
-            return bindPoseRotation2588X;
-        }
-
-        public float getBindPoseRotation2588Y()
-        {
-            return bindPoseRotation2588Y;
-        }
-
-        public float getBindPoseRotation2588Z()
-        {
-            return bindPoseRotation2588Z;
+            return bindPoseRotation2588;
         }
 
         /**
@@ -392,9 +318,9 @@ public class GeometryModelData
                     ", reset2588=" + reset2588 +
                     ", neverRender2588=" + neverRender2588 +
                     ", parent='" + parent + '\'' +
-                    ", pivot=(" + pivotX + "," + pivotY + "," + pivotZ + ")" +
-                    ", rotation(" + rotationX + "," + rotationY + "," + rotationZ + ")" +
-                    ", bindPoseRotation2588(" + bindPoseRotation2588X + "," + bindPoseRotation2588Y + "," + bindPoseRotation2588Z + ")" +
+                    ", pivot=" + pivot +
+                    ", rotation" + rotation +
+                    ", bindPoseRotation2588" + bindPoseRotation2588 +
                     ", mirror=" + mirror +
                     ", inflate=" + inflate +
                     ", debug=" + debug +
@@ -445,7 +371,7 @@ public class GeometryModelData
 
                 // TODO texture_mesh
 
-                return new Bone(name, reset2588, neverRender2588, parent, pivot[0], pivot[1], pivot[2], rotation[0], rotation[1], rotation[2], bindPoseRotation2588[0], bindPoseRotation2588[1], bindPoseRotation2588[2], mirror, inflate, debug, cubes, locators, polyMesh);
+                return new Bone(name, reset2588, neverRender2588, parent, new Vector3f(pivot), new Vector3f(rotation), new Vector3f(bindPoseRotation2588), mirror, inflate, debug, cubes, locators, polyMesh);
             }
         }
     }
@@ -458,38 +384,22 @@ public class GeometryModelData
      */
     public static class Cube
     {
-        private final float originX;
-        private final float originY;
-        private final float originZ;
-        private final float sizeX;
-        private final float sizeY;
-        private final float sizeZ;
-        private final float rotationX;
-        private final float rotationY;
-        private final float rotationZ;
-        private final float pivotX;
-        private final float pivotY;
-        private final float pivotZ;
+        private final Vector3f origin;
+        private final Vector3f size;
+        private final Vector3f rotation;
+        private final Vector3f pivot;
         private final boolean overrideInflate;
         private final float inflate;
         private final boolean overrideMirror;
         private final boolean mirror;
         private final CubeUV[] uv;
 
-        public Cube(float originX, float originY, float originZ, float sizeX, float sizeY, float sizeZ, float rotationX, float rotationY, float rotationZ, float pivotX, float pivotY, float pivotZ, boolean overrideInflate, float inflate, boolean overrideMirror, boolean mirror, CubeUV[] uv)
+        public Cube(Vector3f origin, Vector3f size, Vector3f rotation, Vector3f pivot, boolean overrideInflate, float inflate, boolean overrideMirror, boolean mirror, CubeUV[] uv)
         {
-            this.originX = originX;
-            this.originY = originY;
-            this.originZ = originZ;
-            this.sizeX = sizeX;
-            this.sizeY = sizeY;
-            this.sizeZ = sizeZ;
-            this.rotationX = rotationX;
-            this.rotationY = rotationY;
-            this.rotationZ = rotationZ;
-            this.pivotX = pivotX;
-            this.pivotY = pivotY;
-            this.pivotZ = pivotZ;
+            this.origin = origin;
+            this.size = size;
+            this.rotation = rotation;
+            this.pivot = pivot;
             this.overrideInflate = overrideInflate;
             this.inflate = inflate;
             this.overrideMirror = overrideMirror;
@@ -499,99 +409,35 @@ public class GeometryModelData
         }
 
         /**
-         * @return The un-rotated lower corner of the cube in the x-axis
+         * @return The un-rotated lower corner of the cube
          */
-        public float getOriginX()
+        public Vector3f getOrigin()
         {
-            return originX;
+            return origin;
         }
 
         /**
-         * @return The un-rotated lower corner of the cube in the y-axis
+         * @return The amount to extend beyond the origin
          */
-        public float getOriginY()
+        public Vector3f getSize()
         {
-            return originY;
+            return size;
         }
 
         /**
-         * @return The un-rotated lower corner of the cube in the z-axis
+         * @return The amount in degrees to rotate around the pivot
          */
-        public float getOriginZ()
+        public Vector3f getRotation()
         {
-            return originZ;
+            return rotation;
         }
 
         /**
-         * @return The amount to extend beyond the origin in the x-axis
+         * @return The position to pivot rotation around
          */
-        public float getSizeX()
+        public Vector3f getPivotX()
         {
-            return sizeX;
-        }
-
-        /**
-         * @return The amount to extend beyond the origin in the y-axis
-         */
-        public float getSizeY()
-        {
-            return sizeY;
-        }
-
-        /**
-         * @return The amount to extend beyond the origin in the z-axis
-         */
-        public float getSizeZ()
-        {
-            return sizeZ;
-        }
-
-        /**
-         * @return The amount in degrees to rotate around the pivot in the x-axis
-         */
-        public float getRotationX()
-        {
-            return rotationX;
-        }
-
-        /**
-         * @return The amount in degrees to rotate around the pivot in the y-axis
-         */
-        public float getRotationY()
-        {
-            return rotationY;
-        }
-
-        /**
-         * @return The amount in degrees to rotate around the pivot in the z-axis
-         */
-        public float getRotationZ()
-        {
-            return rotationZ;
-        }
-
-        /**
-         * @return The position to pivot rotation around in the x-axis
-         */
-        public float getPivotX()
-        {
-            return pivotX;
-        }
-
-        /**
-         * @return The position to pivot rotation around in the y-axis
-         */
-        public float getPivotY()
-        {
-            return pivotY;
-        }
-
-        /**
-         * @return The position to pivot rotation around in the z-axis
-         */
-        public float getPivotZ()
-        {
-            return pivotZ;
+            return pivot;
         }
 
         /**
@@ -650,10 +496,10 @@ public class GeometryModelData
         public String toString()
         {
             return "Cube{" +
-                    "origin=(" + originX + "," + originY + "," + originZ + ")" +
-                    ", size=(" + sizeX + "," + sizeY + "," + sizeZ + ")" +
-                    ", rotation=(" + rotationX + "," + rotationY + "," + rotationZ + ")" +
-                    ", pivot=(" + pivotX + "," + pivotY + "," + pivotZ + ")" +
+                    "origin=" + origin +
+                    ", size=" + size +
+                    ", rotation=" + rotation +
+                    ", pivot=" + pivot +
                     ", overrideInflate=" + overrideInflate +
                     ", inflate=" + inflate +
                     ", overrideMirror=" + overrideMirror +
@@ -684,7 +530,7 @@ public class GeometryModelData
                 CubeUV[] uv = parseUV(cubeJson, size);
                 if (uv.length != Direction.values().length)
                     throw new JsonParseException("Expected uv to be of size " + Direction.values().length + ", was " + uv.length);
-                return new Cube(origin[0], origin[1], origin[2], size[0], size[1], size[2], rotation[0], rotation[1], rotation[2], pivot[0], pivot[1], pivot[2], overrideInflate, inflate, overrideMirror, mirror, uv);
+                return new Cube(new Vector3f(origin), new Vector3f(size), new Vector3f(rotation), new Vector3f(pivot), overrideInflate, inflate, overrideMirror, mirror, uv);
             }
 
             private static CubeUV[] parseUV(JsonObject cubeJson, float[] size)
@@ -965,6 +811,7 @@ public class GeometryModelData
 
     /**
      * <p>An indexed polygon in a {@link PolyMesh}.</p>
+     *
      * @author Ocelot
      * @since 1.0.0
      */
@@ -1093,16 +940,12 @@ public class GeometryModelData
     public static class Locator
     {
         private final String identifier;
-        private final float x;
-        private final float y;
-        private final float z;
+        private final Vector3f position;
 
-        public Locator(String identifier, float x, float y, float z)
+        public Locator(String identifier, Vector3f position)
         {
             this.identifier = identifier;
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            this.position = position;
         }
 
         /**
@@ -1114,27 +957,11 @@ public class GeometryModelData
         }
 
         /**
-         * @return The position of this locator in the x-axis
+         * @return The position of this locator
          */
-        public float getX()
+        public Vector3f getPosition()
         {
-            return x;
-        }
-
-        /**
-         * @return The position of this locator in the y-axis
-         */
-        public float getY()
-        {
-            return y;
-        }
-
-        /**
-         * @return The position of this locator in the z-axis
-         */
-        public float getZ()
-        {
-            return z;
+            return position;
         }
 
         @Override
@@ -1142,7 +969,7 @@ public class GeometryModelData
         {
             return "Locator{" +
                     "identifier='" + identifier + '\'' +
-                    ", position=(" + x + y + z + ")" +
+                    ", position=" + position +
                     '}';
         }
     }

@@ -6,7 +6,6 @@ import io.github.ocelot.modelanima.api.client.texture.GeometryAtlasTexture;
 import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
-import io.github.ocelot.modelanima.core.client.geometry.EmptyGeometryModel;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
@@ -24,7 +23,77 @@ public interface GeometryModel
     /**
      * A blank model that can be used for empty entries.
      */
-    GeometryModel EMPTY = new EmptyGeometryModel();
+    GeometryModel EMPTY = new GeometryModel()
+    {
+        @Override
+        public void render(String material, GeometryModelTexture texture, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+        {
+        }
+
+        @Override
+        public void resetTransformation()
+        {
+        }
+
+        @Override
+        public void copyAngles(@Nullable String parent, ModelRenderer modelRenderer)
+        {
+        }
+
+        @Override
+        public Optional<ModelRenderer> getModelRenderer(String part)
+        {
+            return Optional.empty();
+        }
+
+        @Override
+        public ModelRenderer[] getChildRenderers(String part)
+        {
+            return new ModelRenderer[0];
+        }
+
+        @Override
+        public Optional<GeometryModelData.Locator> getLocator(String name)
+        {
+            return Optional.empty();
+        }
+
+        @Override
+        public ModelRenderer[] getModelRenderers()
+        {
+            return new ModelRenderer[0];
+        }
+
+        @Override
+        public GeometryModelData.Locator[] getLocators()
+        {
+            return new GeometryModelData.Locator[0];
+        }
+
+        @Override
+        public String[] getParentModelKeys()
+        {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getMaterialKeys()
+        {
+            return new String[0];
+        }
+
+        @Override
+        public float getTextureWidth()
+        {
+            return 16;
+        }
+
+        @Override
+        public float getTextureHeight()
+        {
+            return 16;
+        }
+    };
 
     /**
      * Renders a specific part with the specified texture key.
@@ -119,10 +188,6 @@ public interface GeometryModel
      */
     default IVertexBuilder getBuffer(IRenderTypeBuffer buffer, GeometryAtlasTexture atlas, GeometryModelTexture texture)
     {
-        return atlas.getSprite(texture.getLocation()).wrapBuffer(buffer.getBuffer(texture.getLayer().getRenderType(atlas.getAtlasLocation())));
-    }
-
-    default IVertexBuilder getBuffer(IRenderTypeBuffer buffer, GeometryAtlasTexture atlas, GeometryModelTexture texture, GeometryModelData.PolyMesh polyMesh){
         return atlas.getSprite(texture.getLocation()).wrapBuffer(buffer.getBuffer(texture.getLayer().getRenderType(atlas.getAtlasLocation())));
     }
 }

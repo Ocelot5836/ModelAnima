@@ -64,18 +64,22 @@ public class BoneModelRenderer extends ModelRenderer
         if (empty)
             return;
 
-        float x = cube.getOriginX() / 16f;
-        float y = cube.getOriginY() / 16f;
-        float z = cube.getOriginZ() / 16f;
-        float sizeX = cube.getSizeX() / 16f;
-        float sizeY = cube.getSizeY() / 16f;
-        float sizeZ = cube.getSizeZ() / 16f;
-        float rotationX = cube.getRotationX();
-        float rotationY = cube.getRotationY();
-        float rotationZ = cube.getRotationZ();
-        float pivotX = cube.getPivotX() / 16f;
-        float pivotY = -cube.getPivotY() / 16f;
-        float pivotZ = cube.getPivotZ() / 16f;
+        Vector3f origin = cube.getOrigin();
+        Vector3f size = cube.getSize();
+        Vector3f rotation = cube.getRotation();
+        Vector3f pivot = cube.getPivotX();
+        float x = origin.getX() / 16f;
+        float y = origin.getY() / 16f;
+        float z = origin.getZ() / 16f;
+        float sizeX = size.getX() / 16f;
+        float sizeY = size.getY() / 16f;
+        float sizeZ = size.getZ() / 16f;
+        float rotationX = rotation.getX();
+        float rotationY = rotation.getY();
+        float rotationZ = rotation.getZ();
+        float pivotX = pivot.getX() / 16f;
+        float pivotY = -pivot.getY() / 16f;
+        float pivotZ = pivot.getZ() / 16f;
         float inflate = (cube.isOverrideInflate() ? cube.getInflate() : this.bone.getInflate()) / 16f;
         boolean mirror = cube.isOverrideMirror() ? cube.isMirror() : this.bone.isMirror();
 
@@ -159,12 +163,14 @@ public class BoneModelRenderer extends ModelRenderer
      */
     public void resetTransform(boolean resetChildren)
     {
-        this.rotateAngleX = (float) (Math.PI / 180f) * this.bone.getRotationX();
-        this.rotateAngleY = (float) (Math.PI / 180f) * this.bone.getRotationY();
-        this.rotateAngleZ = (float) (Math.PI / 180f) * this.bone.getRotationZ();
-        this.rotationPointX = this.bone.getPivotX();
-        this.rotationPointY = -this.bone.getPivotY();
-        this.rotationPointZ = this.bone.getPivotZ();
+        Vector3f rotation = this.bone.getRotation();
+        Vector3f pivot = this.bone.getPivot();
+        this.rotateAngleX = (float) (Math.PI / 180f) * rotation.getX();
+        this.rotateAngleY = (float) (Math.PI / 180f) * rotation.getY();
+        this.rotateAngleZ = (float) (Math.PI / 180f) * rotation.getZ();
+        this.rotationPointX = pivot.getX();
+        this.rotationPointY = -pivot.getY();
+        this.rotationPointZ = pivot.getZ();
         this.copyPosition.setIdentity();
         this.copyNormal.setIdentity();
         if (resetChildren)
