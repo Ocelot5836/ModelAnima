@@ -1,6 +1,8 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.core.client.texture.GeometryTextureSpriteUploader;
+import io.github.ocelot.modelanima.core.client.texture.StaticTextureTableProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ResourceLoadProgressGui;
 import net.minecraft.profiler.IProfiler;
@@ -8,11 +10,12 @@ import net.minecraft.resources.*;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Unit;
 import net.minecraft.util.Util;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,40 +31,33 @@ import java.util.concurrent.Executor;
  * @author Ocelot
  * @since 1.0.0
  */
+@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class GeometryTextureManager
 {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Reloader RELOADER = new Reloader();
     private static final Set<TextureTableProvider> PROVIDERS = new HashSet<>();
     private static final Map<ResourceLocation, GeometryModelTextureTable> TEXTURES = new HashMap<>();
-    private static final Set<String> HASH_TABLES = new HashSet<>();
     private static GeometryTextureSpriteUploader spriteUploader;
 
     private static boolean dirty;
     private static IAsyncReloader asyncReloader;
 
-    /**
-     * <p>Enables loading of geometry textures.</p>
-     *
-     * @param bus The mod event bus to register events on
-     */
-    public static void init(IEventBus bus)
+    @SubscribeEvent
+    public static void onEvent(ColorHandlerEvent.Block event)
     {
-        bus.addListener(EventPriority.NORMAL, false, ColorHandlerEvent.Block.class, event ->
+        spriteUploader = new GeometryTextureSpriteUploader(Minecraft.getInstance().getTextureManager());
+        IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+        if (resourceManager instanceof IReloadableResourceManager)
         {
-            spriteUploader = new GeometryTextureSpriteUploader(Minecraft.getInstance().getTextureManager(), GeometryTextureSpriteUploader.ATLAS_LOCATION);
-            IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-            if (resourceManager instanceof IReloadableResourceManager)
-            {
-                ((IReloadableResourceManager) resourceManager).addReloadListener(RELOADER);
-            }
-        });
+            ((IReloadableResourceManager) resourceManager).addReloadListener(RELOADER);
+        }
         MinecraftForge.EVENT_BUS.addListener(GeometryTextureManager::tick);
     }
 
     private static void tick(TickEvent.ClientTickEvent event)
     {
-        if (dirty)
+        if (event.phase == TickEvent.Phase.END && dirty)
         {
             dirty = false;
             reload(false);

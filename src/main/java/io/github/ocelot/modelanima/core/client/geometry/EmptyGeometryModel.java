@@ -1,7 +1,8 @@
-package io.github.ocelot.modelanima.api.client.geometry;
+package io.github.ocelot.modelanima.core.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import net.minecraft.client.renderer.model.ModelRenderer;

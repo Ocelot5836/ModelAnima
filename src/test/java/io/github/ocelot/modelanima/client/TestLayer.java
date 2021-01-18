@@ -3,7 +3,7 @@ package io.github.ocelot.modelanima.client;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.TestMod;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
-import io.github.ocelot.modelanima.api.client.geometry.LocalGeometryModelLoader;
+import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;

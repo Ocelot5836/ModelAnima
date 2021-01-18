@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.api.client.cache;
+package io.github.ocelot.modelanima.api.common.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * <p>Generates hash files.</p>
+ * <p>Generates hash files automagically.</p>
  *
  * @author Ocelot
  * @since 1.0.0

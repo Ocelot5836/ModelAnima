@@ -4,6 +4,7 @@ import io.github.ocelot.modelanima.TestMod;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -20,13 +21,13 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_COMPONENTS;
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.stb.STBImageWrite.stbi_write_png;
 
-@Mod.EventBusSubscriber(modid = TestMod.MOD_ID)
+@Mod.EventBusSubscriber(modid = TestMod.MOD_ID, value = Dist.CLIENT)
 public class DebugInputs
 {
     @SubscribeEvent
     public static void onEvent(InputEvent.KeyInputEvent event)
     {
-        if (FMLLoader.isProduction())
+        if (FMLLoader.isProduction() || Minecraft.getInstance().currentScreen != null)
             return;
         if (event.getKey() == GLFW.GLFW_KEY_P)
         {

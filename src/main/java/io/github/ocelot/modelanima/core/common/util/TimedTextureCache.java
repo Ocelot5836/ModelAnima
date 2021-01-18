@@ -1,6 +1,7 @@
-package io.github.ocelot.modelanima.api.client.cache;
+package io.github.ocelot.modelanima.core.common.util;
 
-import io.github.ocelot.modelanima.api.client.texture.GeometryTextureCache;
+import io.github.ocelot.modelanima.api.client.util.GeometryCache;
+import io.github.ocelot.modelanima.api.common.util.FileCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,6 +11,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author Ocelot
+ */
 public class TimedTextureCache implements FileCache
 {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -32,7 +36,7 @@ public class TimedTextureCache implements FileCache
         {
             try
             {
-                return GeometryTextureCache.getPath(url, this.cacheTime, this.cacheTimeUnit, s ->
+                return GeometryCache.getPath(url, this.cacheTime, this.cacheTimeUnit, s ->
                 {
                     try
                     {

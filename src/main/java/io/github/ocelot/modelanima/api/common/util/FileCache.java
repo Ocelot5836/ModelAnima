@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.api.client.cache;
+package io.github.ocelot.modelanima.api.common.util;
 
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * <p>Manages caching of files to disk.</p>
+ * <p>Manages caching of files to disk from online.</p>
  *
  * @author Ocelot
  * @since 1.0.0
@@ -23,8 +23,22 @@ public interface FileCache
 {
     String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11";
 
+    /**
+     * Requests an online resource from the specified URL.
+     *
+     * @param url           The url to download the resource from
+     * @param ignoreMissing Whether or not to print an error when an exception is thrown
+     * @return A future for the location of the resource locally
+     */
     CompletableFuture<Path> requestResource(String url, boolean ignoreMissing);
 
+    /**
+     * Opens a GET stream to the specified URL.
+     *
+     * @param url The url to open a stream to
+     * @return The opened stream to the resource
+     * @throws IOException If any error occurs while trying to fetch resources
+     */
     static InputStream get(String url) throws IOException
     {
         HttpGet get = new HttpGet(url);

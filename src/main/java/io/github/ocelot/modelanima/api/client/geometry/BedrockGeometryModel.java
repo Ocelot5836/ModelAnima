@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.core.client.geometry.BoneModelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -31,14 +32,14 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     private final String[] textureKeys;
     private String activeMaterial;
 
-    public BedrockGeometryModel(Function<ResourceLocation, RenderType> renderType, GeometryModelData data)
+    public BedrockGeometryModel(GeometryModelData data)
     {
-        this(renderType, data.getDescription().getTextureWidth(), data.getDescription().getTextureHeight(), data.getBones());
+        this(data.getDescription().getTextureWidth(), data.getDescription().getTextureHeight(), data.getBones());
     }
 
-    public BedrockGeometryModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight, GeometryModelData.Bone[] bones)
+    public BedrockGeometryModel(int textureWidth, int textureHeight, GeometryModelData.Bone[] bones)
     {
-        super(renderType);
+        super(RenderType::getEntityCutoutNoCull);
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
         this.modelParts = new HashMap<>();

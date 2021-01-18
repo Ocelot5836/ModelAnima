@@ -1,6 +1,7 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
 import com.google.gson.Gson;
+import io.github.ocelot.modelanima.api.client.texture.TextureTableProvider;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelLoader;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.profiler.IProfiler;

@@ -1,10 +1,9 @@
 package io.github.ocelot.modelanima;
 
 import com.mojang.brigadier.CommandDispatcher;
-import io.github.ocelot.modelanima.api.client.geometry.LocalGeometryModelLoader;
+import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.client.texture.LocalTextureTableProvider;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.client.ClientInit;
 import net.minecraft.block.Block;
 import net.minecraft.command.CommandSource;
@@ -39,7 +38,6 @@ public class TestMod
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
         {
             LocalGeometryModelLoader.init(modBus);
-            GeometryTextureManager.init(modBus);
             GeometryTextureManager.addProvider(new LocalTextureTableProvider());
             modBus.addListener(ClientInit::initClient);
         });

@@ -2,7 +2,6 @@ package io.github.ocelot.modelanima.api.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -24,21 +23,23 @@ import java.util.function.Supplier;
 public class GeometryEntityModel<T extends Entity> extends EntityModel<T>
 {
     private final Supplier<GeometryModel> model;
-    private final Function<T, ResourceLocation> textureFunction;
+    private final Function<T, ResourceLocation> textureTableFunction;
     private final Set<Pair<String, BoneTransformer<T>>> transforms;
     private ResourceLocation texture;
 
-    public GeometryEntityModel(Supplier<GeometryModel> model, Function<T, ResourceLocation> textureFunction)
+    public GeometryEntityModel(Supplier<GeometryModel> model, Function<T, ResourceLocation> textureTableFunction)
     {
         this.model = model;
-        this.textureFunction = textureFunction;
+        this.textureTableFunction = textureTableFunction;
         this.transforms = new HashSet<>();
     }
 
     @Override
     public void setRotationAngles(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        this.texture = this.textureFunction.apply(entity);
+        this.getModel().resetTransformation();
+
+        this.texture = this.textureTableFunction.apply(entity);
         for (Pair<String, BoneTransformer<T>> transform : this.transforms)
         {
             this.getModel().getModelRenderer(transform.getLeft()).ifPresent(modelRenderer -> transform.getRight().transform(this, modelRenderer, entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch));
@@ -48,7 +49,7 @@ public class GeometryEntityModel<T extends Entity> extends EntityModel<T>
     @Override
     public void render(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-        GeometryModelRenderer.render(null, this.getModel(), this.texture, matrixStack, Minecraft.getInstance().getRenderTypeBuffers().getBufferSource(), packedLight, packedOverlay, red, green, blue, alpha);
+        GeometryModelRenderer.render(this.getModel(), this.texture, matrixStack, Minecraft.getInstance().getRenderTypeBuffers().getBufferSource(), packedLight, packedOverlay, red, green, blue, alpha);
     }
 
     /**

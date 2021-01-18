@@ -1,11 +1,12 @@
-package io.github.ocelot.modelanima.api.client.texture;
+package io.github.ocelot.modelanima.core.client.texture;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.JsonObject;
 import io.github.ocelot.modelanima.ModelAnima;
-import io.github.ocelot.modelanima.api.client.cache.FileCache;
-import io.github.ocelot.modelanima.api.client.cache.HashedTextureCache;
-import io.github.ocelot.modelanima.api.client.cache.TimedTextureCache;
+import io.github.ocelot.modelanima.api.client.texture.GeometryAtlasTexture;
+import io.github.ocelot.modelanima.api.common.util.FileCache;
+import io.github.ocelot.modelanima.core.common.util.HashedTextureCache;
+import io.github.ocelot.modelanima.core.common.util.TimedTextureCache;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
@@ -43,10 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * <p>Part of the core library, prone to change.</p>
- *
  * @author Ocelot
- * @since 1.0.0
  */
 public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.SheetData> implements GeometryAtlasTexture, AutoCloseable
 {
@@ -56,9 +54,9 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     private final Set<GeometryModelTexture> textures;
     private String[] hashTables;
 
-    public GeometryTextureSpriteUploader(TextureManager textureManager, ResourceLocation atlasTextureLocation)
+    public GeometryTextureSpriteUploader(TextureManager textureManager)
     {
-        this.textureAtlas = new AtlasTexture(atlasTextureLocation);
+        this.textureAtlas = new AtlasTexture(ATLAS_LOCATION);
         this.textures = new HashSet<>();
         this.hashTables = new String[0];
         textureManager.loadTexture(this.textureAtlas.getTextureLocation(), this.textureAtlas);

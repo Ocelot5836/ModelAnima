@@ -1,9 +1,10 @@
-package io.github.ocelot.modelanima.api.client.geometry;
+package io.github.ocelot.modelanima.api.client.util;
 
+import io.github.ocelot.modelanima.api.client.geometry.BedrockGeometryModel;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelLoader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IFutureReloadListener;
 import net.minecraft.resources.IReloadableResourceManager;
@@ -24,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * <p>Automatically loads {@link GeometryModel} from JSON.</p>
+ * <p>Automatically loads {@link GeometryModel} from local JSON, which can then be accessed through {@link #getModel(ResourceLocation)}.</p>
  *
  * @author Ocelot
  * @since 1.0.0
@@ -91,7 +92,7 @@ public final class LocalGeometryModelLoader
                 {
                     try
                     {
-                        RENDERERS.put(name, new BedrockGeometryModel(RenderType::getEntityCutoutNoCull, model));
+                        RENDERERS.put(name, new BedrockGeometryModel(model));
                     }
                     catch (Exception e)
                     {

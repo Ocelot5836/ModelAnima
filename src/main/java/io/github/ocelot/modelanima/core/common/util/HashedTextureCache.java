@@ -1,8 +1,9 @@
-package io.github.ocelot.modelanima.api.client.cache;
+package io.github.ocelot.modelanima.core.common.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.ocelot.modelanima.api.client.texture.GeometryTextureCache;
+import io.github.ocelot.modelanima.api.client.util.GeometryCache;
+import io.github.ocelot.modelanima.api.common.util.FileCache;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,8 +15,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+/**
+ * @author Ocelot
+ */
 public class HashedTextureCache implements FileCache
 {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -59,7 +62,7 @@ public class HashedTextureCache implements FileCache
             {
                 try
                 {
-                    return GeometryTextureCache.getPath(url, hashes.get(url), s ->
+                    return GeometryCache.getPath(url, hashes.get(url), s ->
                     {
                         try
                         {

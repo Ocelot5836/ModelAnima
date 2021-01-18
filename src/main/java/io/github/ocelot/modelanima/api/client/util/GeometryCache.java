@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.api.client.texture;
+package io.github.ocelot.modelanima.api.client.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -6,9 +6,10 @@ import com.google.gson.JsonParser;
 import io.github.ocelot.modelanima.ModelAnima;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -33,11 +34,12 @@ import java.util.function.Function;
  * @author Ocelot
  * @since 1.0.0
  */
-public class GeometryTextureCache
+@Mod.EventBusSubscriber(value = Dist.CLIENT)
+public class GeometryCache
 {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
-    private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDir.toURI()).resolve(ModelAnima.DOMAIN + "-geometry-texture-cache");
+    private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDir.toURI()).resolve(ModelAnima.DOMAIN + "-geometry-cache");
 
     private static final Object LOCK = new Object();
     private static final Path CACHE_METADATA_LOCATION = CACHE_FOLDER.resolve("cache.json");
@@ -58,7 +60,6 @@ public class GeometryTextureCache
                 LOGGER.error("Failed to load cache metadata", e);
             }
         }
-        MinecraftForge.EVENT_BUS.register(GeometryTextureCache.class);
     }
 
     private static synchronized void writeMetadata()
@@ -207,7 +208,7 @@ public class GeometryTextureCache
         if (System.currentTimeMillis() - nextWriteTime > 0)
         {
             nextWriteTime = Long.MAX_VALUE;
-            Util.getServerExecutor().execute(GeometryTextureCache::writeMetadata);
+            Util.getServerExecutor().execute(GeometryCache::writeMetadata);
         }
     }
 }
