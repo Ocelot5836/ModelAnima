@@ -15,6 +15,8 @@ import java.util.function.Supplier;
  */
 public class JSONTupleParser
 {
+    // TODO implement MoLang expressions
+
     /**
      * Parses an array of floats from the specified JSON.
      *
