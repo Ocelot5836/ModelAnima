@@ -363,7 +363,7 @@ public class GeometryModelData
                     {
                         String locatorIdentifier = entry.getKey();
                         float[] locatorPosition = JSONTupleParser.getFloat(locatorsJson, locatorIdentifier, 3, () -> new float[3]);
-                        return new Locator(locatorIdentifier, locatorPosition[0], locatorPosition[1], locatorPosition[2]);
+                        return new Locator(locatorIdentifier, new Vector3f(locatorPosition));
                     }).toArray(Locator[]::new);
                 }
 
