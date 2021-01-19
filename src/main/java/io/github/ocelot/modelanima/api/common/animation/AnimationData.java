@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  * <p>Deserializes custom animations from JSON.</p>
@@ -434,9 +435,9 @@ public class AnimationData
                 {
                     JsonObject boneAnimationObject = boneAnimationEntry.getValue().getAsJsonObject();
 
-                    parseTransform(positions, boneAnimationObject, "position");
-                    parseTransform(rotations, boneAnimationObject, "rotation");
-                    parseTransform(scales, boneAnimationObject, "scale");
+                    parseTransform(positions, boneAnimationObject, "position", () -> new float[3]);
+                    parseTransform(rotations, boneAnimationObject, "rotation", () -> new float[3]);
+                    parseTransform(scales, boneAnimationObject, "scale", () -> new float[]{1, 1, 1});
 
                     positions.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
                     rotations.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
@@ -478,30 +479,39 @@ public class AnimationData
             }
         }
 
-        private static void parseTransform(Collection<KeyFrame> frames, JsonObject json, String name) throws JsonParseException
+        private static void parseTransform(Collection<KeyFrame> frames, JsonObject json, String name, Supplier<float[]> defaultValue) throws JsonParseException
         {
             if (!json.has(name))
                 return;
 
-            for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject(name).entrySet())
+            JsonElement transformJson = json.get(name);
+            if (transformJson.isJsonObject())
             {
-                try
+                for (Map.Entry<String, JsonElement> entry : transformJson.getAsJsonObject().entrySet())
                 {
-                    float time = Float.parseFloat(entry.getKey());
-                    if (frames.stream().anyMatch(keyFrame -> keyFrame.getTime() == time))
-                        throw new JsonSyntaxException("Duplicate channel time '" + time + "'");
+                    try
+                    {
+                        float time = Float.parseFloat(entry.getKey());
+                        if (frames.stream().anyMatch(keyFrame -> keyFrame.getTime() == time))
+                            throw new JsonSyntaxException("Duplicate channel time '" + time + "'");
 
-                    Pair<float[], float[]> transform = parseChannel(json.getAsJsonObject(name), entry.getKey());
-                    frames.add(new KeyFrame(time, transform.getLeft()[0], transform.getLeft()[1], transform.getLeft()[2], transform.getRight()[0], transform.getRight()[1], transform.getRight()[2]));
+                        Pair<float[], float[]> transform = parseChannel(transformJson.getAsJsonObject(), entry.getKey(), defaultValue);
+                        frames.add(new KeyFrame(time, transform.getLeft()[0], transform.getLeft()[1], transform.getLeft()[2], transform.getRight()[0], transform.getRight()[1], transform.getRight()[2]));
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        throw new JsonParseException("Invalid keyframe time '" + entry.getKey() + "'", e);
+                    }
                 }
-                catch (NumberFormatException e)
-                {
-                    throw new JsonParseException("Failed to parse keyframe at time '" + entry.getKey() + "'", e);
-                }
+            }
+            else
+            {
+                float[] values = JSONTupleParser.getFloat(json, name, 3, defaultValue);
+                frames.add(new KeyFrame(0, values[0], values[1], values[2], values[0], values[1], values[2]));
             }
         }
 
-        private static Pair<float[], float[]> parseChannel(JsonObject json, String name) throws JsonSyntaxException
+        private static Pair<float[], float[]> parseChannel(JsonObject json, String name, Supplier<float[]> defaultValue) throws JsonSyntaxException
         {
             if (!json.has(name) && !json.get(name).isJsonObject() && !json.get(name).isJsonArray())
                 throw new JsonSyntaxException("Missing " + name + ", expected to find a JsonObject or JsonArray");
@@ -513,7 +523,7 @@ public class AnimationData
                 return Pair.of(JSONTupleParser.getFloat(transformationObject, "pre", 3, null), JSONTupleParser.getFloat(transformationObject, "post", 3, null));
             }
 
-            float[] transformation = JSONTupleParser.getFloat(json, name, 3, () -> new float[3]);
+            float[] transformation = JSONTupleParser.getFloat(json, name, 3, defaultValue);
             return Pair.of(transformation, transformation);
         }
     }
