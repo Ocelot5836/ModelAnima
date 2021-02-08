@@ -134,6 +134,8 @@ public class GeometryCache
             {
                 try
                 {
+                    if (!Files.exists(CACHE_FOLDER))
+                        Files.createDirectory(CACHE_FOLDER);
                     if (!Files.exists(imageFile))
                         Files.createFile(imageFile);
                 }
@@ -195,6 +197,8 @@ public class GeometryCache
         {
             try
             {
+                if (!Files.exists(CACHE_FOLDER))
+                    Files.createDirectory(CACHE_FOLDER);
                 if (!Files.exists(imageFile))
                     Files.createFile(imageFile);
                 CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
