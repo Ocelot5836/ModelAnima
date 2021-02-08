@@ -1,5 +1,6 @@
 package io.github.ocelot.modelanima.core.client.texture;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.JsonObject;
 import io.github.ocelot.modelanima.ModelAnima;
@@ -81,9 +82,12 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         {
             profiler.startTick();
             profiler.startSection("stitching");
+            Stopwatch stopwatch = Stopwatch.createStarted();
             AtlasTexture.SheetData sheetData = this.textureAtlas.stitch(new OnlineResourceManager(resourceManager, onlineRepository, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.LOCATION || texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().gameSettings.mipmapLevels);
+            stopwatch.stop();
             profiler.endSection();
             profiler.endTick();
+            LOGGER.debug("Took " + stopwatch + " to process " + this.textures.size() + " geometry textures");
             return sheetData;
         }
     }
@@ -332,9 +336,9 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
         private static ExecutorService createOnlineWorker(Supplier<Integer> idGenerator)
         {
-            int i = MathHelper.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 7);
+            int i = Runtime.getRuntime().availableProcessors();
             ExecutorService executorservice;
-            if (i <= 0)
+            if (i <= 1)
             {
                 executorservice = MoreExecutors.newDirectExecutorService();
             }
@@ -344,6 +348,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 {
                     ForkJoinWorkerThread forkjoinworkerthread = new ForkJoinWorkerThread(pool)
                     {
+                        @Override
                         protected void onTermination(Throwable t)
                         {
                             if (t != null)
