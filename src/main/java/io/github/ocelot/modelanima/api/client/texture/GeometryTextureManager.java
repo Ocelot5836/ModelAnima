@@ -14,7 +14,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -43,15 +44,22 @@ public class GeometryTextureManager
     private static boolean dirty;
     private static IAsyncReloader asyncReloader;
 
-    @SubscribeEvent
-    public static void onEvent(ColorHandlerEvent.Block event)
+    /**
+     * <p>Enables loading of geometry textures.</p>
+     *
+     * @param bus The mod event bus to register events on
+     */
+    public static void init(IEventBus bus)
     {
-        spriteUploader = new GeometryTextureSpriteUploader(Minecraft.getInstance().getTextureManager());
-        IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-        if (resourceManager instanceof IReloadableResourceManager)
+        bus.addListener(EventPriority.NORMAL, true, ColorHandlerEvent.Block.class, event ->
         {
-            ((IReloadableResourceManager) resourceManager).addReloadListener(RELOADER);
-        }
+            spriteUploader = new GeometryTextureSpriteUploader(Minecraft.getInstance().getTextureManager());
+            IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+            if (resourceManager instanceof IReloadableResourceManager)
+            {
+                ((IReloadableResourceManager) resourceManager).addReloadListener(RELOADER);
+            }
+        });
         MinecraftForge.EVENT_BUS.addListener(GeometryTextureManager::tick);
     }
 
