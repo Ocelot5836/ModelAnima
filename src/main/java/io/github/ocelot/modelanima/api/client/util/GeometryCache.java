@@ -139,13 +139,16 @@ public class GeometryCache
             {
                 try
                 {
-                    synchronized (IO_LOCK)
-                    {
-                        if (!Files.exists(CACHE_FOLDER))
+                    if (!Files.exists(CACHE_FOLDER))
+                        synchronized (IO_LOCK)
+                        {
                             Files.createDirectory(CACHE_FOLDER);
-                        if (!Files.exists(imageFile))
+                        }
+                    if (!Files.exists(imageFile))
+                        synchronized (IO_LOCK)
+                        {
                             Files.createFile(imageFile);
-                    }
+                        }
                 }
                 catch (Exception e)
                 {
@@ -208,13 +211,16 @@ public class GeometryCache
         {
             try
             {
-                synchronized (IO_LOCK)
-                {
-                    if (!Files.exists(CACHE_FOLDER))
+                if (!Files.exists(CACHE_FOLDER))
+                    synchronized (IO_LOCK)
+                    {
                         Files.createDirectory(CACHE_FOLDER);
-                    if (!Files.exists(imageFile))
+                    }
+                if (!Files.exists(imageFile))
+                    synchronized (IO_LOCK)
+                    {
                         Files.createFile(imageFile);
-                }
+                    }
                 synchronized (METADATA_LOCK)
                 {
                     CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
