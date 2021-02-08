@@ -41,7 +41,6 @@ public class GeometryCache
     private static final Gson GSON = new Gson();
     private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDir.toURI()).resolve(ModelAnima.DOMAIN + "-geometry-cache");
 
-    private static final Object LOCK = new Object();
     private static final Path CACHE_METADATA_LOCATION = CACHE_FOLDER.resolve("cache.json");
     private static JsonObject CACHE_METADATA = new JsonObject();
     private static long nextWriteTime = Long.MAX_VALUE;
@@ -91,10 +90,7 @@ public class GeometryCache
             {
                 String fileCache = DigestUtils.md5Hex(stream);
                 CACHE_METADATA.addProperty(key, fileCache);
-                synchronized (LOCK)
-                {
-                    nextWriteTime = System.currentTimeMillis() + 5000;
-                }
+                nextWriteTime = System.currentTimeMillis() + 5000;
                 if (hash.equalsIgnoreCase(fileCache))
                     return true;
             }
@@ -124,7 +120,21 @@ public class GeometryCache
 
         InputStream fetchedStream = fetcher.apply(url);
         if (fetchedStream == null)
+        {
+            if (hash == null)
+            {
+                try
+                {
+                    if (!Files.exists(imageFile))
+                        Files.createFile(imageFile);
+                }
+                catch (Exception e)
+                {
+                    LOGGER.error("Failed to create empty file '" + imageFile + "' for '" + url + "'", e);
+                }
+            }
             return null;
+        }
 
         try
         {
@@ -135,7 +145,7 @@ public class GeometryCache
         }
         catch (Exception e)
         {
-            LOGGER.error("Failed to write image '" + url + "'", e);
+            LOGGER.error("Failed to write image '" + url + "' to '" + imageFile + "'", e);
         }
         finally
         {
@@ -173,7 +183,18 @@ public class GeometryCache
 
         InputStream fetchedStream = fetcher.apply(url);
         if (fetchedStream == null)
+        {
+            try
+            {
+                if (!Files.exists(imageFile))
+                    Files.createFile(imageFile);
+            }
+            catch (Exception e)
+            {
+                LOGGER.error("Failed to create empty file '" + imageFile + "' for '" + url + "'", e);
+            }
             return null;
+        }
 
         try
         {
@@ -181,10 +202,7 @@ public class GeometryCache
                 Files.createDirectory(CACHE_FOLDER);
             Files.copy(fetchedStream, imageFile, StandardCopyOption.REPLACE_EXISTING);
             CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
-            synchronized (LOCK)
-            {
-                nextWriteTime = System.currentTimeMillis() + 5000;
-            }
+            nextWriteTime = System.currentTimeMillis() + 5000;
             return imageFile;
         }
         catch (Exception e)

@@ -336,9 +336,9 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
         private static ExecutorService createOnlineWorker(Supplier<Integer> idGenerator)
         {
-            int i = Runtime.getRuntime().availableProcessors();
+            int i = MathHelper.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 7);
             ExecutorService executorservice;
-            if (i <= 1)
+            if (i <= 0)
             {
                 executorservice = MoreExecutors.newDirectExecutorService();
             }
