@@ -77,7 +77,7 @@ public class GeometryCache
         }
     }
 
-    private static boolean isCached(String url, @Nullable String hash, Path imageFile)
+    private static synchronized boolean isCached(String url, @Nullable String hash, Path imageFile)
     {
         if (Files.exists(imageFile))
         {
@@ -115,7 +115,7 @@ public class GeometryCache
      * @return The location of a file that can be opened with the data
      */
     @Nullable
-    public static Path getPath(String url, @Nullable String hash, Function<String, InputStream> fetcher)
+    public static synchronized Path getPath(String url, @Nullable String hash, Function<String, InputStream> fetcher)
     {
         Path imageFile = CACHE_FOLDER.resolve(DigestUtils.md5Hex(url));
 
@@ -155,7 +155,7 @@ public class GeometryCache
      * @return The location of a file that can be opened with the data
      */
     @Nullable
-    public static Path getPath(String url, long timeout, TimeUnit unit, Function<String, InputStream> fetcher)
+    public static synchronized Path getPath(String url, long timeout, TimeUnit unit, Function<String, InputStream> fetcher)
     {
         Path imageFile = CACHE_FOLDER.resolve(DigestUtils.md5Hex(url));
 
