@@ -41,10 +41,12 @@ public class GeometryCache
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
     private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDir.toURI()).resolve(ModelAnima.DOMAIN + "-geometry-cache");
+    private static final Object METADATA_LOCK = new Object();
+    private static final Object IO_LOCK = new Object();
 
     private static final Path CACHE_METADATA_LOCATION = CACHE_FOLDER.resolve("cache.json");
-    private static JsonObject CACHE_METADATA = new JsonObject();
-    private static long nextWriteTime = Long.MAX_VALUE;
+    private static volatile JsonObject CACHE_METADATA = new JsonObject();
+    private static volatile long nextWriteTime = Long.MAX_VALUE;
 
     static
     {
@@ -77,7 +79,7 @@ public class GeometryCache
         }
     }
 
-    private static synchronized boolean isCached(String url, @Nullable String hash, Path imageFile)
+    private static boolean isCached(String url, @Nullable String hash, Path imageFile)
     {
         if (Files.exists(imageFile))
         {
@@ -98,8 +100,11 @@ public class GeometryCache
             try (InputStream stream = new FileInputStream(imageFile.toFile()))
             {
                 String fileCache = DigestUtils.md5Hex(stream);
-                CACHE_METADATA.addProperty(key, fileCache);
-                nextWriteTime = System.currentTimeMillis() + 5000;
+                synchronized (METADATA_LOCK)
+                {
+                    CACHE_METADATA.addProperty(key, fileCache);
+                    nextWriteTime = System.currentTimeMillis() + 5000;
+                }
                 if (hash.equalsIgnoreCase(fileCache))
                     return true;
             }
@@ -120,7 +125,7 @@ public class GeometryCache
      * @return The location of a file that can be opened with the data
      */
     @Nullable
-    public static synchronized Path getPath(String url, @Nullable String hash, Function<String, InputStream> fetcher)
+    public static Path getPath(String url, @Nullable String hash, Function<String, InputStream> fetcher)
     {
         Path imageFile = CACHE_FOLDER.resolve(DigestUtils.md5Hex(url));
 
@@ -134,10 +139,13 @@ public class GeometryCache
             {
                 try
                 {
-                    if (!Files.exists(CACHE_FOLDER))
-                        Files.createDirectory(CACHE_FOLDER);
-                    if (!Files.exists(imageFile))
-                        Files.createFile(imageFile);
+                    synchronized (IO_LOCK)
+                    {
+                        if (!Files.exists(CACHE_FOLDER))
+                            Files.createDirectory(CACHE_FOLDER);
+                        if (!Files.exists(imageFile))
+                            Files.createFile(imageFile);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -149,9 +157,12 @@ public class GeometryCache
 
         try
         {
-            if (!Files.exists(CACHE_FOLDER))
-                Files.createDirectory(CACHE_FOLDER);
-            Files.copy(fetchedStream, imageFile, StandardCopyOption.REPLACE_EXISTING);
+            synchronized (IO_LOCK)
+            {
+                if (!Files.exists(CACHE_FOLDER))
+                    Files.createDirectory(CACHE_FOLDER);
+                Files.copy(fetchedStream, imageFile, StandardCopyOption.REPLACE_EXISTING);
+            }
             return imageFile;
         }
         catch (Exception e)
@@ -176,7 +187,7 @@ public class GeometryCache
      * @return The location of a file that can be opened with the data
      */
     @Nullable
-    public static synchronized Path getPath(String url, long timeout, TimeUnit unit, Function<String, InputStream> fetcher)
+    public static Path getPath(String url, long timeout, TimeUnit unit, Function<String, InputStream> fetcher)
     {
         Path imageFile = CACHE_FOLDER.resolve(DigestUtils.md5Hex(url));
 
@@ -197,11 +208,17 @@ public class GeometryCache
         {
             try
             {
-                if (!Files.exists(CACHE_FOLDER))
-                    Files.createDirectory(CACHE_FOLDER);
-                if (!Files.exists(imageFile))
-                    Files.createFile(imageFile);
-                CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
+                synchronized (IO_LOCK)
+                {
+                    if (!Files.exists(CACHE_FOLDER))
+                        Files.createDirectory(CACHE_FOLDER);
+                    if (!Files.exists(imageFile))
+                        Files.createFile(imageFile);
+                }
+                synchronized (METADATA_LOCK)
+                {
+                    CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
+                }
             }
             catch (Exception e)
             {
@@ -212,11 +229,17 @@ public class GeometryCache
 
         try
         {
-            if (!Files.exists(CACHE_FOLDER))
-                Files.createDirectory(CACHE_FOLDER);
-            Files.copy(fetchedStream, imageFile, StandardCopyOption.REPLACE_EXISTING);
-            CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
-            nextWriteTime = System.currentTimeMillis() + 5000;
+            synchronized (IO_LOCK)
+            {
+                if (!Files.exists(CACHE_FOLDER))
+                    Files.createDirectory(CACHE_FOLDER);
+                Files.copy(fetchedStream, imageFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+            synchronized (METADATA_LOCK)
+            {
+                CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
+                nextWriteTime = System.currentTimeMillis() + 5000;
+            }
             return imageFile;
         }
         catch (Exception e)
