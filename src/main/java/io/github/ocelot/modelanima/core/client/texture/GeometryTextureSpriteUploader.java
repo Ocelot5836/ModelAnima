@@ -5,11 +5,11 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.JsonObject;
 import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.client.texture.GeometryAtlasTexture;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.api.common.util.FileCache;
 import io.github.ocelot.modelanima.core.common.util.HashedTextureCache;
 import io.github.ocelot.modelanima.core.common.util.TimedTextureCache;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -26,6 +26,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Bootstrap;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -156,9 +157,8 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 {
                     return JSONUtils.fromJson(bufferedreader);
                 }
-                catch (Exception e)
+                catch (Exception ignored)
                 {
-                    LOGGER.warn("Failed to read metadata", e);
                 }
 
                 return null;
@@ -188,6 +188,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
                 try
                 {
+                    files.getRight().join();
                     return new OnlineResource(url, resourceLocation, textureStream, files.getRight().join());
                 }
                 catch (Exception e)

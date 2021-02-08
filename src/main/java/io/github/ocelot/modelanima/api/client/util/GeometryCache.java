@@ -10,6 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -85,7 +86,15 @@ public class GeometryCache
 
             String key = DigestUtils.md5Hex(url);
             if (CACHE_METADATA.has(key) && CACHE_METADATA.get(key).isJsonPrimitive() && CACHE_METADATA.get(key).getAsJsonPrimitive().isString())
-                return hash.equalsIgnoreCase(CACHE_METADATA.get(key).getAsString());
+            {
+                if (!hash.equalsIgnoreCase(CACHE_METADATA.get(key).getAsString()))
+                {
+                    if (!FMLLoader.isProduction())
+                        LOGGER.warn("Hash for '" + url + "' did not match. Expected " + hash + ", got " + CACHE_METADATA.get(key).getAsString());
+                    return false;
+                }
+                return true;
+            }
             try (InputStream stream = new FileInputStream(imageFile.toFile()))
             {
                 String fileCache = DigestUtils.md5Hex(stream);
@@ -176,7 +185,7 @@ public class GeometryCache
             {
                 long now = System.currentTimeMillis();
                 long expirationDate = CACHE_METADATA.get(key).getAsLong();
-                if (now - expirationDate < 0)
+                if (expirationDate - now > 0)
                     return imageFile;
             }
         }
@@ -188,6 +197,7 @@ public class GeometryCache
             {
                 if (!Files.exists(imageFile))
                     Files.createFile(imageFile);
+                CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
             }
             catch (Exception e)
             {
