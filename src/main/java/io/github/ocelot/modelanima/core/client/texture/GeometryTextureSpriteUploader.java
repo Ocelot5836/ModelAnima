@@ -63,6 +63,17 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         textureManager.loadTexture(this.textureAtlas.getTextureLocation(), this.textureAtlas);
     }
 
+    private void beginStitch(long startTime, Stopwatch stopwatch)
+    {
+        stopwatch.start();
+    }
+
+    private void endStitch(Stopwatch stopwatch)
+    {
+        stopwatch.stop();
+        LOGGER.debug("Took " + stopwatch + " to process " + this.textures.size() + " geometry textures");
+    }
+
     @Override
     public ResourceLocation getAtlasLocation()
     {
@@ -82,12 +93,12 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         {
             profiler.startTick();
             profiler.startSection("stitching");
-            Stopwatch stopwatch = Stopwatch.createStarted();
+            Stopwatch stopwatch = Stopwatch.createUnstarted();
+            this.beginStitch(System.currentTimeMillis(), stopwatch);
             AtlasTexture.SheetData sheetData = this.textureAtlas.stitch(new OnlineResourceManager(resourceManager, onlineRepository, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.LOCATION || texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().gameSettings.mipmapLevels);
-            stopwatch.stop();
+            this.endStitch(stopwatch);
             profiler.endSection();
             profiler.endTick();
-            LOGGER.debug("Took " + stopwatch + " to process " + this.textures.size() + " geometry textures");
             return sheetData;
         }
     }
