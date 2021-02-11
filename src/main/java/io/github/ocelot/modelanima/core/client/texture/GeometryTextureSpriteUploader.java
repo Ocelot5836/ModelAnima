@@ -188,7 +188,6 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
             String url = parseUrl(new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().substring(9, resourceLocation.getPath().length() - 4)));
             if (url != null)
             {
-                Stopwatch stopwatch = Stopwatch.createStarted();
                 if (!this.onlineLocations.containsKey(url))
                     throw new IOException("Failed to fetch texture data from '" + url + "'");
 
@@ -200,13 +199,11 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 try
                 {
                     files.getRight().join();
-                    LOGGER.debug(ModelAnima.GEOMETRY, "Took " + stopwatch.stop() + " to process '" + url + "'");
                     return new OnlineResource(url, resourceLocation, textureStream, files.getRight().join());
                 }
                 catch (Exception e)
                 {
                     LOGGER.error("Took too long to parse texture metadata for '" + url + "'", e);
-                    LOGGER.debug(ModelAnima.GEOMETRY, "Took " + stopwatch.stop() + " to process '" + url + "'");
                     return new OnlineResource(url, resourceLocation, textureStream, null);
                 }
             }
