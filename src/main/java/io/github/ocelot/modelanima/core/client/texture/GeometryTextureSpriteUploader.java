@@ -196,16 +196,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 if (textureStream == null)
                     throw new IOException("Failed to fetch texture data from '" + url + "'");
 
-                try
-                {
-                    files.getRight().join();
-                    return new OnlineResource(url, resourceLocation, textureStream, files.getRight().join());
-                }
-                catch (Exception e)
-                {
-                    LOGGER.error("Took too long to parse texture metadata for '" + url + "'", e);
-                    return new OnlineResource(url, resourceLocation, textureStream, null);
-                }
+                return new OnlineResource(url, resourceLocation, textureStream, files.getRight().join());
             }
             return this.parent.getResource(resourceLocation);
         }
