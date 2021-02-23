@@ -27,16 +27,15 @@ import java.util.regex.Pattern;
  */
 public class GeometryModelTexture
 {
-    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", false, -1, false, 0);
-    public static final GeometryModelTexture INVISIBLE = new GeometryModelTexture(Type.INVISIBLE, TextureLayer.SOLID, "missingno", false, -1, false, 0);
+    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", false, -1, false);
+    public static final GeometryModelTexture INVISIBLE = new GeometryModelTexture(Type.INVISIBLE, TextureLayer.SOLID, "missingno", false, -1, false);
     public static final Codec<GeometryModelTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Type::byName, type -> type.name().toLowerCase(Locale.ROOT)).fieldOf("type").forGetter(GeometryModelTexture::getType),
             Codec.STRING.xmap(TextureLayer::byName, type -> type.name().toLowerCase(Locale.ROOT)).optionalFieldOf("layer", TextureLayer.SOLID).forGetter(GeometryModelTexture::getLayer),
             Codec.STRING.fieldOf("texture").forGetter(GeometryModelTexture::getData),
             Codec.BOOL.optionalFieldOf("cache", true).forGetter(GeometryModelTexture::canCache),
             Codec.STRING.optionalFieldOf("color", "0xFFFFFF").xmap(NumberUtils::createInteger, color -> "0x" + Integer.toHexString(color & 0xFFFFFF).toUpperCase(Locale.ROOT)).forGetter(GeometryModelTexture::getColor),
-            Codec.BOOL.optionalFieldOf("glowing", false).forGetter(GeometryModelTexture::isGlowing),
-            Codec.INT.optionalFieldOf("textureLayer", 0).forGetter(GeometryModelTexture::getTextureLayer)
+            Codec.BOOL.optionalFieldOf("glowing", false).forGetter(GeometryModelTexture::isGlowing)
     ).apply(instance, GeometryModelTexture::new));
     private static final Pattern ONLINE_PATTERN = Pattern.compile("=");
 
@@ -46,10 +45,9 @@ public class GeometryModelTexture
     private final boolean cache;
     private final int color;
     private final boolean glowing;
-    private final int textureLayer;
     private final ResourceLocation location;
 
-    public GeometryModelTexture(Type type, TextureLayer layer, String data, boolean cache, int color, boolean glowing, int textureLayer)
+    public GeometryModelTexture(Type type, TextureLayer layer, String data, boolean cache, int color, boolean glowing)
     {
         this.type = type;
         this.layer = layer;
@@ -57,13 +55,12 @@ public class GeometryModelTexture
         this.cache = cache;
         this.color = color;
         this.glowing = glowing;
-        this.textureLayer = textureLayer;
         this.location = type.createLocation(data);
     }
 
     public GeometryModelTexture(PacketBuffer buf)
     {
-        this(buf.readEnumValue(Type.class), buf.readEnumValue(TextureLayer.class), buf.readString(), buf.readBoolean(), buf.readInt(), buf.readBoolean(), buf.readVarInt());
+        this(buf.readEnumValue(Type.class), buf.readEnumValue(TextureLayer.class), buf.readString(), buf.readBoolean(), buf.readInt(), buf.readBoolean());
     }
 
     /**
@@ -79,7 +76,6 @@ public class GeometryModelTexture
         buf.writeBoolean(this.cache);
         buf.writeInt(this.color);
         buf.writeBoolean(this.glowing);
-        buf.writeVarInt(this.textureLayer);
     }
 
     /**
@@ -152,14 +148,6 @@ public class GeometryModelTexture
     public boolean isGlowing()
     {
         return glowing;
-    }
-
-    /**
-     * @return The layer this texture should render in
-     */
-    public int getTextureLayer()
-    {
-        return textureLayer;
     }
 
     /**
