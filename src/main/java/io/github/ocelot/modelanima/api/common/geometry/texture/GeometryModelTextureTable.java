@@ -44,12 +44,13 @@ public class GeometryModelTextureTable
         int count = buf.readVarInt();
         for (int i = 0; i < count; i++)
         {
+            String key = buf.readString();
             int layers = buf.readVarInt();
             for (int j = 0; j < layers; j++)
                 textureSet.add(new GeometryModelTexture(buf));
             if (!textureSet.isEmpty())
             {
-                this.textures.put(buf.readString(), textureSet.toArray(new GeometryModelTexture[0]));
+                this.textures.put(key, textureSet.toArray(new GeometryModelTexture[0]));
                 textureSet.clear();
             }
         }
