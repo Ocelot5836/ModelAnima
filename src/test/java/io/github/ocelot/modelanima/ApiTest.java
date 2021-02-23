@@ -1,10 +1,6 @@
 package io.github.ocelot.modelanima;
 
 import io.github.ocelot.modelanima.api.common.animation.AnimationLoader;
-import io.github.ocelot.modelanima.api.common.geometry.GeometryModelLoader;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
-import net.minecraft.nbt.NBTDynamicOps;
 
 import java.util.Arrays;
 
@@ -227,15 +223,6 @@ public class ApiTest
                 "  }\n" +
                 "}";
 
-
-        GeometryModelTextureTable table = GeometryModelLoader.parseTextures(textureTable);
-
-        System.out.println(GeometryModelLoader.parseModel(model));
-        System.out.println(table);
         System.out.println(Arrays.toString(AnimationLoader.parse(animation)));
-
-        System.out.println(new GeometryModelTextureTable(table.serializeNBT()));
-
-        System.out.println(GeometryModelTexture.CODEC.encodeStart(NBTDynamicOps.INSTANCE, table.getTexture("texture")).getOrThrow(true, System.out::println));
     }
 }
