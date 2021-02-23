@@ -6,7 +6,6 @@ import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
@@ -14,7 +13,6 @@ import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {
@@ -29,17 +27,12 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
         if (GeometryTextureManager.isReloading())
             return;
 
-        Minecraft.getInstance().getRenderTypeBuffers().getBufferSource().finish();
-        GeometryModel geometryModel = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "dragon"));
+        GeometryModel geometryModel = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "stall"));
 
         matrixStack.push();
         GeometryModelRenderer.copyModelAngles(this.getEntityModel(), geometryModel);
-        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/stall"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/poly_test"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         matrixStack.pop();
-
-        GL11.glShadeModel(GL11.GL_SMOOTH);
-        Minecraft.getInstance().getRenderTypeBuffers().getBufferSource().finish();
-        GL11.glShadeModel(GL11.GL_FLAT);
 
 //        GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/hoodie")), new ResourceLocation(TestMod.MOD_ID, "discord_hoodie"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
 //        GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/cap")), new ResourceLocation(TestMod.MOD_ID, "v_cap"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);

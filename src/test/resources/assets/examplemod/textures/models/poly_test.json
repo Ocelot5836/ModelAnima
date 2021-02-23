@@ -1,6 +1,20 @@
 {
-  "poly_mesh.texture": {
-    "type": "location",
-    "texture": "block/gold_block"
-  }
+  "poly_mesh.texture": [
+    {
+      "type": "online",
+      "texture": "https://raw.githubusercontent.com/team-abnormals/environmental/master/src/main/resources/assets/environmental/textures/entity/slabfish/type/bmo.png",
+      "layer": "cutout",
+      "cache": false
+    }, {
+      "type": "online",
+      "texture": "https://raw.githubusercontent.com/team-abnormals/environmental/master/src/main/resources/assets/environmental/textures/entity/slabfish/backpack/pink.png",
+      "layer": "cutout",
+      "cache": false
+    }, {
+      "type": "online",
+      "texture": "https://raw.githubusercontent.com/team-abnormals/environmental/master/src/main/resources/assets/environmental/textures/entity/slabfish/sweater/pink.png",
+      "layer": "cutout",
+      "cache": false
+    }
+  ]
 }

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
+import io.github.ocelot.modelanima.core.client.geometry.GeometryRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
@@ -250,11 +251,11 @@ public class GeometryModelTexture
      */
     public enum TextureLayer
     {
-        SOLID(() -> RenderType::getEntitySolid),
-        CUTOUT(() -> RenderType::getEntityCutoutNoCull),
-        CUTOUT_CULL(() -> RenderType::getEntityCutout),
-        TRANSLUCENT(() -> RenderType::getEntityTranslucent),
-        TRANSLUCENT_CULL(() -> RenderType::getEntityTranslucentCull);
+        SOLID(() -> GeometryRenderTypes::getGeometrySolid),
+        CUTOUT(() -> GeometryRenderTypes::getGeometryCutout),
+        CUTOUT_CULL(() -> GeometryRenderTypes::getGeometryCutoutCull),
+        TRANSLUCENT(() -> GeometryRenderTypes::getGeometryTranslucent),
+        TRANSLUCENT_CULL(() -> GeometryRenderTypes::getGeometryTranslucentCull);
 
         private final Supplier<Function<ResourceLocation, RenderType>> renderTypeGetter;
 
