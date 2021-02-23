@@ -39,7 +39,7 @@ public class GeometryModelTextureTable
     public GeometryModelTextureTable(PacketBuffer buf)
     {
         this.textures = new HashMap<>();
-        Set<GeometryModelTexture> textureSet = new HashSet<>();
+        List<GeometryModelTexture> textureSet = new ArrayList<>();
 
         int count = buf.readVarInt();
         for (int i = 0; i < count; i++)
@@ -58,7 +58,7 @@ public class GeometryModelTextureTable
     public GeometryModelTextureTable(CompoundNBT nbt)
     {
         this.textures = new HashMap<>();
-        Set<GeometryModelTexture> textureSet = new HashSet<>();
+        List<GeometryModelTexture> textureSet = new ArrayList<>();
 
         ListNBT texturesNbt = nbt.getList("Textures", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < texturesNbt.size(); i++)
@@ -199,7 +199,7 @@ public class GeometryModelTextureTable
         {
             JsonObject texturesObject = json.getAsJsonObject();
             Map<String, GeometryModelTexture[]> textures = new HashMap<>();
-            Set<GeometryModelTexture> textureSet = new HashSet<>();
+            List<GeometryModelTexture> textureSet = new ArrayList<>();
             for (Map.Entry<String, JsonElement> entry : texturesObject.entrySet())
             {
                 try
