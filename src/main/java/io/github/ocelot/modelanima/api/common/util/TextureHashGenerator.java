@@ -46,7 +46,7 @@ public class TextureHashGenerator
                 return;
             try (InputStream stream = new FileInputStream(child.toFile()))
             {
-                hashes.addProperty(urlBase + child.toString().replaceAll("\\\\", "/").substring("src/generated/input/".length()), DigestUtils.md5Hex(IOUtils.toString(stream, StandardCharsets.UTF_8)));
+                hashes.addProperty(urlBase + child.toString().replaceAll("\\\\", "/").substring("src/generated/input/".length()), DigestUtils.md5Hex(IOUtils.toByteArray(stream)));
             }
             catch (Exception e)
             {

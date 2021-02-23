@@ -2,9 +2,10 @@ package io.github.ocelot.modelanima.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.TestMod;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
-import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
+import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -29,11 +30,12 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
             return;
 
         Minecraft.getInstance().getRenderTypeBuffers().getBufferSource().finish();
+        GeometryModel geometryModel = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "link"));
 
         matrixStack.push();
-        matrixStack.translate(0, 1, 0);
         matrixStack.scale(0.01f, 0.01f, 0.01f);
-        GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "rosalina")), new ResourceLocation(TestMod.MOD_ID, "rosalina"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.copyModelAngles(this.getEntityModel(), geometryModel);
+        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/ohno/link"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         matrixStack.pop();
 
         GL11.glShadeModel(GL11.GL_SMOOTH);

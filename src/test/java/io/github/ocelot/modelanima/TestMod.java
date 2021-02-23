@@ -38,6 +38,7 @@ public class TestMod
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
         {
             LocalGeometryModelLoader.init(modBus);
+            GeometryTextureManager.init(modBus);
             GeometryTextureManager.addProvider(new LocalTextureTableProvider());
             modBus.addListener(ClientInit::initClient);
         });

@@ -1,14 +1,15 @@
 package io.github.ocelot.modelanima.core.client.texture;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.JsonObject;
 import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.client.texture.GeometryAtlasTexture;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.api.common.util.FileCache;
 import io.github.ocelot.modelanima.core.common.util.HashedTextureCache;
 import io.github.ocelot.modelanima.core.common.util.TimedTextureCache;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -62,6 +63,17 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         textureManager.loadTexture(this.textureAtlas.getTextureLocation(), this.textureAtlas);
     }
 
+    private void beginStitch(long startTime, Stopwatch stopwatch)
+    {
+        stopwatch.start();
+    }
+
+    private void endStitch(Stopwatch stopwatch)
+    {
+        stopwatch.stop();
+        LOGGER.debug("Took " + stopwatch + " to process " + this.textures.size() + " geometry textures");
+    }
+
     @Override
     public ResourceLocation getAtlasLocation()
     {
@@ -81,7 +93,10 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         {
             profiler.startTick();
             profiler.startSection("stitching");
+            Stopwatch stopwatch = Stopwatch.createUnstarted();
+            this.beginStitch(System.currentTimeMillis(), stopwatch);
             AtlasTexture.SheetData sheetData = this.textureAtlas.stitch(new OnlineResourceManager(resourceManager, onlineRepository, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.LOCATION || texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().gameSettings.mipmapLevels);
+            this.endStitch(stopwatch);
             profiler.endSection();
             profiler.endTick();
             return sheetData;
@@ -152,9 +167,8 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 {
                     return JSONUtils.fromJson(bufferedreader);
                 }
-                catch (Exception e)
+                catch (Exception ignored)
                 {
-                    LOGGER.warn("Failed to read metadata", e);
                 }
 
                 return null;
@@ -182,15 +196,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 if (textureStream == null)
                     throw new IOException("Failed to fetch texture data from '" + url + "'");
 
-                try
-                {
-                    return new OnlineResource(url, resourceLocation, textureStream, files.getRight().join());
-                }
-                catch (Exception e)
-                {
-                    LOGGER.error("Took too long to parse texture metadata for '" + url + "'", e);
-                    return new OnlineResource(url, resourceLocation, textureStream, null);
-                }
+                return new OnlineResource(url, resourceLocation, textureStream, files.getRight().join());
             }
             return this.parent.getResource(resourceLocation);
         }
@@ -344,6 +350,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                 {
                     ForkJoinWorkerThread forkjoinworkerthread = new ForkJoinWorkerThread(pool)
                     {
+                        @Override
                         protected void onTermination(Throwable t)
                         {
                             if (t != null)

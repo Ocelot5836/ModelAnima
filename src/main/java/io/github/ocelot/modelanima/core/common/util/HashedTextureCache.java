@@ -48,7 +48,7 @@ public class HashedTextureCache implements FileCache
             Map<String, String> hashes = new HashMap<>();
             for (CompletableFuture<Map<String, String>> future : hashesFuture)
                 hashes.putAll(future.join());
-            LOGGER.debug("Downloaded " + hashes.size() + " hashes from " + hashTableUrls.length + " hash tables");
+            LOGGER.debug("Downloaded " + hashes.size() + " hashes from " + hashTableUrls.length + " hash table(s)");
             return hashes;
         }, Util.getServerExecutor());
     }

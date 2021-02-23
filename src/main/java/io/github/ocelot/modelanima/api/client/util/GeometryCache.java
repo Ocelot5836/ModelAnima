@@ -10,6 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -40,11 +41,12 @@ public class GeometryCache
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
     private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDir.toURI()).resolve(ModelAnima.DOMAIN + "-geometry-cache");
+    private static final Object METADATA_LOCK = new Object();
+    private static final Object IO_LOCK = new Object();
 
-    private static final Object LOCK = new Object();
     private static final Path CACHE_METADATA_LOCATION = CACHE_FOLDER.resolve("cache.json");
-    private static JsonObject CACHE_METADATA = new JsonObject();
-    private static long nextWriteTime = Long.MAX_VALUE;
+    private static volatile JsonObject CACHE_METADATA = new JsonObject();
+    private static volatile long nextWriteTime = Long.MAX_VALUE;
 
     static
     {
@@ -86,13 +88,21 @@ public class GeometryCache
 
             String key = DigestUtils.md5Hex(url);
             if (CACHE_METADATA.has(key) && CACHE_METADATA.get(key).isJsonPrimitive() && CACHE_METADATA.get(key).getAsJsonPrimitive().isString())
-                return hash.equalsIgnoreCase(CACHE_METADATA.get(key).getAsString());
+            {
+                if (!hash.equalsIgnoreCase(CACHE_METADATA.get(key).getAsString()))
+                {
+                    if (!FMLLoader.isProduction())
+                        LOGGER.warn("Hash for '" + url + "' did not match. Expected " + hash + ", got " + CACHE_METADATA.get(key).getAsString());
+                    return false;
+                }
+                return true;
+            }
             try (InputStream stream = new FileInputStream(imageFile.toFile()))
             {
                 String fileCache = DigestUtils.md5Hex(stream);
-                CACHE_METADATA.addProperty(key, fileCache);
-                synchronized (LOCK)
+                synchronized (METADATA_LOCK)
                 {
+                    CACHE_METADATA.addProperty(key, fileCache);
                     nextWriteTime = System.currentTimeMillis() + 5000;
                 }
                 if (hash.equalsIgnoreCase(fileCache))
@@ -124,18 +134,43 @@ public class GeometryCache
 
         InputStream fetchedStream = fetcher.apply(url);
         if (fetchedStream == null)
+        {
+            if (hash == null)
+            {
+                try
+                {
+                    if (!Files.exists(CACHE_FOLDER))
+                        synchronized (IO_LOCK)
+                        {
+                            Files.createDirectory(CACHE_FOLDER);
+                        }
+                    if (!Files.exists(imageFile))
+                        synchronized (IO_LOCK)
+                        {
+                            Files.createFile(imageFile);
+                        }
+                }
+                catch (Exception e)
+                {
+                    LOGGER.error("Failed to create empty file '" + imageFile + "' for '" + url + "'", e);
+                }
+            }
             return null;
+        }
 
         try
         {
-            if (!Files.exists(CACHE_FOLDER))
-                Files.createDirectory(CACHE_FOLDER);
-            Files.copy(fetchedStream, imageFile, StandardCopyOption.REPLACE_EXISTING);
+            synchronized (IO_LOCK)
+            {
+                if (!Files.exists(CACHE_FOLDER))
+                    Files.createDirectory(CACHE_FOLDER);
+                Files.copy(fetchedStream, imageFile, StandardCopyOption.REPLACE_EXISTING);
+            }
             return imageFile;
         }
         catch (Exception e)
         {
-            LOGGER.error("Failed to write image '" + url + "'", e);
+            LOGGER.error("Failed to write image '" + url + "' to '" + imageFile + "'", e);
         }
         finally
         {
@@ -166,23 +201,49 @@ public class GeometryCache
             {
                 long now = System.currentTimeMillis();
                 long expirationDate = CACHE_METADATA.get(key).getAsLong();
-                if (now - expirationDate < 0)
+                if (expirationDate - now > 0)
                     return imageFile;
             }
         }
 
         InputStream fetchedStream = fetcher.apply(url);
         if (fetchedStream == null)
+        {
+            try
+            {
+                if (!Files.exists(CACHE_FOLDER))
+                    synchronized (IO_LOCK)
+                    {
+                        Files.createDirectory(CACHE_FOLDER);
+                    }
+                if (!Files.exists(imageFile))
+                    synchronized (IO_LOCK)
+                    {
+                        Files.createFile(imageFile);
+                    }
+                synchronized (METADATA_LOCK)
+                {
+                    CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
+                }
+            }
+            catch (Exception e)
+            {
+                LOGGER.error("Failed to create empty file '" + imageFile + "' for '" + url + "'", e);
+            }
             return null;
+        }
 
         try
         {
-            if (!Files.exists(CACHE_FOLDER))
-                Files.createDirectory(CACHE_FOLDER);
-            Files.copy(fetchedStream, imageFile, StandardCopyOption.REPLACE_EXISTING);
-            CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
-            synchronized (LOCK)
+            synchronized (IO_LOCK)
             {
+                if (!Files.exists(CACHE_FOLDER))
+                    Files.createDirectory(CACHE_FOLDER);
+                Files.copy(fetchedStream, imageFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+            synchronized (METADATA_LOCK)
+            {
+                CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
                 nextWriteTime = System.currentTimeMillis() + 5000;
             }
             return imageFile;

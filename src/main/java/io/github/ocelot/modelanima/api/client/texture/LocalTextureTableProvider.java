@@ -35,7 +35,7 @@ public class LocalTextureTableProvider implements TextureTableProvider
 
     public LocalTextureTableProvider()
     {
-        this("textures/models");
+        this("textures");
     }
 
     public LocalTextureTableProvider(@Nullable String folder)
