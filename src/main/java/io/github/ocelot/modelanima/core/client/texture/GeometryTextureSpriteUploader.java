@@ -122,7 +122,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     public GeometryTextureSpriteUploader setTextures(Map<ResourceLocation, GeometryModelTextureTable> textures, String[] hashTables)
     {
         this.textures.clear();
-        this.textures.addAll(textures.values().stream().flatMap(table -> table.getTextures().stream()).collect(Collectors.toSet()));
+        this.textures.addAll(textures.values().stream().flatMap(table -> table.getTextures().stream().flatMap(Arrays::stream)).collect(Collectors.toSet()));
         this.hashTables = hashTables;
         return this;
     }

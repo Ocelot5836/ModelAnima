@@ -2,7 +2,6 @@ package io.github.ocelot.modelanima.api.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import cpw.mods.modlauncher.api.INameMappingService;
-import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
@@ -10,8 +9,6 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
@@ -69,14 +66,17 @@ public class GeometryModelRenderer
     public static void render(GeometryModel model, @Nullable ResourceLocation textureLocation, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
         GeometryModelTextureTable textures = textureLocation == null ? GeometryModelTextureTable.EMPTY : GeometryTextureManager.get(textureLocation);
-        Arrays.stream(model.getMaterialKeys()).map(material -> textures == null ? GeometryModelTexture.MISSING.getLayer() : textures.getTexture(material).getLayer()).sorted().forEach(textureLayer ->
+        Arrays.stream(model.getMaterialKeys()).flatMap(material -> Arrays.stream(textures.getLayerTextures(material))).map(GeometryModelTexture::getLayer).sorted().forEach(layer ->
         {
             for (String material : model.getMaterialKeys())
             {
-                GeometryModelTexture texture = textures == null ? GeometryModelTexture.MISSING : textures.getTexture(material);
-                if (texture.getType() == GeometryModelTexture.Type.INVISIBLE || texture.getLayer() != textureLayer)
-                    continue;
-                model.render(material, texture, matrixStack, model.getBuffer(buffer, GeometryTextureManager.getAtlas(), texture), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
+                GeometryModelTexture[] layers = textures.getLayerTextures(material);
+                for (GeometryModelTexture texture : layers)
+                {
+                    if (texture.getType() == GeometryModelTexture.Type.INVISIBLE || texture.getLayer() != layer)
+                        continue;
+                    model.render(material, texture, matrixStack, model.getBuffer(buffer, GeometryTextureManager.getAtlas(), texture), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
+                }
             }
         });
     }

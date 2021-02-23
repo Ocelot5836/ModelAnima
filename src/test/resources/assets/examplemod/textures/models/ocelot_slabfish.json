@@ -1,0 +1,15 @@
+{
+  "texture": [
+    {
+      "type": "online",
+      "texture": "https://raw.githubusercontent.com/team-abnormals/environmental/master/src/main/resources/assets/environmental/textures/entity/slabfish/type/ocelot.png",
+      "layer": "solid",
+      "cache": false
+    }, {
+      "type": "online",
+      "texture": "https://raw.githubusercontent.com/team-abnormals/environmental/master/src/main/resources/assets/environmental/textures/entity/slabfish/backpack/ocelot.png",
+      "layer": "cutout",
+      "cache": false
+    }
+  ]
+}
