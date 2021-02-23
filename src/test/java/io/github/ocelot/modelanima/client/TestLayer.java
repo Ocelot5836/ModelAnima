@@ -35,7 +35,7 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
         matrixStack.push();
         matrixStack.scale(0.01f, 0.01f, 0.01f);
         GeometryModelRenderer.copyModelAngles(this.getEntityModel(), geometryModel);
-        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/link"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/ohno/link"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         matrixStack.pop();
 
         GL11.glShadeModel(GL11.GL_SMOOTH);
