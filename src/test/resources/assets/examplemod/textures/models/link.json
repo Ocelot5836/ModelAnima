@@ -1,7 +1,0 @@
-{
-  "poly_mesh.texture": {
-    "type": "location",
-    "texture": "examplemod:entity/link",
-    "layer": "cutout"
-  }
-}

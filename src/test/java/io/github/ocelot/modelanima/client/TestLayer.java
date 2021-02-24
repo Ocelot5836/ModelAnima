@@ -27,14 +27,8 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
         if (GeometryTextureManager.isReloading())
             return;
 
-        GeometryModel geometryModel = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "stall"));
-
-        matrixStack.push();
+        GeometryModel geometryModel = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "ohno/link"));
         GeometryModelRenderer.copyModelAngles(this.getEntityModel(), geometryModel);
         GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/poly_test"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
-        matrixStack.pop();
-
-//        GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/hoodie")), new ResourceLocation(TestMod.MOD_ID, "discord_hoodie"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
-//        GeometryModelRenderer.render(this.getEntityModel(), LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "battlefields/cap")), new ResourceLocation(TestMod.MOD_ID, "v_cap"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }

@@ -1,5 +1,6 @@
 package io.github.ocelot.modelanima.core.client.geometry;
 
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -35,41 +36,33 @@ public final class GeometryRenderTypes extends RenderType
         super(nameIn, formatIn, drawModeIn, bufferSizeIn, useDelegateIn, needsSortingIn, setupTaskIn, clearTaskIn);
     }
 
-    public static RenderType getGeometrySolid(ResourceLocation locationIn)
+    public static RenderType getGeometrySolid(GeometryModelTexture texture, ResourceLocation locationIn)
     {
-        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(locationIn, false, false)).transparency(NO_TRANSPARENCY).diffuseLighting(SMOOTH_LIGHTING).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true);
+        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(locationIn, false, false)).transparency(NO_TRANSPARENCY).diffuseLighting(texture.isSmoothShading() ? SMOOTH_LIGHTING : DIFFUSE_LIGHTING_ENABLED).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true);
         return makeType("geometry_solid", DefaultVertexFormats.ENTITY, 7, 256, true, false, rendertype$state);
     }
 
-    public static RenderType getGeometryCutout(ResourceLocation locationIn)
+    public static RenderType getGeometryCutout(GeometryModelTexture texture, ResourceLocation locationIn)
     {
-        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(locationIn, false, false)).transparency(NO_TRANSPARENCY).diffuseLighting(SMOOTH_LIGHTING).alpha(DEFAULT_ALPHA).cull(CULL_DISABLED).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true);
+        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(locationIn, false, false)).transparency(NO_TRANSPARENCY).diffuseLighting(texture.isSmoothShading() ? SMOOTH_LIGHTING : DIFFUSE_LIGHTING_ENABLED).alpha(DEFAULT_ALPHA).cull(CULL_DISABLED).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true);
         return makeType("geometry_cutout", DefaultVertexFormats.ENTITY, 7, 256, true, false, rendertype$state);
     }
 
-    public static RenderType getGeometryCutoutCull(ResourceLocation locationIn)
+    public static RenderType getGeometryCutoutCull(GeometryModelTexture texture, ResourceLocation locationIn)
     {
-        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(locationIn, false, false)).transparency(NO_TRANSPARENCY).diffuseLighting(SMOOTH_LIGHTING).alpha(DEFAULT_ALPHA).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true);
+        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(locationIn, false, false)).transparency(NO_TRANSPARENCY).diffuseLighting(texture.isSmoothShading() ? SMOOTH_LIGHTING : DIFFUSE_LIGHTING_ENABLED).alpha(DEFAULT_ALPHA).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true);
         return makeType("geometry_cutout_cull", DefaultVertexFormats.ENTITY, 7, 256, true, false, rendertype$state);
     }
 
-    public static RenderType getGeometryTranslucent(ResourceLocation locationIn)
+    public static RenderType getGeometryTranslucent(GeometryModelTexture texture, ResourceLocation locationIn)
     {
-        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(locationIn, false, false)).transparency(TRANSLUCENT_TRANSPARENCY).diffuseLighting(SMOOTH_LIGHTING).alpha(DEFAULT_ALPHA).cull(CULL_DISABLED).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true);
+        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(locationIn, false, false)).transparency(TRANSLUCENT_TRANSPARENCY).diffuseLighting(texture.isSmoothShading() ? SMOOTH_LIGHTING : DIFFUSE_LIGHTING_ENABLED).alpha(DEFAULT_ALPHA).cull(CULL_DISABLED).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true);
         return makeType("geometry_translucent", DefaultVertexFormats.ENTITY, 7, 256, true, true, rendertype$state);
     }
 
-    public static RenderType getGeometryTranslucentCull(ResourceLocation locationIn)
+    public static RenderType getGeometryTranslucentCull(GeometryModelTexture texture, ResourceLocation locationIn)
     {
-        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(locationIn, false, false)).transparency(TRANSLUCENT_TRANSPARENCY).diffuseLighting(SMOOTH_LIGHTING).alpha(DEFAULT_ALPHA).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true);
+        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(locationIn, false, false)).transparency(TRANSLUCENT_TRANSPARENCY).diffuseLighting(texture.isSmoothShading() ? SMOOTH_LIGHTING : DIFFUSE_LIGHTING_ENABLED).alpha(DEFAULT_ALPHA).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true);
         return makeType("geometry_translucent_cull", DefaultVertexFormats.ENTITY, 7, 256, true, true, rendertype$state);
-    }
-
-    private static class LightRenderState extends RenderState
-    {
-        private LightRenderState()
-        {
-            super("smooth_light", () -> glShadeModel(GL_SMOOTH), () -> glShadeModel(GL_FLAT));
-        }
     }
 }

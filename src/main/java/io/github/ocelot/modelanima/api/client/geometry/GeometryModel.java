@@ -188,6 +188,6 @@ public interface GeometryModel
      */
     default IVertexBuilder getBuffer(IRenderTypeBuffer buffer, GeometryAtlasTexture atlas, GeometryModelTexture texture)
     {
-        return atlas.getSprite(texture.getLocation()).wrapBuffer(buffer.getBuffer(texture.getLayer().getRenderType(atlas.getAtlasLocation())));
+        return atlas.getSprite(texture.getLocation()).wrapBuffer(buffer.getBuffer(texture.getLayer().getRenderType(texture, atlas.getAtlasLocation())));
     }
 }

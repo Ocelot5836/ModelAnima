@@ -15,6 +15,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -27,15 +28,16 @@ import java.util.regex.Pattern;
  */
 public class GeometryModelTexture
 {
-    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", false, -1, false);
-    public static final GeometryModelTexture INVISIBLE = new GeometryModelTexture(Type.INVISIBLE, TextureLayer.SOLID, "missingno", false, -1, false);
+    public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", false, -1, false, false);
+    public static final GeometryModelTexture INVISIBLE = new GeometryModelTexture(Type.INVISIBLE, TextureLayer.SOLID, "missingno", false, -1, false, false);
     public static final Codec<GeometryModelTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Type::byName, type -> type.name().toLowerCase(Locale.ROOT)).fieldOf("type").forGetter(GeometryModelTexture::getType),
             Codec.STRING.xmap(TextureLayer::byName, type -> type.name().toLowerCase(Locale.ROOT)).optionalFieldOf("layer", TextureLayer.SOLID).forGetter(GeometryModelTexture::getLayer),
             Codec.STRING.fieldOf("texture").forGetter(GeometryModelTexture::getData),
             Codec.BOOL.optionalFieldOf("cache", true).forGetter(GeometryModelTexture::canCache),
             Codec.STRING.optionalFieldOf("color", "0xFFFFFF").xmap(NumberUtils::createInteger, color -> "0x" + Integer.toHexString(color & 0xFFFFFF).toUpperCase(Locale.ROOT)).forGetter(GeometryModelTexture::getColor),
-            Codec.BOOL.optionalFieldOf("glowing", false).forGetter(GeometryModelTexture::isGlowing)
+            Codec.BOOL.optionalFieldOf("glowing", false).forGetter(GeometryModelTexture::isGlowing),
+            Codec.BOOL.optionalFieldOf("smoothShading", false).forGetter(GeometryModelTexture::isSmoothShading)
     ).apply(instance, GeometryModelTexture::new));
     private static final Pattern ONLINE_PATTERN = Pattern.compile("=");
 
@@ -45,9 +47,10 @@ public class GeometryModelTexture
     private final boolean cache;
     private final int color;
     private final boolean glowing;
+    private final boolean smoothShading;
     private final ResourceLocation location;
 
-    public GeometryModelTexture(Type type, TextureLayer layer, String data, boolean cache, int color, boolean glowing)
+    public GeometryModelTexture(Type type, TextureLayer layer, String data, boolean cache, int color, boolean glowing, boolean smoothShading)
     {
         this.type = type;
         this.layer = layer;
@@ -55,12 +58,13 @@ public class GeometryModelTexture
         this.cache = cache;
         this.color = color;
         this.glowing = glowing;
+        this.smoothShading = smoothShading;
         this.location = type.createLocation(data);
     }
 
     public GeometryModelTexture(PacketBuffer buf)
     {
-        this(buf.readEnumValue(Type.class), buf.readEnumValue(TextureLayer.class), buf.readString(), buf.readBoolean(), buf.readInt(), buf.readBoolean());
+        this(buf.readEnumValue(Type.class), buf.readEnumValue(TextureLayer.class), buf.readString(), buf.readBoolean(), buf.readInt(), buf.readBoolean(), buf.readBoolean());
     }
 
     /**
@@ -76,6 +80,7 @@ public class GeometryModelTexture
         buf.writeBoolean(this.cache);
         buf.writeInt(this.color);
         buf.writeBoolean(this.glowing);
+        buf.writeBoolean(this.smoothShading);
     }
 
     /**
@@ -148,6 +153,14 @@ public class GeometryModelTexture
     public boolean isGlowing()
     {
         return glowing;
+    }
+
+    /**
+     * @return Whether or not smooth shading should be used
+     */
+    public boolean isSmoothShading()
+    {
+        return smoothShading;
     }
 
     /**
@@ -245,9 +258,9 @@ public class GeometryModelTexture
         TRANSLUCENT(() -> GeometryRenderTypes::getGeometryTranslucent),
         TRANSLUCENT_CULL(() -> GeometryRenderTypes::getGeometryTranslucentCull);
 
-        private final Supplier<Function<ResourceLocation, RenderType>> renderTypeGetter;
+        private final Supplier<BiFunction<GeometryModelTexture, ResourceLocation, RenderType>> renderTypeGetter;
 
-        TextureLayer(Supplier<Function<ResourceLocation, RenderType>> renderTypeGetter)
+        TextureLayer(Supplier<BiFunction<GeometryModelTexture, ResourceLocation, RenderType>> renderTypeGetter)
         {
             this.renderTypeGetter = renderTypeGetter;
         }
@@ -255,13 +268,14 @@ public class GeometryModelTexture
         /**
          * Fetches the render type for the specified location.
          *
-         * @param location The texture to use in the render type
+         * @param texture       The texture to use in the render type
+         * @param atlasLocation The location of the texture atlas to use
          * @return The render type for this layer
          */
         @OnlyIn(Dist.CLIENT)
-        public RenderType getRenderType(ResourceLocation location)
+        public RenderType getRenderType(GeometryModelTexture texture, ResourceLocation atlasLocation)
         {
-            return this.renderTypeGetter.get().apply(location);
+            return this.renderTypeGetter.get().apply(texture, atlasLocation);
         }
 
         /**
