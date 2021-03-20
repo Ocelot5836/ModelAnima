@@ -14,6 +14,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
 version = "${project.minecraft}-${project.modVersion}"
 group = 'io.github.ocelot' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -118,3 +119,23 @@ artifacts {
 jar.finalizedBy('reobfJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 //publish.dependsOn('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+            artifact apiJar
+        }
+    }
+    repositories {
+        if(project.hasProperty("jacksonMavenUser") && project.hasProperty("jacksonMavenPass")) {
+            maven {
+                url "https://maven.jaackson.me"
+                credentials {
+                    username = project.properties.jacksonMavenUser
+                    password = project.properties.jacksonMavenPass
+                }
+            }
+        }
+    }
+}
