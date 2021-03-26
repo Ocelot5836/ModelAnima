@@ -217,18 +217,19 @@ public class BoneModelRenderer extends ModelRenderer
                     addVertex(builder, packedLight, packedOverlay, red, green, blue, alpha, matrix4f, vertex);
                 }
             }
-            for (Polygon polygon : this.polygons)
+            if ("poly_mesh.texture".equals(this.parent.getActiveMaterial()))
             {
-                if (!"poly_mesh.texture".equals(this.parent.getActiveMaterial()))
-                    continue;
-                for (int i = 0; i < 4; i++)
+                for (Polygon polygon : this.polygons)
                 {
-                    int index = MathHelper.clamp(i, 0, polygon.vertices.length - 1);
-                    Vertex vertex = polygon.vertices[index];
-                    Vector3f normal = polygon.normals[index];
-                    NORMAL_VECTOR.set(normal.getX(), normal.getY(), normal.getZ());
-                    NORMAL_VECTOR.transform(matrix3f);
-                    addVertex(builder, packedLight, packedOverlay, red, green, blue, alpha, matrix4f, vertex);
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int index = MathHelper.clamp(i, 0, polygon.vertices.length - 1);
+                        Vertex vertex = polygon.vertices[index];
+                        Vector3f normal = polygon.normals[index];
+                        NORMAL_VECTOR.set(normal.getX(), normal.getY(), normal.getZ());
+                        NORMAL_VECTOR.transform(matrix3f);
+                        addVertex(builder, packedLight, packedOverlay, red, green, blue, alpha, matrix4f, vertex);
+                    }
                 }
             }
 
