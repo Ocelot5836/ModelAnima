@@ -6,12 +6,15 @@ import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
+import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.ResourceLocation;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
@@ -27,8 +30,8 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
         if (GeometryTextureManager.isReloading())
             return;
 
-        GeometryModel geometryModel = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "ohno/link"));
+        GeometryModel geometryModel = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "llama_trader"));
         GeometryModelRenderer.copyModelAngles(this.getEntityModel(), geometryModel);
-        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/poly_test"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/llama_trader"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }

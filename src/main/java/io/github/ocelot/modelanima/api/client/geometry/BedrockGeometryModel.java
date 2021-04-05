@@ -9,14 +9,11 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * <p>A {@link Model} that uses data from {@link GeometryModelData}.</p>
@@ -27,7 +24,6 @@ import java.util.stream.Stream;
 public class BedrockGeometryModel extends Model implements GeometryModel
 {
     private final Map<String, BoneModelRenderer> modelParts;
-    private final Map<String, GeometryModelData.Locator> locators;
     private final String[] modelKeys;
     private final String[] textureKeys;
     private String activeMaterial;
@@ -43,7 +39,6 @@ public class BedrockGeometryModel extends Model implements GeometryModel
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
         this.modelParts = new HashMap<>();
-        this.locators = Stream.of(Arrays.stream(bones).map(GeometryModelData.Bone::getLocators).toArray(GeometryModelData.Locator[][]::new)).flatMap(Stream::of).collect(Collectors.toMap(GeometryModelData.Locator::getIdentifier, locator -> locator));
 
         Set<String> textures = new HashSet<>();
         for (GeometryModelData.Bone bone : bones)
@@ -148,21 +143,9 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     }
 
     @Override
-    public Optional<GeometryModelData.Locator> getLocator(String name)
-    {
-        return Optional.ofNullable(this.locators.get(name));
-    }
-
-    @Override
     public ModelRenderer[] getModelRenderers()
     {
         return this.modelParts.values().toArray(new BoneModelRenderer[0]);
-    }
-
-    @Override
-    public GeometryModelData.Locator[] getLocators()
-    {
-        return this.locators.values().toArray(new GeometryModelData.Locator[0]);
     }
 
     @Override

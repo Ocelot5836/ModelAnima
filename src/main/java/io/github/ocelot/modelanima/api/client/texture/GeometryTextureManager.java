@@ -1,5 +1,6 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.core.client.texture.GeometryTextureSpriteUploader;
 import io.github.ocelot.modelanima.core.client.texture.StaticTextureTableProvider;
@@ -27,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * <p>Manages textures for</p>
+ * <p>Manages textures for all geometry models. Used by {@link GeometryModelRenderer}.</p>
  *
  * @author Ocelot
  * @since 1.0.0

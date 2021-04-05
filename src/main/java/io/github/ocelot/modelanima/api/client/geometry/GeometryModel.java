@@ -6,8 +6,10 @@ import io.github.ocelot.modelanima.api.client.texture.GeometryAtlasTexture;
 import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.core.client.geometry.BoneModelRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.util.math.vector.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -53,21 +55,9 @@ public interface GeometryModel
         }
 
         @Override
-        public Optional<GeometryModelData.Locator> getLocator(String name)
-        {
-            return Optional.empty();
-        }
-
-        @Override
         public ModelRenderer[] getModelRenderers()
         {
             return new ModelRenderer[0];
-        }
-
-        @Override
-        public GeometryModelData.Locator[] getLocators()
-        {
-            return new GeometryModelData.Locator[0];
         }
 
         @Override
@@ -141,22 +131,25 @@ public interface GeometryModel
     ModelRenderer[] getChildRenderers(String part);
 
     /**
-     * Fetches a specific locator by name.
-     *
-     * @param name The name of the locator to fetch
-     * @return An optional of the locator by that name
-     */
-    Optional<GeometryModelData.Locator> getLocator(String name);
-
-    /**
      * @return An array of all model renderers
      */
     ModelRenderer[] getModelRenderers();
 
     /**
+     * Fetches all locators for the specified part.
+     *
+     * @param part The name of the part to get locators from
      * @return All locators in the model
      */
-    GeometryModelData.Locator[] getLocators();
+    default GeometryModelData.Locator[] getLocators(String part)
+    {
+        return this.getModelRenderer(part).map(modelRenderer ->
+        {
+            if (!(modelRenderer instanceof BoneModelRenderer))
+                return new GeometryModelData.Locator[0];
+            return ((BoneModelRenderer) modelRenderer).getBone().getLocators();
+        }).orElseGet(() -> new GeometryModelData.Locator[0]);
+    }
 
     /**
      * @return An array of all used part keys
