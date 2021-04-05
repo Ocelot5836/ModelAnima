@@ -255,7 +255,7 @@ public class BoneModelRenderer extends ModelRenderer
         modelRenderer.translateRotate(matrixStack);
         this.copyPosition.mul(matrixStack.getLast().getMatrix());
         this.copyNormal.mul(matrixStack.getLast().getNormal());
-        this.copyVanilla = modelRenderer.getClass() == ModelRenderer.class;
+        this.copyVanilla = !BoneModelRenderer.class.isAssignableFrom(modelRenderer.getClass());
     }
 
     @Override
