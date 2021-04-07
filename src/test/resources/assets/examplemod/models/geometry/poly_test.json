@@ -3,7 +3,7 @@
   "minecraft:geometry": [
     {
       "description": {
-        "identifier": "geometry.unknown",
+        "identifier": "poly_test",
         "texture_width": 64,
         "texture_height": 64
       },

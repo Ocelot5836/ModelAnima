@@ -27,8 +27,8 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
         if (GeometryTextureManager.isReloading())
             return;
 
-        GeometryModel geometryModel = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "ohno/link"));
+        GeometryModel geometryModel = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "slabfish"));
         GeometryModelRenderer.copyModelAngles(this.getEntityModel(), geometryModel);
-        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/poly_test"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/slabfish"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }

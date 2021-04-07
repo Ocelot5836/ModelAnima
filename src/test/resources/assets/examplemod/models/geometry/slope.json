@@ -3,7 +3,7 @@
   "minecraft:geometry": [
     {
       "description": {
-        "identifier": "geometry.unknown",
+        "identifier": "slope",
         "texture_width": 16,
         "texture_height": 16
       },
