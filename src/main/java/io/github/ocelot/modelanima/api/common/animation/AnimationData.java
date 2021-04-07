@@ -3,7 +3,6 @@ package io.github.ocelot.modelanima.api.common.animation;
 import com.google.gson.*;
 import io.github.ocelot.modelanima.api.common.util.JSONTupleParser;
 import net.minecraft.util.JSONUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -192,6 +191,7 @@ public class AnimationData
     public static class KeyFrame
     {
         private final float time;
+        private final LerpMode lerpMode;
         private final float transformPreX;
         private final float transformPreY;
         private final float transformPreZ;
@@ -199,9 +199,10 @@ public class AnimationData
         private final float transformPostY;
         private final float transformPostZ;
 
-        public KeyFrame(float time, float transformPreX, float transformPreY, float transformPreZ, float transformPostX, float transformPostY, float transformPostZ)
+        public KeyFrame(float time, LerpMode lerpMode, float transformPreX, float transformPreY, float transformPreZ, float transformPostX, float transformPostY, float transformPostZ)
         {
             this.time = time;
+            this.lerpMode = lerpMode;
             this.transformPreX = transformPreX;
             this.transformPreY = transformPreY;
             this.transformPreZ = transformPreZ;
@@ -216,6 +217,14 @@ public class AnimationData
         public float getTime()
         {
             return time;
+        }
+
+        /**
+         * @return The function to use when interpolating to and from this frame
+         */
+        public LerpMode getLerpMode()
+        {
+            return lerpMode;
         }
 
         /**
@@ -275,6 +284,17 @@ public class AnimationData
                     ", transformPost=" + transformPostX + "," + transformPostY + ", " + transformPostZ + ")" +
                     '}';
         }
+    }
+
+    /**
+     * <p>Animation interpolation functions.</p>
+     *
+     * @author Ocelot
+     * @since 1.0.0
+     */
+    public enum LerpMode
+    {
+        LINEAR, CATMULLROM
     }
 
     /**
@@ -382,27 +402,7 @@ public class AnimationData
      */
     public enum Loop
     {
-        NONE, LOOP, HOLD_ON_LAST_FRAME;
-
-        public static class Deserializer implements JsonDeserializer<Loop>
-        {
-            @Override
-            public Loop deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
-            {
-                if (!json.isJsonPrimitive())
-                    throw new JsonSyntaxException("Expected Boolean or String, was " + JSONUtils.toString(json));
-                if (json.getAsJsonPrimitive().isBoolean())
-                    return json.getAsBoolean() ? LOOP : NONE;
-                if (json.getAsJsonPrimitive().isString())
-                {
-                    for (Loop loop : values())
-                        if (loop.name().equalsIgnoreCase(json.getAsString()))
-                            return loop;
-                    throw new JsonSyntaxException("Unsupported loop: " + json.getAsString() + ". Supported loops: " + Arrays.toString(Arrays.stream(values()).map(loop -> loop.name().toLowerCase(Locale.ROOT)).toArray(String[]::new)));
-                }
-                throw new JsonSyntaxException("Expected Boolean or String, was " + JSONUtils.toString(json));
-            }
-        }
+        NONE, LOOP, HOLD_ON_LAST_FRAME
     }
 
     public static class Deserializer implements JsonDeserializer<AnimationData[]>
@@ -419,7 +419,7 @@ public class AnimationData
 
                 /* Parse global animation properties */
                 String animationName = animationEntry.getKey();
-                Loop loop = animationObject.has("loop") ? context.deserialize(animationObject.get("loop"), Loop.class) : Loop.NONE; // bool
+                Loop loop = animationObject.has("loop") ? parseLoop(animationObject.get("loop")) : Loop.NONE; // bool
                 float blendWeight = JSONUtils.getFloat(animationObject, "blend_weight", 1.0f); // expression TODO Molang
                 float animationLength = JSONUtils.getFloat(animationObject, "animation_length", -1); // float
                 boolean overridePreviousAnimation = JSONUtils.getBoolean(animationObject, "override_previous_animation", false); // bool
@@ -461,6 +461,22 @@ public class AnimationData
             return animations.toArray(new AnimationData[0]);
         }
 
+        private static Loop parseLoop(JsonElement json)
+        {
+            if (!json.isJsonPrimitive())
+                throw new JsonSyntaxException("Expected Boolean or String, was " + JSONUtils.toString(json));
+            if (json.getAsJsonPrimitive().isBoolean())
+                return json.getAsBoolean() ? Loop.LOOP : Loop.NONE;
+            if (json.getAsJsonPrimitive().isString())
+            {
+                for (Loop loop : Loop.values())
+                    if (loop.name().equalsIgnoreCase(json.getAsString()))
+                        return loop;
+                throw new JsonSyntaxException("Unsupported loop: " + json.getAsString());
+            }
+            throw new JsonSyntaxException("Expected Boolean or String, was " + JSONUtils.toString(json));
+        }
+
         private static void parseEffect(BiConsumer<Float, JsonObject> effectConsumer, JsonObject json, String name)
         {
             if (!json.has(name))
@@ -495,8 +511,8 @@ public class AnimationData
                         if (frames.stream().anyMatch(keyFrame -> keyFrame.getTime() == time))
                             throw new JsonSyntaxException("Duplicate channel time '" + time + "'");
 
-                        Pair<float[], float[]> transform = parseChannel(transformJson.getAsJsonObject(), entry.getKey(), defaultValue);
-                        frames.add(new KeyFrame(time, transform.getLeft()[0], transform.getLeft()[1], transform.getLeft()[2], transform.getRight()[0], transform.getRight()[1], transform.getRight()[2]));
+                        ChannelData data = parseChannel(transformJson.getAsJsonObject(), entry.getKey(), defaultValue);
+                        frames.add(new KeyFrame(time, data.lerpMode, data.pre[0], data.pre[1], data.pre[2], data.post[0], data.post[1], data.post[2]));
                     }
                     catch (NumberFormatException e)
                     {
@@ -507,11 +523,11 @@ public class AnimationData
             else
             {
                 float[] values = JSONTupleParser.getFloat(json, name, 3, defaultValue);
-                frames.add(new KeyFrame(0, values[0], values[1], values[2], values[0], values[1], values[2]));
+                frames.add(new KeyFrame(0, LerpMode.LINEAR, values[0], values[1], values[2], values[0], values[1], values[2]));
             }
         }
 
-        private static Pair<float[], float[]> parseChannel(JsonObject json, String name, Supplier<float[]> defaultValue) throws JsonSyntaxException
+        private static ChannelData parseChannel(JsonObject json, String name, Supplier<float[]> defaultValue) throws JsonSyntaxException
         {
             if (!json.has(name) && !json.get(name).isJsonObject() && !json.get(name).isJsonArray())
                 throw new JsonSyntaxException("Missing " + name + ", expected to find a JsonObject or JsonArray");
@@ -520,11 +536,48 @@ public class AnimationData
             if (transformationElement.isJsonObject())
             {
                 JsonObject transformationObject = transformationElement.getAsJsonObject();
-                return Pair.of(JSONTupleParser.getFloat(transformationObject, "pre", 3, null), JSONTupleParser.getFloat(transformationObject, "post", 3, null));
+
+                // Parse Lerp Mode
+                LerpMode lerpMode = LerpMode.LINEAR;
+                if (transformationObject.has("lerp_mode"))
+                {
+                    lerpMode = null;
+
+                    String mode = JSONUtils.getString(transformationObject, "lerp_mode");
+                    for (LerpMode m : LerpMode.values())
+                    {
+                        if (m.name().toLowerCase(Locale.ROOT).equals(mode))
+                        {
+                            lerpMode = m;
+                            break;
+                        }
+                    }
+
+                    if (lerpMode == null)
+                        throw new JsonSyntaxException("Unknown Lerp Mode: " + mode);
+                }
+
+                // Parse channels. Pre will default to post if not present
+                float[] post = JSONTupleParser.getFloat(transformationObject, "post", 3, null);
+                return new ChannelData(JSONTupleParser.getFloat(transformationObject, "pre", 3, () -> post), post, lerpMode);
             }
 
             float[] transformation = JSONTupleParser.getFloat(json, name, 3, defaultValue);
-            return Pair.of(transformation, transformation);
+            return new ChannelData(transformation, transformation, LerpMode.LINEAR);
+        }
+
+        private static class ChannelData
+        {
+            private final float[] pre;
+            private final float[] post;
+            private final LerpMode lerpMode;
+
+            private ChannelData(float[] pre, float[] post, LerpMode lerpMode)
+            {
+                this.pre = pre;
+                this.post = post;
+                this.lerpMode = lerpMode;
+            }
         }
     }
 }

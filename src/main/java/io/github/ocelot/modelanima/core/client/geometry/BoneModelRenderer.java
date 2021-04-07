@@ -30,6 +30,9 @@ public class BoneModelRenderer extends ModelRenderer
     private final ObjectList<Polygon> polygons;
     private final Matrix4f copyPosition;
     private final Matrix3f copyNormal;
+    private final Vector3f animPos;
+    private final Vector3f animRotation;
+    private final Vector3f animScale;
     private boolean copyVanilla;
 
     public BoneModelRenderer(BedrockGeometryModel parent, GeometryModelData.Bone bone)
@@ -42,6 +45,9 @@ public class BoneModelRenderer extends ModelRenderer
         this.polygons = new ObjectArrayList<>();
         this.copyPosition = new Matrix4f();
         this.copyNormal = new Matrix3f();
+        this.animPos = new Vector3f();
+        this.animRotation = new Vector3f();
+        this.animScale = new Vector3f();
         this.resetTransform(false);
         Arrays.stream(bone.getCubes()).forEach(this::addCube);
         GeometryModelData.PolyMesh polyMesh = bone.getPolyMesh();
@@ -173,6 +179,9 @@ public class BoneModelRenderer extends ModelRenderer
         this.rotationPointZ = pivot.getZ();
         this.copyPosition.setIdentity();
         this.copyNormal.setIdentity();
+        this.animPos.set(0, 0, 0);
+        this.animRotation.set(0, 0, 0);
+        this.animScale.set(1, 1, 1);
         if (resetChildren)
             this.children.forEach(boneModelRenderer -> boneModelRenderer.resetTransform(true));
         this.copyVanilla = false;
@@ -261,16 +270,38 @@ public class BoneModelRenderer extends ModelRenderer
     @Override
     public void translateRotate(MatrixStack matrixStack)
     {
-        matrixStack.translate(this.rotationPointX / 16.0F, this.rotationPointY / 16.0F, this.rotationPointZ / 16.0F);
-        if (this.rotateAngleZ != 0)
-            matrixStack.rotate(Vector3f.ZP.rotation(this.rotateAngleZ));
-        if (this.rotateAngleY != 0)
-            matrixStack.rotate(Vector3f.YP.rotation(this.rotateAngleY));
-        if (this.rotateAngleX != 0)
-            matrixStack.rotate(Vector3f.XP.rotation(this.rotateAngleX));
+        matrixStack.translate((this.animPos.getX() + this.rotationPointX) / 16.0F, (this.animPos.getY() + this.rotationPointY) / 16.0F, (this.animPos.getZ() + this.rotationPointZ) / 16.0F);
+        if (this.animScale.getX() != 1 || this.animScale.getY() != 1 || this.animScale.getZ() != 1)
+            matrixStack.scale(this.animScale.getX(), this.animScale.getY(), this.animScale.getZ());
+        if (this.rotateAngleZ + this.animRotation.getZ() != 0)
+            matrixStack.rotate(Vector3f.ZP.rotation(this.rotateAngleZ + this.animRotation.getZ()));
+        if (this.rotateAngleY + this.animRotation.getY() != 0)
+            matrixStack.rotate(Vector3f.YP.rotation(this.rotateAngleY + this.animRotation.getY()));
+        if (this.rotateAngleX + this.animRotation.getX() != 0)
+            matrixStack.rotate(Vector3f.XP.rotation(this.rotateAngleX + this.animRotation.getX()));
         matrixStack.translate(-this.rotationPointX / 16.0F, -this.rotationPointY / 16.0F, -this.rotationPointZ / 16.0F);
         matrixStack.getLast().getMatrix().mul(this.copyPosition);
         matrixStack.getLast().getNormal().mul(this.copyNormal);
+    }
+
+    /**
+     * Applies additional transformations that can be dynamically changed.
+     *
+     * @param x         The x offset
+     * @param y         The y offset
+     * @param z         The z offset
+     * @param rotationX The x rotation offset
+     * @param rotationY The y rotation offset
+     * @param rotationZ The z rotation offset
+     * @param scaleX    The x factor
+     * @param scaleY    The y factor
+     * @param scaleZ    The z factor
+     */
+    public void applyAnimationAngles(float x, float y, float z, float rotationX, float rotationY, float rotationZ, float scaleX, float scaleY, float scaleZ)
+    {
+        this.animPos.set(x, -y, z);
+        this.animRotation.set((float) (rotationX / 180F * Math.PI), (float) (rotationY / 180F * Math.PI), (float) (rotationZ / 180F * Math.PI));
+        this.animScale.set(scaleX, scaleY, scaleZ);
     }
 
     /**

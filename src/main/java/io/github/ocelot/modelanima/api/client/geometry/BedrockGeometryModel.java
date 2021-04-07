@@ -2,6 +2,7 @@ package io.github.ocelot.modelanima.api.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.core.client.geometry.BoneModelRenderer;
@@ -9,6 +10,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3f;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -21,8 +24,12 @@ import java.util.stream.Collectors;
  * @author Ocelot
  * @since 1.0.0
  */
-public class BedrockGeometryModel extends Model implements GeometryModel
+public class BedrockGeometryModel extends Model implements GeometryModel, AnimatedModel
 {
+    private static final Vector3f POSITION = new Vector3f();
+    private static final Vector3f ROTATION = new Vector3f();
+    private static final Vector3f SCALE = new Vector3f();
+
     private final Map<String, BoneModelRenderer> modelParts;
     private final String[] modelKeys;
     private final String[] textureKeys;
@@ -114,7 +121,13 @@ public class BedrockGeometryModel extends Model implements GeometryModel
     public void render(String material, GeometryModelTexture texture, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
         this.activeMaterial = material;
-        this.modelParts.values().forEach(renderer -> renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha));
+        this.modelParts.values().forEach(renderer ->
+        {
+            String parent = renderer.getBone().getParent();
+            if (parent != null && !parent.startsWith("parent."))
+                return;
+            renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
+        });
         this.activeMaterial = "texture";
     }
 
@@ -172,8 +185,61 @@ public class BedrockGeometryModel extends Model implements GeometryModel
         return textureHeight;
     }
 
+    @Override
+    public void applyAnimation(float animationTime, AnimationData animation)
+    {
+        animationTime %= animation.getAnimationLength();
+        for (AnimationData.BoneAnimation boneAnimation : animation.getBoneAnimations())
+        {
+            if (!this.modelParts.containsKey(boneAnimation.getName()))
+                continue;
+
+            POSITION.set(0, 0, 0);
+            ROTATION.set(0, 0, 0);
+            SCALE.set(1, 1, 1);
+            get(animationTime, boneAnimation.getPositionFrames(), POSITION);
+            get(animationTime, boneAnimation.getRotationFrames(), ROTATION);
+            get(animationTime, boneAnimation.getScaleFrames(), SCALE);
+
+            this.modelParts.get(boneAnimation.getName()).applyAnimationAngles(POSITION.getX(), POSITION.getY(), POSITION.getZ(), ROTATION.getX(), ROTATION.getY(), ROTATION.getZ(), SCALE.getX(), SCALE.getY(), SCALE.getZ());
+        }
+    }
+
+    @Override
+    public GeometryModelData.Locator[] getLocators(String part)
+    {
+        return this.getModelRenderer(part).map(modelRenderer ->
+        {
+            if (!(modelRenderer instanceof BoneModelRenderer))
+                return new GeometryModelData.Locator[0];
+            return ((BoneModelRenderer) modelRenderer).getBone().getLocators();
+        }).orElseGet(() -> new GeometryModelData.Locator[0]);
+    }
+
     public String getActiveMaterial()
     {
         return activeMaterial;
+    }
+
+    private static void get(float animationTime, AnimationData.KeyFrame[] frames, Vector3f vector)
+    {
+        for (int i = 0; i < frames.length; i++)
+        {
+            AnimationData.KeyFrame to = frames[i];
+            if (to.getTime() == 0 || animationTime > to.getTime())
+                continue;
+
+            AnimationData.KeyFrame from = i == 0 ? null : frames[i - 1];
+            float progress = (from == null ? animationTime / to.getTime() : (animationTime - from.getTime()) / (to.getTime() - from.getTime()));
+            float fromX = from == null ? vector.getX() : from.getTransformPostX();
+            float fromY = from == null ? vector.getY() : from.getTransformPostY();
+            float fromZ = from == null ? vector.getZ() : from.getTransformPostZ();
+
+            float x = MathHelper.lerp(progress, fromX, to.getTransformPreX());
+            float y = MathHelper.lerp(progress, fromY, to.getTransformPreY());
+            float z = MathHelper.lerp(progress, fromZ, to.getTransformPreZ());
+            vector.set(x, y, z);
+            break;
+        }
     }
 }

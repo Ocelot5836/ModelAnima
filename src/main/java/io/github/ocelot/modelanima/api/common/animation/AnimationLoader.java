@@ -15,7 +15,7 @@ public class AnimationLoader
 {
     private static final String VERSION = "1.8.0";
 
-    public static final Gson GSON = new GsonBuilder().registerTypeAdapter(AnimationData[].class, new AnimationData.Deserializer()).registerTypeAdapter(AnimationData.Loop.class, new AnimationData.Loop.Deserializer()).create();
+    public static final Gson GSON = new GsonBuilder().registerTypeAdapter(AnimationData[].class, new AnimationData.Deserializer()).create();
 
     /**
      * Creates a new animation from the specified JSON element.

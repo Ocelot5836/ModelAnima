@@ -136,22 +136,6 @@ public interface GeometryModel
     ModelRenderer[] getModelRenderers();
 
     /**
-     * Fetches all locators for the specified part.
-     *
-     * @param part The name of the part to get locators from
-     * @return All locators in the model
-     */
-    default GeometryModelData.Locator[] getLocators(String part)
-    {
-        return this.getModelRenderer(part).map(modelRenderer ->
-        {
-            if (!(modelRenderer instanceof BoneModelRenderer))
-                return new GeometryModelData.Locator[0];
-            return ((BoneModelRenderer) modelRenderer).getBone().getLocators();
-        }).orElseGet(() -> new GeometryModelData.Locator[0]);
-    }
-
-    /**
      * @return An array of all used part keys
      */
     String[] getParentModelKeys();
