@@ -3,7 +3,7 @@
 	"minecraft:geometry": [
 		{
 			"description": {
-				"identifier": "geometry.unknown",
+				"identifier": "stall",
 				"texture_width": 256,
 				"texture_height": 256
 			},

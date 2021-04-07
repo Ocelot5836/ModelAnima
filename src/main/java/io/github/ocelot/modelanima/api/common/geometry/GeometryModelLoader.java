@@ -30,7 +30,7 @@ public class GeometryModelLoader
      * @param reader The reader to get data from
      * @return A new geometry model from the reader
      */
-    public static GeometryModelData parseModel(Reader reader) throws JsonSyntaxException, JsonIOException
+    public static GeometryModelData[] parseModel(Reader reader) throws JsonSyntaxException, JsonIOException
     {
         return parseModel(new JsonParser().parse(reader));
     }
@@ -41,7 +41,7 @@ public class GeometryModelLoader
      * @param reader The reader to get data from
      * @return A new geometry model from the reader
      */
-    public static GeometryModelData parseModel(JsonReader reader) throws JsonSyntaxException, JsonIOException
+    public static GeometryModelData[] parseModel(JsonReader reader) throws JsonSyntaxException, JsonIOException
     {
         return parseModel(new JsonParser().parse(reader));
     }
@@ -52,7 +52,7 @@ public class GeometryModelLoader
      * @param json The raw json string
      * @return A new geometry model from the json
      */
-    public static GeometryModelData parseModel(String json) throws JsonSyntaxException
+    public static GeometryModelData[] parseModel(String json) throws JsonSyntaxException
     {
         return parseModel(new JsonParser().parse(json));
     }
@@ -63,11 +63,11 @@ public class GeometryModelLoader
      * @param json The parsed json element
      * @return A new geometry model from the json
      */
-    public static GeometryModelData parseModel(JsonElement json) throws JsonSyntaxException
+    public static GeometryModelData[] parseModel(JsonElement json) throws JsonSyntaxException
     {
         if (!json.getAsJsonObject().get("format_version").getAsString().equals(VERSION))
             throw new JsonSyntaxException("Unsupported model version. Only " + VERSION + " is supported."); // TODO support multiple versions
-        return GSON.fromJson(json.getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0), GeometryModelData.class);
+        return GSON.fromJson(json.getAsJsonObject().getAsJsonArray("minecraft:geometry"), GeometryModelData[].class);
     }
 
     /**

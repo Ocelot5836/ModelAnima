@@ -3,7 +3,7 @@
   "minecraft:geometry": [
     {
       "description": {
-        "identifier": "geometry.custom_model",
+        "identifier": "coldman",
         "texture_width": 37,
         "texture_height": 36,
         "visible_bounds_width": 3,

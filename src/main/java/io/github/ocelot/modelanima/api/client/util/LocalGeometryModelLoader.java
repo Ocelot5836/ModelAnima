@@ -33,7 +33,7 @@ import java.util.concurrent.Executor;
 public final class LocalGeometryModelLoader
 {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Map<ResourceLocation, GeometryModel> RENDERERS = new HashMap<>();
+    private static final Map<ResourceLocation, GeometryModel> MODELS = new HashMap<>();
 
     /**
      * <p>Enables loading of models from resources automatically.</p>
@@ -60,7 +60,7 @@ public final class LocalGeometryModelLoader
      */
     public static GeometryModel getModel(ResourceLocation name)
     {
-        return RENDERERS.getOrDefault(name, GeometryModel.EMPTY);
+        return MODELS.getOrDefault(name, GeometryModel.EMPTY);
     }
 
     private static class Reloader implements IFutureReloadListener
@@ -73,26 +73,31 @@ public final class LocalGeometryModelLoader
                 Map<ResourceLocation, GeometryModelData> modelLocations = new HashMap<>();
                 for (ResourceLocation modelLocation : resourceManager.getAllResourceLocations("models/geometry/", name -> name.endsWith(".json")))
                 {
-                    ResourceLocation modelName = new ResourceLocation(modelLocation.getNamespace(), modelLocation.getPath().substring("models/geometry/".length(), modelLocation.getPath().length() - ".json".length()));
                     try (IResource resource = resourceManager.getResource(modelLocation))
                     {
-                        modelLocations.put(modelName, GeometryModelLoader.parseModel(IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8)));
+                        GeometryModelData[] models = GeometryModelLoader.parseModel(IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8));
+                        for (GeometryModelData model : models)
+                        {
+                            ResourceLocation id = new ResourceLocation(modelLocation.getNamespace(), model.getDescription().getIdentifier());
+                            if (modelLocations.put(id, model) != null)
+                                LOGGER.warn("Duplicate geometry model with id '" + id + "'");
+                        }
                     }
                     catch (Exception e)
                     {
-                        LOGGER.error("Failed to load geometry model '" + modelName + "'", e);
+                        LOGGER.error("Failed to load geometry file '" + modelLocation.getNamespace() + ":" + modelLocation.getPath().substring(16, modelLocation.getPath().length() - 5) + "'", e);
                     }
                 }
                 LOGGER.info("Loaded " + modelLocations.size() + " geometry models.");
                 return modelLocations;
             }, backgroundExecutor).thenCompose(stage::markCompleteAwaitingOthers).thenAcceptAsync(modelLocations ->
             {
-                RENDERERS.clear();
+                MODELS.clear();
                 modelLocations.forEach((name, model) ->
                 {
                     try
                     {
-                        RENDERERS.put(name, new BedrockGeometryModel(model));
+                        MODELS.put(name, new BedrockGeometryModel(model));
                     }
                     catch (Exception e)
                     {
