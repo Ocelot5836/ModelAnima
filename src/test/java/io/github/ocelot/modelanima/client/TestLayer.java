@@ -23,16 +23,16 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        GeometryModel geometryModel = GeometryModelManager.getModel(new ResourceLocation(TestMod.MOD_ID, "llama_trader"));
+        GeometryModel geometryModel = GeometryModelManager.getModel(new ResourceLocation(TestMod.MOD_ID, "owl"));
         geometryModel.resetTransformation();
         GeometryModelRenderer.copyModelAngles(this.getEntityModel(), geometryModel);
 
         if (geometryModel instanceof AnimatedModel)
         {
-            AnimationData animation = AnimationManager.getAnimation(new ResourceLocation(TestMod.MOD_ID, "llama_trader_test"));
+            AnimationData animation = AnimationManager.getAnimation(new ResourceLocation(TestMod.MOD_ID, "owl_floss"));
             ((AnimatedModel) geometryModel).applyAnimation((player.ticksExisted + partialTicks) / 20F, animation);
         }
 
-        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "models/llama_trader"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "owl"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }

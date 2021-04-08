@@ -67,7 +67,7 @@ public class GeometryModelRenderer
     {
         if (GeometryTextureManager.isReloading())
             return;
-        GeometryModelTextureTable textures = textureLocation == null ? GeometryModelTextureTable.EMPTY : GeometryTextureManager.get(textureLocation);
+        GeometryModelTextureTable textures = textureLocation == null ? GeometryModelTextureTable.EMPTY : GeometryTextureManager.getTextures(textureLocation);
         Arrays.stream(model.getMaterialKeys()).flatMap(material -> Arrays.stream(textures.getLayerTextures(material))).map(GeometryModelTexture::getLayer).sorted().forEach(layer ->
         {
             for (String material : model.getMaterialKeys())

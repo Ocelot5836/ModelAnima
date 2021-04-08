@@ -34,7 +34,7 @@ public class LocalTextureTableLoader implements TextureTableLoader
 
     public LocalTextureTableLoader()
     {
-        this("textures");
+        this("textures/models");
     }
 
     public LocalTextureTableLoader(@Nullable String folder)

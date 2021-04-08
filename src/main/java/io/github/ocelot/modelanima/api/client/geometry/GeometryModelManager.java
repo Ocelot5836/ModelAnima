@@ -1,5 +1,6 @@
 package io.github.ocelot.modelanima.api.client.geometry;
 
+import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
@@ -79,12 +80,16 @@ public final class GeometryModelManager
     /**
      * Fetches an animation by the specified name.
      *
-     * @param name The name of the model
-     * @return The bedrock model found or {@link GeometryModel#EMPTY}
+     * @param location The name of the model
+     * @return The bedrock model found or {@link GeometryModel#EMPTY} if there was no model
      */
-    public static GeometryModel getModel(ResourceLocation name)
+    public static GeometryModel getModel(ResourceLocation location)
     {
-        return MODELS.getOrDefault(name, GeometryModel.EMPTY);
+        return MODELS.computeIfAbsent(location, key ->
+        {
+            LOGGER.warn("Unknown geometry model with key '{}'", location);
+            return GeometryModel.EMPTY;
+        });
     }
 
     /**

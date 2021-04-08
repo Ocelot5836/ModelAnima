@@ -85,7 +85,7 @@ public class GeometryTextureManager
      * @param location The location of the texture table
      * @return The texture table with the name or {@link GeometryModelTextureTable#EMPTY} if there was no texture
      */
-    public static GeometryModelTextureTable get(ResourceLocation location)
+    public static GeometryModelTextureTable getTextures(ResourceLocation location)
     {
         return TEXTURES.computeIfAbsent(location, key ->
         {

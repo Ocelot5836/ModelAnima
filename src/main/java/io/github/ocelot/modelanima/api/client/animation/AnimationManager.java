@@ -1,8 +1,7 @@
 package io.github.ocelot.modelanima.api.client.animation;
 
-import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
-import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
+import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
@@ -17,7 +16,10 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -77,12 +79,16 @@ public final class AnimationManager
     /**
      * Fetches an animation by the specified name.
      *
-     * @param name The name of the model
-     * @return The bedrock model found or {@link GeometryModel#EMPTY}
+     * @param location The name of the model
+     * @return The animation found or {@link AnimationData#EMPTY} if there was no animation
      */
-    public static AnimationData getAnimation(ResourceLocation name)
+    public static AnimationData getAnimation(ResourceLocation location)
     {
-        return ANIMATIONS.getOrDefault(name, AnimationData.EMPTY);
+        return ANIMATIONS.computeIfAbsent(location, key ->
+        {
+            LOGGER.warn("Unknown animation with key '{}'", location);
+            return AnimationData.EMPTY;
+        });
     }
 
     /**
