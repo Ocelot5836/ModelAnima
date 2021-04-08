@@ -4,20 +4,17 @@ import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.core.client.texture.GeometryTextureSpriteUploader;
 import io.github.ocelot.modelanima.core.client.texture.StaticTextureTableProvider;
+import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ResourceLoadProgressGui;
 import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.*;
+import net.minecraft.resources.IFutureReloadListener;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Unit;
-import net.minecraft.util.Util;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,23 +30,20 @@ import java.util.concurrent.Executor;
  * @author Ocelot
  * @since 1.0.0
  */
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class GeometryTextureManager
 {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Reloader RELOADER = new Reloader();
+    private static final DynamicReloader DYNAMIC_RELOADER = new DynamicReloader();
     private static final Set<TextureTableProvider> PROVIDERS = new HashSet<>();
     private static final Map<ResourceLocation, GeometryModelTextureTable> TEXTURES = new HashMap<>();
     private static GeometryTextureSpriteUploader spriteUploader;
 
-    private static boolean dirty;
-    private static IAsyncReloader asyncReloader;
+    static
+    {
+        DYNAMIC_RELOADER.addListener(RELOADER);
+    }
 
-    /**
-     * <p>Enables loading of geometry textures.</p>
-     *
-     * @param bus The mod event bus to register events on
-     */
     public static void init(IEventBus bus)
     {
         bus.addListener(EventPriority.NORMAL, true, ColorHandlerEvent.Block.class, event ->
@@ -61,16 +55,6 @@ public class GeometryTextureManager
                 ((IReloadableResourceManager) resourceManager).addReloadListener(RELOADER);
             }
         });
-        MinecraftForge.EVENT_BUS.addListener(GeometryTextureManager::tick);
-    }
-
-    private static void tick(TickEvent.ClientTickEvent event)
-    {
-        if (event.phase == TickEvent.Phase.END && dirty)
-        {
-            dirty = false;
-            reload(false);
-        }
     }
 
     /**
@@ -93,8 +77,6 @@ public class GeometryTextureManager
     public static void addProvider(TextureTableProvider provider)
     {
         PROVIDERS.add(provider);
-        if (spriteUploader != null)
-            dirty = true;
     }
 
     /**
@@ -110,6 +92,17 @@ public class GeometryTextureManager
             LOGGER.warn("Unknown texture table with key '{}'", location);
             return GeometryModelTextureTable.EMPTY;
         });
+    }
+
+    /**
+     * <p>Reloads all textures and opens the loading gui if specified.</p>
+     *
+     * @param showLoadingScreen Whether or not to show the loading screen during the reload
+     * @return A future for when the reload is complete
+     */
+    public static CompletableFuture<Unit> reload(boolean showLoadingScreen)
+    {
+        return DYNAMIC_RELOADER.reload(showLoadingScreen);
     }
 
     /**
@@ -129,35 +122,11 @@ public class GeometryTextureManager
     }
 
     /**
-     * <p>Reloads all textures and opens the loading gui if specified.</p>
-     *
-     * @param showLoadingScreen Whether or not to show the loading screen during the reload
-     * @return A future for when the reload is complete
-     */
-    public static CompletableFuture<Unit> reload(boolean showLoadingScreen)
-    {
-        if (asyncReloader != null)
-            return asyncReloader.onceDone();
-        asyncReloader = AsyncReloader.create(Minecraft.getInstance().getResourceManager(), Collections.singletonList(RELOADER), Util.getServerExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE));
-        if (showLoadingScreen)
-            Minecraft.getInstance().setLoadingGui(new ResourceLoadProgressGui(Minecraft.getInstance(), asyncReloader, error ->
-            {
-                asyncReloader = null;
-                error.ifPresent(LOGGER::error);
-            }, true));
-        return asyncReloader.onceDone().thenApplyAsync(unit ->
-        {
-            asyncReloader = null;
-            return unit;
-        });
-    }
-
-    /**
      * @return Whether or not a reload is currently happening
      */
     public static boolean isReloading()
     {
-        return asyncReloader != null;
+        return DYNAMIC_RELOADER.isReloading();
     }
 
     private static class Reloader implements IFutureReloadListener
@@ -171,9 +140,8 @@ public class GeometryTextureManager
                 Set<String> hashTables = new HashSet<>();
                 PROVIDERS.forEach(provider -> provider.addTextures((location, texture) ->
                 {
-                    if (textures.containsKey(location))
+                    if (textures.put(location, texture) != null)
                         LOGGER.warn("Texture at location '" + location + "' already exists and is being overridden.");
-                    textures.put(location, texture);
                 }));
                 PROVIDERS.forEach(provider -> provider.addHashTables(hashTables::add));
                 return Pair.of(textures, hashTables.toArray(new String[0]));
@@ -184,9 +152,8 @@ public class GeometryTextureManager
                         TEXTURES.clear();
                         PROVIDERS.forEach(provider -> provider.addTextures((location, texture) ->
                         {
-                            if (TEXTURES.containsKey(location))
+                            if (TEXTURES.put(location, texture) != null)
                                 LOGGER.warn("Texture at location '" + location + "' already exists and is being overridden.");
-                            TEXTURES.put(location, texture);
                         }));
                     }, gameExecutor);
         }

@@ -3,7 +3,7 @@ package io.github.ocelot.modelanima.api.client.util;
 import io.github.ocelot.modelanima.api.client.geometry.BedrockGeometryModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
-import io.github.ocelot.modelanima.api.common.geometry.GeometryModelLoader;
+import io.github.ocelot.modelanima.api.common.geometry.GeometryModelParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IFutureReloadListener;
@@ -30,6 +30,7 @@ import java.util.concurrent.Executor;
  * @author Ocelot
  * @since 1.0.0
  */
+@Deprecated
 public final class LocalGeometryModelLoader
 {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -75,7 +76,7 @@ public final class LocalGeometryModelLoader
                 {
                     try (IResource resource = resourceManager.getResource(modelLocation))
                     {
-                        GeometryModelData[] models = GeometryModelLoader.parseModel(IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8));
+                        GeometryModelData[] models = GeometryModelParser.parseModel(IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8));
                         for (GeometryModelData model : models)
                         {
                             ResourceLocation id = new ResourceLocation(modelLocation.getNamespace(), model.getDescription().getIdentifier());

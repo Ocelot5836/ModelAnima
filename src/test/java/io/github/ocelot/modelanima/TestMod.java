@@ -1,9 +1,11 @@
 package io.github.ocelot.modelanima;
 
 import com.mojang.brigadier.CommandDispatcher;
-import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
+import io.github.ocelot.modelanima.api.client.animation.AnimationManager;
+import io.github.ocelot.modelanima.api.client.animation.LocalAnimationLoader;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.client.texture.LocalTextureTableProvider;
+import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
 import io.github.ocelot.modelanima.client.ClientInit;
 import net.minecraft.block.Block;
 import net.minecraft.command.CommandSource;
@@ -37,9 +39,10 @@ public class TestMod
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
         {
+            ModelAnima.init(modBus);
             LocalGeometryModelLoader.init(modBus);
-            GeometryTextureManager.init(modBus);
             GeometryTextureManager.addProvider(new LocalTextureTableProvider());
+            AnimationManager.addLoader(new LocalAnimationLoader());
             modBus.addListener(ClientInit::initClient);
         });
         BLOCKS.register(modBus);

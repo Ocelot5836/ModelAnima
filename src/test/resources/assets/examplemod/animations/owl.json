@@ -1,7 +1,7 @@
 {
   "format_version": "1.8.0",
   "animations": {
-    "floss": {
+    "owl_floss": {
       "loop": true,
       "bones": {
         "body": {
@@ -46,7 +46,7 @@
         }
       }
     },
-    "dance": {
+    "owl_dance": {
       "loop": "hold_on_last_frame",
       "animation_length": 1.68,
       "bones": {
@@ -66,7 +66,7 @@
         }
       }
     },
-    "sad": {
+    "owl_sad": {
       "loop": true,
       "animation_length": 5.12,
       "override_previous_animation": true,

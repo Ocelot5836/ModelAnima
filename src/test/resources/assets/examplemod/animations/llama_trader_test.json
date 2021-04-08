@@ -1,7 +1,7 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"pump": {
+		"llama_trader_pump": {
 			"loop": true,
 			"animation_length": 0.4,
 			"anim_time_update": "test",
@@ -48,7 +48,7 @@
 				}
 			}
 		},
-		"test": {
+		"llama_trader_test": {
 			"loop": true,
 			"animation_length": 3,
 			"bones": {
@@ -60,7 +60,7 @@
 					},
 					"position": {
 						"0.0": [0, 0, 0],
-						"1.0": [0, 8, 0],
+						"1.0": [0, 8, 16],
 						"3.0": [0, 0, 0]
 					},
 					"scale": {

@@ -65,6 +65,8 @@ public class GeometryModelRenderer
      */
     public static void render(GeometryModel model, @Nullable ResourceLocation textureLocation, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
+        if (GeometryTextureManager.isReloading())
+            return;
         GeometryModelTextureTable textures = textureLocation == null ? GeometryModelTextureTable.EMPTY : GeometryTextureManager.get(textureLocation);
         Arrays.stream(model.getMaterialKeys()).flatMap(material -> Arrays.stream(textures.getLayerTextures(material))).map(GeometryModelTexture::getLayer).sorted().forEach(layer ->
         {

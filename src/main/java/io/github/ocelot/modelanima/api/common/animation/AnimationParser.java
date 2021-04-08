@@ -11,7 +11,7 @@ import java.io.Reader;
  * @author Ocelot
  * @since 1.0.0
  */
-public class AnimationLoader
+public class AnimationParser
 {
     private static final String VERSION = "1.8.0";
 

@@ -1,6 +1,6 @@
 package io.github.ocelot.modelanima;
 
-import io.github.ocelot.modelanima.api.common.animation.AnimationLoader;
+import io.github.ocelot.modelanima.api.common.animation.AnimationParser;
 
 import java.util.Arrays;
 
@@ -223,6 +223,6 @@ public class ApiTest
                 "  }\n" +
                 "}";
 
-        System.out.println(Arrays.toString(AnimationLoader.parse(animation)));
+        System.out.println(Arrays.toString(AnimationParser.parse(animation)));
     }
 }

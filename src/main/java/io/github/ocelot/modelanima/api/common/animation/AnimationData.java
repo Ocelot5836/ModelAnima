@@ -1,8 +1,10 @@
 package io.github.ocelot.modelanima.api.common.animation;
 
 import com.google.gson.*;
+import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.util.JSONTupleParser;
 import net.minecraft.util.JSONUtils;
+import net.minecraft.util.math.vector.Vector3f;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -17,6 +19,11 @@ import java.util.function.Supplier;
  */
 public class AnimationData
 {
+    /**
+     * A completely empty animation definition.
+     */
+    public static final AnimationData EMPTY = new AnimationData("empty", Loop.NONE, 0.0F, 0.0F, false, new BoneAnimation[0], new SoundEffect[0], new ParticleEffect[0]);
+
     private final String name;
     private final Loop loop;
     private final float blendWeight;

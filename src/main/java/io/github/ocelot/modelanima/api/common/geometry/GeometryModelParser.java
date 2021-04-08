@@ -12,7 +12,7 @@ import java.io.Reader;
  * @author Ocelot
  * @since 1.0.0
  */
-public class GeometryModelLoader
+public class GeometryModelParser
 {
     private static final String VERSION = "1.12.0";
     private static final Gson GSON = new GsonBuilder().

@@ -1,8 +1,7 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
 import com.google.gson.Gson;
-import io.github.ocelot.modelanima.api.client.texture.TextureTableProvider;
-import io.github.ocelot.modelanima.api.common.geometry.GeometryModelLoader;
+import io.github.ocelot.modelanima.api.common.geometry.GeometryModelParser;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResource;
@@ -41,7 +40,7 @@ public class LocalTextureTableProvider implements TextureTableProvider
     public LocalTextureTableProvider(@Nullable String folder)
     {
         this.textures = new HashMap<>();
-        this.folder = folder;
+        this.folder = folder == null || folder.isEmpty() ? "" : folder + "/";
         this.hashTables = new String[0];
     }
 
@@ -64,15 +63,15 @@ public class LocalTextureTableProvider implements TextureTableProvider
         return CompletableFuture.supplyAsync(() ->
         {
             Map<ResourceLocation, GeometryModelTextureTable> textureLocations = new HashMap<>();
-            for (ResourceLocation textureTableLocation : resourceManager.getAllResourceLocations(this.folder == null || this.folder.isEmpty() ? "" : this.folder + "/", name -> name.endsWith(".json")))
+            for (ResourceLocation textureTableLocation : resourceManager.getAllResourceLocations(this.folder, name -> name.endsWith(".json")))
             {
-                ResourceLocation textureTableName = new ResourceLocation(textureTableLocation.getNamespace(), textureTableLocation.getPath().substring((this.folder == null || this.folder.isEmpty() ? "" : this.folder + "/").length(), textureTableLocation.getPath().length() - ".json".length()));
+                ResourceLocation textureTableName = new ResourceLocation(textureTableLocation.getNamespace(), textureTableLocation.getPath().substring(this.folder.length(), textureTableLocation.getPath().length() - 5));
                 if (textureTableName.getPath().equals("hash_tables"))
                     continue;
 
                 try (IResource resource = resourceManager.getResource(textureTableLocation))
                 {
-                    textureLocations.put(textureTableName, GeometryModelLoader.parseTextures(new InputStreamReader(resource.getInputStream())));
+                    textureLocations.put(textureTableName, GeometryModelParser.parseTextures(new InputStreamReader(resource.getInputStream())));
                 }
                 catch (Exception e)
                 {
@@ -86,7 +85,7 @@ public class LocalTextureTableProvider implements TextureTableProvider
             Set<String> hashTables = new HashSet<>();
             for (String domain : resourceManager.getResourceNamespaces())
             {
-                ResourceLocation hashTableLocation = new ResourceLocation(domain, (this.folder == null || this.folder.isEmpty() ? "" : this.folder + "/") + "hash_tables.json");
+                ResourceLocation hashTableLocation = new ResourceLocation(domain, this.folder + "hash_tables.json");
                 if (!resourceManager.hasResource(hashTableLocation))
                     continue;
 
