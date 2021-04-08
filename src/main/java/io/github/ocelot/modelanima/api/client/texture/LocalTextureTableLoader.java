@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  * @author Ocelot
  * @since 1.0.0
  */
-public class LocalTextureTableProvider implements TextureTableProvider
+public class LocalTextureTableLoader implements TextureTableLoader
 {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
@@ -32,12 +32,12 @@ public class LocalTextureTableProvider implements TextureTableProvider
     private final String folder;
     private String[] hashTables;
 
-    public LocalTextureTableProvider()
+    public LocalTextureTableLoader()
     {
         this("textures");
     }
 
-    public LocalTextureTableProvider(@Nullable String folder)
+    public LocalTextureTableLoader(@Nullable String folder)
     {
         this.textures = new HashMap<>();
         this.folder = folder == null || folder.isEmpty() ? "" : folder + "/";

@@ -327,7 +327,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
             AtomicInteger idGenerator = new AtomicInteger();
             this.executor = createOnlineWorker(idGenerator::getAndIncrement);
             this.hashedCache = new HashedTextureCache(this.executor, hashTableUrls);
-            this.cache = new TimedTextureCache(this.executor, 30, TimeUnit.MINUTES);
+            this.cache = new TimedTextureCache(this.executor, 1, TimeUnit.DAYS);
             this.resources = new HashMap<>();
         }
 

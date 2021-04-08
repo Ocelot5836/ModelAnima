@@ -3,10 +3,7 @@ package io.github.ocelot.modelanima.client;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.TestMod;
 import io.github.ocelot.modelanima.api.client.animation.AnimationManager;
-import io.github.ocelot.modelanima.api.client.geometry.AnimatedModel;
-import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
-import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
-import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
+import io.github.ocelot.modelanima.api.client.geometry.*;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -26,7 +23,7 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        GeometryModel geometryModel = LocalGeometryModelLoader.getModel(new ResourceLocation(TestMod.MOD_ID, "llama_trader"));
+        GeometryModel geometryModel = GeometryModelManager.getModel(new ResourceLocation(TestMod.MOD_ID, "llama_trader"));
         geometryModel.resetTransformation();
         GeometryModelRenderer.copyModelAngles(this.getEntityModel(), geometryModel);
 

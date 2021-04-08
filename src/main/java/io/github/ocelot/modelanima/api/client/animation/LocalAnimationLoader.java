@@ -1,5 +1,6 @@
 package io.github.ocelot.modelanima.api.client.animation;
 
+import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.animation.AnimationParser;
 import net.minecraft.resources.IResource;
@@ -20,7 +21,7 @@ import java.util.concurrent.Executor;
  * @author Ocelot
  * @since 1.0.0
  */
-public class LocalAnimationLoader implements AnimationLoader
+public class LocalAnimationLoader implements BackgroundLoader<Map<ResourceLocation, AnimationData>>
 {
     private static final Logger LOGGER = LogManager.getLogger();
 

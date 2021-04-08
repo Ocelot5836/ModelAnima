@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * @author Ocelot
  * @since 1.0.0
  */
-public interface TextureTableProvider extends IFutureReloadListener
+public interface TextureTableLoader extends IFutureReloadListener
 {
     /**
      * Adds all textures to the provided consumer.

@@ -1,6 +1,5 @@
-package io.github.ocelot.modelanima.api.client.animation;
+package io.github.ocelot.modelanima.api.client.geometry;
 
-import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
@@ -17,24 +16,27 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * <p>Manages {@link AnimationData} loading using custom loaders, which can then be accessed through {@link #getAnimation(ResourceLocation)}.</p>
+ * <p>Manages {@link AnimationData} loading using custom loaders, which can then be accessed through {@link #getModel(ResourceLocation)}.</p>
  *
  * @author Ocelot
  * @see BackgroundLoader
  * @since 1.0.0
  */
-public final class AnimationManager
+public final class GeometryModelManager
 {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Reloader RELOADER = new Reloader();
     private static final DynamicReloader DYNAMIC_RELOADER = new DynamicReloader();
-    private static final Set<BackgroundLoader<Map<ResourceLocation, AnimationData>>> LOADERS = new HashSet<>();
-    private static final Map<ResourceLocation, AnimationData> ANIMATIONS = new HashMap<>();
+    private static final Set<BackgroundLoader<Map<ResourceLocation, GeometryModel>>> LOADERS = new HashSet<>();
+    private static final Map<ResourceLocation, GeometryModel> MODELS = new HashMap<>();
 
     static
     {
@@ -58,7 +60,7 @@ public final class AnimationManager
      *
      * @param loader The loader to add
      */
-    public static void addLoader(BackgroundLoader<Map<ResourceLocation, AnimationData>> loader)
+    public static void addLoader(BackgroundLoader<Map<ResourceLocation, GeometryModel>> loader)
     {
         LOADERS.add(loader);
     }
@@ -80,9 +82,9 @@ public final class AnimationManager
      * @param name The name of the model
      * @return The bedrock model found or {@link GeometryModel#EMPTY}
      */
-    public static AnimationData getAnimation(ResourceLocation name)
+    public static GeometryModel getModel(ResourceLocation name)
     {
-        return ANIMATIONS.getOrDefault(name, AnimationData.EMPTY);
+        return MODELS.getOrDefault(name, GeometryModel.EMPTY);
     }
 
     /**
@@ -98,17 +100,17 @@ public final class AnimationManager
         @Override
         public CompletableFuture<Void> reload(IStage stage, IResourceManager resourceManager, IProfiler preparationsProfiler, IProfiler reloadProfiler, Executor backgroundExecutor, Executor gameExecutor)
         {
-            Map<ResourceLocation, AnimationData> animationData = new HashMap<>();
-            return CompletableFuture.allOf(LOADERS.stream().map(animationLoader -> animationLoader.reload(resourceManager, backgroundExecutor, gameExecutor).thenAcceptAsync(pairs ->
+            Map<ResourceLocation, GeometryModel> geometryModels = new HashMap<>();
+            return CompletableFuture.allOf(LOADERS.stream().map(modelLoader -> modelLoader.reload(resourceManager, backgroundExecutor, gameExecutor).thenAcceptAsync(pairs ->
             {
-                for (Map.Entry<ResourceLocation, AnimationData> entry : pairs.entrySet())
-                    if (animationData.put(entry.getKey(), entry.getValue()) != null)
-                        LOGGER.warn("Duplicate animation: " + entry.getKey());
+                for (Map.Entry<ResourceLocation, GeometryModel> entry : pairs.entrySet())
+                    if (geometryModels.put(entry.getKey(), entry.getValue()) != null)
+                        LOGGER.warn("Duplicate geometry model: " + entry.getKey());
             }, gameExecutor)).toArray(CompletableFuture[]::new)).thenCompose(stage::markCompleteAwaitingOthers).thenRunAsync(() ->
             {
-                LOGGER.info("Loaded " + animationData.size() + " animations.");
-                ANIMATIONS.clear();
-                ANIMATIONS.putAll(animationData);
+                LOGGER.info("Loaded " + geometryModels.size() + " geometry models.");
+                MODELS.clear();
+                MODELS.putAll(geometryModels);
             }, gameExecutor);
         }
     }

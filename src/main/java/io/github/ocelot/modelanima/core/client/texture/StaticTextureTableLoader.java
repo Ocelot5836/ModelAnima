@@ -1,6 +1,6 @@
 package io.github.ocelot.modelanima.core.client.texture;
 
-import io.github.ocelot.modelanima.api.client.texture.TextureTableProvider;
+import io.github.ocelot.modelanima.api.client.texture.TextureTableLoader;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
@@ -15,13 +15,13 @@ import java.util.function.Consumer;
 /**
  * @author Ocelot
  */
-public class StaticTextureTableProvider implements TextureTableProvider
+public class StaticTextureTableLoader implements TextureTableLoader
 {
     private final ResourceLocation location;
     private final GeometryModelTextureTable texture;
     private final String hashTable;
 
-    public StaticTextureTableProvider(ResourceLocation location, GeometryModelTextureTable texture, @Nullable String hashTable)
+    public StaticTextureTableLoader(ResourceLocation location, GeometryModelTextureTable texture, @Nullable String hashTable)
     {
         this.location = location;
         this.texture = texture;

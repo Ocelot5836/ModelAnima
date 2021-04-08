@@ -3,13 +3,9 @@ package io.github.ocelot.modelanima.api.client.geometry;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import io.github.ocelot.modelanima.api.client.texture.GeometryAtlasTexture;
-import io.github.ocelot.modelanima.api.client.util.LocalGeometryModelLoader;
-import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
-import io.github.ocelot.modelanima.core.client.geometry.BoneModelRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.math.vector.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.Optional;

@@ -3,7 +3,7 @@ package io.github.ocelot.modelanima.api.client.texture;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.core.client.texture.GeometryTextureSpriteUploader;
-import io.github.ocelot.modelanima.core.client.texture.StaticTextureTableProvider;
+import io.github.ocelot.modelanima.core.client.texture.StaticTextureTableLoader;
 import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
@@ -35,7 +35,7 @@ public class GeometryTextureManager
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Reloader RELOADER = new Reloader();
     private static final DynamicReloader DYNAMIC_RELOADER = new DynamicReloader();
-    private static final Set<TextureTableProvider> PROVIDERS = new HashSet<>();
+    private static final Set<TextureTableLoader> PROVIDERS = new HashSet<>();
     private static final Map<ResourceLocation, GeometryModelTextureTable> TEXTURES = new HashMap<>();
     private static GeometryTextureSpriteUploader spriteUploader;
 
@@ -66,7 +66,7 @@ public class GeometryTextureManager
      */
     public static void addTexture(ResourceLocation location, GeometryModelTextureTable texture, @Nullable String hashTable)
     {
-        addProvider(new StaticTextureTableProvider(location, texture, hashTable));
+        addProvider(new StaticTextureTableLoader(location, texture, hashTable));
     }
 
     /**
@@ -74,7 +74,7 @@ public class GeometryTextureManager
      *
      * @param provider The provider for textures
      */
-    public static void addProvider(TextureTableProvider provider)
+    public static void addProvider(TextureTableLoader provider)
     {
         PROVIDERS.add(provider);
     }

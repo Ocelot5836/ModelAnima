@@ -1,6 +1,7 @@
 package io.github.ocelot.modelanima;
 
 import io.github.ocelot.modelanima.api.client.animation.AnimationManager;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModelManager;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import net.minecraftforge.eventbus.api.IEventBus;
 
@@ -24,6 +25,7 @@ public class ModelAnima
      */
     public static void init(IEventBus bus)
     {
+        GeometryModelManager.init(bus);
         GeometryTextureManager.init(bus);
         AnimationManager.init(bus);
     }
