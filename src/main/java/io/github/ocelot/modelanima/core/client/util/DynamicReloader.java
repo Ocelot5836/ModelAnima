@@ -44,9 +44,11 @@ public class DynamicReloader
                 asyncReloader = null;
                 error.ifPresent(LOGGER::error);
             }, true));
-        return asyncReloader.onceDone().thenApplyAsync(unit ->
+        return this.asyncReloader.onceDone().handle((unit, e) ->
         {
-            asyncReloader = null;
+            if (e != null)
+                LOGGER.error("Error reloading", e);
+            this.asyncReloader = null;
             return unit;
         });
     }
