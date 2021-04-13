@@ -188,7 +188,22 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     @Override
     public void applyAnimation(float animationTime, AnimationData animation)
     {
-        animationTime %= animation.getAnimationLength();
+        if (animationTime > animation.getAnimationLength())
+        {
+            switch (animation.getLoop())
+            {
+                case NONE:
+                    animationTime = 0;
+                    break;
+                case LOOP:
+                    animationTime %= animation.getAnimationLength();
+                    break;
+                case HOLD_ON_LAST_FRAME:
+                    animationTime = animation.getAnimationLength();
+                    break;
+            }
+        }
+
         for (AnimationData.BoneAnimation boneAnimation : animation.getBoneAnimations())
         {
             if (!this.modelParts.containsKey(boneAnimation.getName()))
@@ -226,11 +241,11 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         for (int i = 0; i < frames.length; i++)
         {
             AnimationData.KeyFrame to = frames[i];
-            if (to.getTime() == 0 || animationTime > to.getTime())
+            if (to.getTime() == 0 || (animationTime > to.getTime() && i < frames.length - 1))
                 continue;
 
             AnimationData.KeyFrame from = i == 0 ? null : frames[i - 1];
-            float progress = (from == null ? animationTime / to.getTime() : (animationTime - from.getTime()) / (to.getTime() - from.getTime()));
+            float progress = (from == null ? animationTime / to.getTime() : Math.min(1.0F, (animationTime - from.getTime()) / (to.getTime() - from.getTime())));
             float fromX = from == null ? vector.getX() : from.getTransformPostX();
             float fromY = from == null ? vector.getY() : from.getTransformPostY();
             float fromZ = from == null ? vector.getZ() : from.getTransformPostZ();

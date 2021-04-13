@@ -37,7 +37,7 @@ public class DynamicReloader
     {
         if (asyncReloader != null)
             return asyncReloader.onceDone();
-        asyncReloader = AsyncReloader.create(Minecraft.getInstance().getResourceManager(), new ArrayList<>(this.reloadListeners), Util.getServerExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE));
+        asyncReloader = AsyncReloader.create(Minecraft.getInstance().getResourceManager(), this.reloadListeners, Util.getServerExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE));
         if (showLoadingScreen)
             Minecraft.getInstance().setLoadingGui(new ResourceLoadProgressGui(Minecraft.getInstance(), asyncReloader, error ->
             {

@@ -1,0 +1,6 @@
+{
+  "texture": {
+    "type": "location",
+    "texture": "examplemod:entity/rat"
+  }
+}

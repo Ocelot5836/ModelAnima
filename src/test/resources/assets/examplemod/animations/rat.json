@@ -1,0 +1,29 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"test_rat": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.24,
+			"bones": {
+				"Lowbody": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.2": [-50, 0, 0]
+					}
+				},
+				"Upperbody": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.2": [-32.5, 0, 0]
+					}
+				},
+				"Head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.2": [77.5, 0, 0]
+					}
+				}
+			}
+		}
+	}
+}

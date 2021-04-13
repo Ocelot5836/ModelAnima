@@ -3,7 +3,10 @@ package io.github.ocelot.modelanima.client;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.TestMod;
 import io.github.ocelot.modelanima.api.client.animation.AnimationManager;
-import io.github.ocelot.modelanima.api.client.geometry.*;
+import io.github.ocelot.modelanima.api.client.geometry.AnimatedModel;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModelManager;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -15,6 +18,12 @@ import net.minecraft.util.ResourceLocation;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {
+    private static final ResourceLocation MODEL = new ResourceLocation(TestMod.MOD_ID, "rat");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(TestMod.MOD_ID, "rat");
+    private static final ResourceLocation ANIMATION = new ResourceLocation(TestMod.MOD_ID, "test_rat");
+
+    private float sneakStart;
+
     public TestLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer)
     {
         super(entityRenderer);
@@ -23,16 +32,27 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        GeometryModel geometryModel = GeometryModelManager.getModel(new ResourceLocation(TestMod.MOD_ID, "owl"));
+        GeometryModel geometryModel = GeometryModelManager.getModel(MODEL);
         geometryModel.resetTransformation();
         GeometryModelRenderer.copyModelAngles(this.getEntityModel(), geometryModel);
 
-        if (geometryModel instanceof AnimatedModel)
+        float ticks = player.ticksExisted + partialTicks;
+        if (player.isSneaking())
         {
-            AnimationData animation = AnimationManager.getAnimation(new ResourceLocation(TestMod.MOD_ID, "owl_floss"));
-            ((AnimatedModel) geometryModel).applyAnimation((player.ticksExisted + partialTicks) / 20F, animation);
+            if (this.sneakStart == -1)
+                this.sneakStart = ticks;
+
+            if (geometryModel instanceof AnimatedModel)
+            {
+                AnimationData animation = AnimationManager.getAnimation(ANIMATION);
+                ((AnimatedModel) geometryModel).applyAnimation((ticks - this.sneakStart) / 20F, animation);
+            }
+        }
+        else
+        {
+            this.sneakStart = -1;
         }
 
-        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "owl"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.render(geometryModel, TEXTURE, matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }
