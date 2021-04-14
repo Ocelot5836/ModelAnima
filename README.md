@@ -27,7 +27,8 @@ repositories {
 }
 
 dependencies {
-    implementation fg.deobf("com.github.Ocelot5836:ModelAnima:${project.modelAnima}")
+    compileOnly fg.deobf("com.github.Ocelot5836:ModelAnima:${project.modelAnima}:api")
+    runtimeOnly fg.deobf("com.github.Ocelot5836:ModelAnima:${project.modelAnima}")
     shade "com.github.Ocelot5836:ModelAnima:${project.modelAnima}"
 }
 ```
@@ -37,6 +38,7 @@ These remaining settings are added to allow the jar to build properly.
 ```gradle
 shadowJar {
     configurations = [project.configurations.shade]
+    relocate 'io.github.ocelot', 'your.project.lib.ocelot'
 }
 
 reobf {
@@ -55,15 +57,4 @@ Finally, choose the version of Model Anima you wish to use and add the following
 
 ```properties
 modelAnima=ModelAnimaVersion
-```
-
-## Optional
-
-If you want, you can add this so Model Anima will be compiled into a different package to allow better compatibility.
-
-```gradle
-shadowJar {
-    configurations = [project.configurations.shade]
-    relocate 'io.github.ocelot', 'your.project.lib.ocelot'
-}
 ```
