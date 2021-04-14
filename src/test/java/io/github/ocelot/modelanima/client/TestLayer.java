@@ -18,9 +18,9 @@ import net.minecraft.util.ResourceLocation;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {
-    private static final ResourceLocation MODEL = new ResourceLocation(TestMod.MOD_ID, "rat");
-    private static final ResourceLocation TEXTURE = new ResourceLocation(TestMod.MOD_ID, "rat");
-    private static final ResourceLocation ANIMATION = new ResourceLocation(TestMod.MOD_ID, "test_rat");
+    private static final ResourceLocation MODEL = new ResourceLocation(TestMod.MOD_ID, "llama_trader");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(TestMod.MOD_ID, "llama_trader");
+    private static final ResourceLocation ANIMATION = new ResourceLocation(TestMod.MOD_ID, "llama_trader_pump");
 
     private float sneakStart;
 
