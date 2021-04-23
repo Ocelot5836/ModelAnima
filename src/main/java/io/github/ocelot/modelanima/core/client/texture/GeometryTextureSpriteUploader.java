@@ -63,6 +63,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         textureManager.loadTexture(this.textureAtlas.getTextureLocation(), this.textureAtlas);
     }
 
+    @SuppressWarnings("unused")
     private void beginStitch(long startTime, Stopwatch stopwatch)
     {
         stopwatch.start();
@@ -351,7 +352,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
                     ForkJoinWorkerThread forkjoinworkerthread = new ForkJoinWorkerThread(pool)
                     {
                         @Override
-                        protected void onTermination(Throwable t)
+                        protected void onTermination(@Nullable Throwable t)
                         {
                             if (t != null)
                             {

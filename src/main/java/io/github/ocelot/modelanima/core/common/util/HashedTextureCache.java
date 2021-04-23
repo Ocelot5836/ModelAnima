@@ -4,17 +4,18 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.ocelot.modelanima.api.client.util.GeometryCache;
 import io.github.ocelot.modelanima.api.common.util.FileCache;
-import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 /**
  * @author Ocelot
@@ -30,27 +31,31 @@ public class HashedTextureCache implements FileCache
     public HashedTextureCache(Executor executor, String[] hashTableUrls)
     {
         this.executor = executor;
-        this.hashes = CompletableFuture.supplyAsync(() ->
-        {
-            Set<CompletableFuture<Map<String, String>>> hashesFuture = Arrays.stream(hashTableUrls).map(it -> CompletableFuture.supplyAsync(() ->
-            {
-                try (InputStreamReader reader = new InputStreamReader(FileCache.get(it)))
-                {
-                    return GSON.fromJson(reader, TypeToken.getParameterized(Map.class, String.class, String.class).getType());
-                }
-                catch (Exception e)
-                {
-                    LOGGER.error("Failed to load hash table from '" + it + "'");
-                    return Collections.<String, String>emptyMap();
-                }
-            }, executor)).collect(Collectors.toSet());
 
-            Map<String, String> hashes = new HashMap<>();
-            for (CompletableFuture<Map<String, String>> future : hashesFuture)
-                hashes.putAll(future.join());
-            LOGGER.debug("Downloaded " + hashes.size() + " hashes from " + hashTableUrls.length + " hash table(s)");
-            return hashes;
-        }, Util.getServerExecutor());
+        Map<String, String> hashes = new ConcurrentHashMap<>();
+        this.hashes = CompletableFuture.allOf(Arrays.stream(hashTableUrls).map(it -> CompletableFuture.runAsync(() ->
+        {
+            try (InputStreamReader reader = new InputStreamReader(FileCache.get(it)))
+            {
+                hashes.putAll(GSON.fromJson(reader, TypeToken.getParameterized(Map.class, String.class, String.class).getType()));
+            }
+            catch (Exception e)
+            {
+                LOGGER.error("Failed to load hash table from '" + it + "'");
+            }
+        }, executor)).toArray(CompletableFuture[]::new)).handleAsync((__, t) ->
+        {
+            if (t != null)
+            {
+                LOGGER.error("Error downloading hashes from: " + String.join(", ", hashTableUrls), t);
+                return Collections.emptyMap();
+            }
+            else
+            {
+                LOGGER.debug("Downloaded " + hashes.size() + " hashes from " + hashTableUrls.length + " hash table(s)");
+                return hashes;
+            }
+        }, executor);
     }
 
     @Override
