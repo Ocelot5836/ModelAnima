@@ -4,7 +4,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 
 /**
- * <p>Fetches a geometry texture by the specified name</p>
+ * <p>Fetches a geometry texture by the specified name.</p>
  *
  * @author Ocelot
  * @since 1.0.0

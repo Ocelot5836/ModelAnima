@@ -45,6 +45,7 @@ public class GeometryCache
     private static final Object IO_LOCK = new Object();
 
     private static final Path CACHE_METADATA_LOCATION = CACHE_FOLDER.resolve("cache.json");
+    private static final int METADATA_WRITE_TIME = 5000;
     private static volatile JsonObject CACHE_METADATA = new JsonObject();
     private static volatile long nextWriteTime = Long.MAX_VALUE;
 
@@ -103,7 +104,7 @@ public class GeometryCache
                 synchronized (METADATA_LOCK)
                 {
                     CACHE_METADATA.addProperty(key, fileCache);
-                    nextWriteTime = System.currentTimeMillis() + 5000;
+                    nextWriteTime = System.currentTimeMillis() + METADATA_WRITE_TIME;
                 }
                 if (hash.equalsIgnoreCase(fileCache))
                     return true;
@@ -224,6 +225,7 @@ public class GeometryCache
                 synchronized (METADATA_LOCK)
                 {
                     CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
+                    nextWriteTime = System.currentTimeMillis() + METADATA_WRITE_TIME;
                 }
             }
             catch (Exception e)
@@ -244,7 +246,7 @@ public class GeometryCache
             synchronized (METADATA_LOCK)
             {
                 CACHE_METADATA.addProperty(key, System.currentTimeMillis() + unit.toMillis(timeout));
-                nextWriteTime = System.currentTimeMillis() + 5000;
+                nextWriteTime = System.currentTimeMillis() + METADATA_WRITE_TIME;
             }
             return imageFile;
         }
