@@ -6,10 +6,8 @@ import com.google.gson.JsonParser;
 import io.github.ocelot.modelanima.ModelAnima;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
-import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -35,7 +33,6 @@ import java.util.function.Function;
  * @author Ocelot
  * @since 1.0.0
  */
-@Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class GeometryCache
 {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -63,6 +60,7 @@ public class GeometryCache
                 LOGGER.error("Failed to load cache metadata", e);
             }
         }
+        MinecraftForge.EVENT_BUS.addListener(GeometryCache::clientTick);
     }
 
     private static synchronized void writeMetadata()
@@ -262,8 +260,7 @@ public class GeometryCache
         return null;
     }
 
-    @SubscribeEvent
-    public static void onEvent(TickEvent.ClientTickEvent event)
+    private static void clientTick(TickEvent.ClientTickEvent event)
     {
         if (event.phase != TickEvent.Phase.END || nextWriteTime == Long.MAX_VALUE)
             return;
