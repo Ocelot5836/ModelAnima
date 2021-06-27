@@ -40,7 +40,7 @@ public class GeometryModelRenderer
             model.resetTransformation();
             return;
         }
-        Map<String, ModelRenderer> parentParts = MODEL_PARTS.computeIfAbsent(parent, key -> mapRenderers(parent));
+        Map<String, ModelRenderer> parentParts = MODEL_PARTS.computeIfAbsent(parent, GeometryModelRenderer::mapRenderers);
         for (String modelKey : model.getParentModelKeys())
         {
             String deobfName = ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, modelKey);
@@ -108,19 +108,27 @@ public class GeometryModelRenderer
     private static Map<String, ModelRenderer> mapRenderers(Model model)
     {
         Map<String, ModelRenderer> renderers = new HashMap<>();
-        Field[] fields = model.getClass().getFields();
-        for (Field field : fields)
+        Class<?> i = model.getClass();
+        while (i != null && i != Object.class)
         {
-            if (ModelRenderer.class.isAssignableFrom(field.getType()))
+            for (Field field : i.getDeclaredFields())
             {
-                try
+                if (!field.isSynthetic())
                 {
-                    renderers.put(field.getName(), (ModelRenderer) field.get(model));
-                }
-                catch (Exception ignored)
-                {
+                    if (ModelRenderer.class.isAssignableFrom(field.getType()))
+                    {
+                        try
+                        {
+                            field.setAccessible(true);
+                            renderers.put(field.getName(), (ModelRenderer) field.get(model));
+                        }
+                        catch (Exception ignored)
+                        {
+                        }
+                    }
                 }
             }
+            i = i.getSuperclass();
         }
         return renderers;
     }
