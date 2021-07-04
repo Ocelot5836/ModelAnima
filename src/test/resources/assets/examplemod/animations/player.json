@@ -1,9 +1,6 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"test": {
-			"loop": true
-		},
 		"player_test": {
 			"animation_length": 1.04,
 			"bones": {
