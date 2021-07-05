@@ -15,8 +15,8 @@ public class Foobar
     public static final Codec<Foobar> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     Codec.BOOL.fieldOf("foo").forGetter(Foobar::isFoo),
-                    Codec.INT_STREAM.xmap(IntStream::toArray, Arrays::stream).fieldOf("bar").withDefault(() -> new int[0]).forGetter(Foobar::getBar),
-                    BlockState.BLOCKSTATE_CODEC.optionalFieldOf("blockstate_example").forGetter(Foobar::getBlockState)
+                    Codec.INT_STREAM.xmap(IntStream::toArray, Arrays::stream).optionalFieldOf("bar", new int[0]).forGetter(Foobar::getBar),
+                    BlockState.CODEC.optionalFieldOf("blockstate_example").forGetter(Foobar::getBlockState)
             ).apply(instance, (aBoolean, integers, blockState) -> new Foobar(aBoolean, integers, blockState.orElse(null)))
     );
 

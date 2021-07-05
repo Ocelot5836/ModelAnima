@@ -215,21 +215,15 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         }
 
         @Override
-        public Collection<ResourceLocation> func_230231_a_(ResourceLocation resourceLocation, Predicate<String> filter)
-        {
-            return this.parent.func_230231_a_(resourceLocation, filter);
-        }
-
-        @Override
         public Collection<ResourceLocation> getAllResourceLocations(String path, Predicate<String> filter)
         {
             return this.parent.getAllResourceLocations(path, filter);
         }
 
         @Override
-        public Stream<IResourcePack> func_230232_b_()
+        public Stream<IResourcePack> getResourcePackStream()
         {
-            return this.parent.func_230232_b_();
+            return this.parent.getResourcePackStream();
         }
 
         @Nullable
