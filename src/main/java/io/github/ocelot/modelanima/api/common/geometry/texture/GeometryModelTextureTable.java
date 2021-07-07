@@ -44,7 +44,7 @@ public class GeometryModelTextureTable
         int count = buf.readVarInt();
         for (int i = 0; i < count; i++)
         {
-            String key = buf.readString();
+            String key = buf.readUtf();
             int layers = buf.readVarInt();
             for (int j = 0; j < layers; j++)
                 textureSet.add(new GeometryModelTexture(buf));
@@ -90,7 +90,7 @@ public class GeometryModelTextureTable
         buf.writeVarInt(this.textures.size());
         this.textures.forEach((key, layers) ->
         {
-            buf.writeString(key);
+            buf.writeUtf(key);
             buf.writeVarInt(layers.length);
             for (GeometryModelTexture texture : layers)
                 texture.write(buf);

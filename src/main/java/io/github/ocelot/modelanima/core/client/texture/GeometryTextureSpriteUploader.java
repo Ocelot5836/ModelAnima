@@ -60,7 +60,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         this.textureAtlas = new AtlasTexture(ATLAS_LOCATION);
         this.textures = new HashSet<>();
         this.hashTables = new String[0];
-        textureManager.loadTexture(this.textureAtlas.getTextureLocation(), this.textureAtlas);
+        textureManager.register(this.textureAtlas.location(), this.textureAtlas);
     }
 
     @SuppressWarnings("unused")
@@ -93,12 +93,12 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         try (OnlineRepository onlineRepository = new OnlineRepository(this.hashTables))
         {
             profiler.startTick();
-            profiler.startSection("stitching");
+            profiler.push("stitching");
             Stopwatch stopwatch = Stopwatch.createUnstarted();
             this.beginStitch(System.currentTimeMillis(), stopwatch);
-            AtlasTexture.SheetData sheetData = this.textureAtlas.stitch(new OnlineResourceManager(resourceManager, onlineRepository, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.LOCATION || texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().gameSettings.mipmapLevels);
+            AtlasTexture.SheetData sheetData = this.textureAtlas.prepareToStitch(new OnlineResourceManager(resourceManager, onlineRepository, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.LOCATION || texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().options.mipmapLevels);
             this.endStitch(stopwatch);
-            profiler.endSection();
+            profiler.pop();
             profiler.endTick();
             return sheetData;
         }
@@ -108,16 +108,16 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     protected void apply(AtlasTexture.SheetData sheetData, IResourceManager resourceManager, IProfiler profiler)
     {
         profiler.startTick();
-        profiler.startSection("upload");
-        this.textureAtlas.upload(sheetData);
-        profiler.endSection();
+        profiler.push("upload");
+        this.textureAtlas.reload(sheetData);
+        profiler.pop();
         profiler.endTick();
     }
 
     @Override
     public void close()
     {
-        this.textureAtlas.clear();
+        this.textureAtlas.clearTextureData();
     }
 
     public GeometryTextureSpriteUploader setTextures(Map<ResourceLocation, GeometryModelTextureTable> textures, String[] hashTables)
@@ -166,21 +166,21 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
                 try (BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8)))
                 {
-                    return JSONUtils.fromJson(bufferedreader);
+                    return JSONUtils.parse(bufferedreader);
                 }
                 catch (Exception ignored)
                 {
                 }
 
                 return null;
-            }, Util.getRenderingService());
+            }, Util.ioPool());
             return Pair.of(texturePath, metadataPath);
         }
 
         @Override
-        public Set<String> getResourceNamespaces()
+        public Set<String> getNamespaces()
         {
-            return this.parent.getResourceNamespaces();
+            return this.parent.getNamespaces();
         }
 
         @Override
@@ -209,21 +209,21 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         }
 
         @Override
-        public List<IResource> getAllResources(ResourceLocation resourceLocation) throws IOException
+        public List<IResource> getResources(ResourceLocation resourceLocation) throws IOException
         {
-            return this.parent.getAllResources(resourceLocation);
+            return this.parent.getResources(resourceLocation);
         }
 
         @Override
-        public Collection<ResourceLocation> getAllResourceLocations(String path, Predicate<String> filter)
+        public Collection<ResourceLocation> listResources(String path, Predicate<String> filter)
         {
-            return this.parent.getAllResourceLocations(path, filter);
+            return this.parent.listResources(path, filter);
         }
 
         @Override
-        public Stream<IResourcePack> getResourcePackStream()
+        public Stream<IResourcePack> listPacks()
         {
-            return this.parent.getResourcePackStream();
+            return this.parent.listPacks();
         }
 
         @Nullable
@@ -283,12 +283,12 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
             {
                 if (this.metadataJson == null)
                     return null;
-                String s = serializer.getSectionName();
-                return this.metadataJson.has(s) ? serializer.deserialize(JSONUtils.getJsonObject(this.metadataJson, s)) : null;
+                String s = serializer.getMetadataSectionName();
+                return this.metadataJson.has(s) ? serializer.fromJson(JSONUtils.getAsJsonObject(this.metadataJson, s)) : null;
             }
 
             @Override
-            public String getPackName()
+            public String getSourceName()
             {
                 return ModelAnima.DOMAIN + "_online";
             }
@@ -369,7 +369,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
                     if (throwable instanceof ReportedException)
                     {
-                        Bootstrap.printToSYSOUT(((ReportedException) throwable).getCrashReport().getCompleteReport());
+                        Bootstrap.realStdoutPrintln(((ReportedException) throwable).getReport().getFriendlyReport());
                         System.exit(-1);
                     }
 

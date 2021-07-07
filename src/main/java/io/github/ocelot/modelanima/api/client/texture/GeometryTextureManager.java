@@ -52,7 +52,7 @@ public class GeometryTextureManager
             IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
             if (resourceManager instanceof IReloadableResourceManager)
             {
-                ((IReloadableResourceManager) resourceManager).addReloadListener(RELOADER);
+                ((IReloadableResourceManager) resourceManager).registerReloadListener(RELOADER);
             }
         });
     }
@@ -147,7 +147,7 @@ public class GeometryTextureManager
                 return Pair.of(textures, hashTables.toArray(new String[0]));
             }, backgroundExecutor)
                     .thenCompose(pair -> spriteUploader.setTextures(pair.getLeft(), pair.getRight()).reload(stage, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor))
-                    .thenCompose(stage::markCompleteAwaitingOthers).thenAcceptAsync(textures ->
+                    .thenCompose(stage::wait).thenAcceptAsync(textures ->
                     {
                         TEXTURES.clear();
                         PROVIDERS.forEach(provider -> provider.addTextures((location, texture) ->

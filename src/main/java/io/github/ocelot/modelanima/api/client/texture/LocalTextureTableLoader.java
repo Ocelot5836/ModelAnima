@@ -63,7 +63,7 @@ public class LocalTextureTableLoader implements TextureTableLoader
         return CompletableFuture.supplyAsync(() ->
         {
             Map<ResourceLocation, GeometryModelTextureTable> textureLocations = new HashMap<>();
-            for (ResourceLocation textureTableLocation : resourceManager.getAllResourceLocations(this.folder, name -> name.endsWith(".json")))
+            for (ResourceLocation textureTableLocation : resourceManager.listResources(this.folder, name -> name.endsWith(".json")))
             {
                 ResourceLocation textureTableName = new ResourceLocation(textureTableLocation.getNamespace(), textureTableLocation.getPath().substring(this.folder.length(), textureTableLocation.getPath().length() - 5));
                 if (textureTableName.getPath().equals("hash_tables"))
@@ -83,7 +83,7 @@ public class LocalTextureTableLoader implements TextureTableLoader
         }, backgroundExecutor).thenAcceptBothAsync(CompletableFuture.supplyAsync(() ->
         {
             Set<String> hashTables = new HashSet<>();
-            for (String domain : resourceManager.getResourceNamespaces())
+            for (String domain : resourceManager.getNamespaces())
             {
                 ResourceLocation hashTableLocation = new ResourceLocation(domain, this.folder + "hash_tables.json");
                 if (!resourceManager.hasResource(hashTableLocation))
@@ -105,6 +105,6 @@ public class LocalTextureTableLoader implements TextureTableLoader
             this.textures.clear();
             this.textures.putAll(textureLocations);
             this.hashTables = hashTables;
-        }, gameExecutor).thenCompose(stage::markCompleteAwaitingOthers);
+        }, gameExecutor).thenCompose(stage::wait);
     }
 }

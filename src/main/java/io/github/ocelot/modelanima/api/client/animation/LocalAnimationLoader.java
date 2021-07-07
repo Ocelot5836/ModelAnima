@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.api.client.animation;
 
-import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.animation.AnimationParser;
+import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -43,7 +43,7 @@ public class LocalAnimationLoader implements BackgroundLoader<Map<ResourceLocati
         return CompletableFuture.supplyAsync(() ->
         {
             Map<ResourceLocation, AnimationData> animationData = new HashMap<>();
-            for (ResourceLocation animationLocation : resourceManager.getAllResourceLocations(this.folder, name -> name.endsWith(".json")))
+            for (ResourceLocation animationLocation : resourceManager.listResources(this.folder, name -> name.endsWith(".json")))
             {
                 try (IResource resource = resourceManager.getResource(animationLocation))
                 {

@@ -50,7 +50,7 @@ public final class AnimationManager
             IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
             if (resourceManager instanceof IReloadableResourceManager)
             {
-                ((IReloadableResourceManager) resourceManager).addReloadListener(RELOADER);
+                ((IReloadableResourceManager) resourceManager).registerReloadListener(RELOADER);
             }
         });
     }
@@ -110,7 +110,7 @@ public final class AnimationManager
                 for (Map.Entry<ResourceLocation, AnimationData> entry : pairs.entrySet())
                     if (animationData.put(entry.getKey(), entry.getValue()) != null)
                         LOGGER.warn("Duplicate animation: " + entry.getKey());
-            }, gameExecutor)).toArray(CompletableFuture[]::new)).thenCompose(stage::markCompleteAwaitingOthers).thenRunAsync(() ->
+            }, gameExecutor)).toArray(CompletableFuture[]::new)).thenCompose(stage::wait).thenRunAsync(() ->
             {
                 LOGGER.info("Loaded " + animationData.size() + " animations.");
                 ANIMATIONS.clear();

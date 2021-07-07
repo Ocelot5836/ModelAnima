@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.api.client.geometry;
 
-import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelParser;
+import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -44,7 +44,7 @@ public final class LocalGeometryModelLoader implements BackgroundLoader<Map<Reso
         return CompletableFuture.supplyAsync(() ->
         {
             Map<ResourceLocation, GeometryModelData> modelLocations = new HashMap<>();
-            for (ResourceLocation modelLocation : resourceManager.getAllResourceLocations(this.folder, name -> name.endsWith(".json")))
+            for (ResourceLocation modelLocation : resourceManager.listResources(this.folder, name -> name.endsWith(".json")))
             {
                 try (IResource resource = resourceManager.getResource(modelLocation))
                 {

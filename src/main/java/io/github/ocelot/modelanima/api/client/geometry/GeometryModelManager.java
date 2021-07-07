@@ -1,8 +1,7 @@
 package io.github.ocelot.modelanima.api.client.geometry;
 
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
-import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
+import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
@@ -51,7 +50,7 @@ public final class GeometryModelManager
             IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
             if (resourceManager instanceof IReloadableResourceManager)
             {
-                ((IReloadableResourceManager) resourceManager).addReloadListener(RELOADER);
+                ((IReloadableResourceManager) resourceManager).registerReloadListener(RELOADER);
             }
         });
     }
@@ -111,7 +110,7 @@ public final class GeometryModelManager
                 for (Map.Entry<ResourceLocation, GeometryModel> entry : pairs.entrySet())
                     if (geometryModels.put(entry.getKey(), entry.getValue()) != null)
                         LOGGER.warn("Duplicate geometry model: " + entry.getKey());
-            }, gameExecutor)).toArray(CompletableFuture[]::new)).thenCompose(stage::markCompleteAwaitingOthers).thenRunAsync(() ->
+            }, gameExecutor)).toArray(CompletableFuture[]::new)).thenCompose(stage::wait).thenRunAsync(() ->
             {
                 LOGGER.info("Loaded " + geometryModels.size() + " geometry models.");
                 MODELS.clear();

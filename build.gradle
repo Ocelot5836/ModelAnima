@@ -72,6 +72,16 @@ minecraft {
     }
 }
 
+if (project.hasProperty('UPDATE_MAPPINGS')) {
+    extractRangeMap {
+        sources sourceSets.test.java.srcDirs
+    }
+    applyRangeMap {
+        sources sourceSets.test.java.srcDirs
+    }
+    sourceSets.test.java.srcDirs.each { extractMappedNew.addTarget it }
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${project.minecraft}-${project.forge}"
 }
@@ -128,7 +138,7 @@ publishing {
         }
     }
     repositories {
-        if(project.hasProperty("jacksonMavenUser") && project.hasProperty("jacksonMavenPass")) {
+        if (project.hasProperty("jacksonMavenUser") && project.hasProperty("jacksonMavenPass")) {
             maven {
                 url "https://maven.jaackson.me"
                 credentials {

@@ -1,9 +1,7 @@
 package io.github.ocelot.modelanima.api.common.util;
 
 import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 

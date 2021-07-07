@@ -36,15 +36,15 @@ public class DynamicReloader
     public CompletableFuture<Unit> reload(boolean showLoadingScreen)
     {
         if (asyncReloader != null)
-            return asyncReloader.onceDone();
-        asyncReloader = AsyncReloader.create(Minecraft.getInstance().getResourceManager(), this.reloadListeners, Util.getServerExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE));
+            return asyncReloader.done();
+        asyncReloader = AsyncReloader.of(Minecraft.getInstance().getResourceManager(), this.reloadListeners, Util.backgroundExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE));
         if (showLoadingScreen)
-            Minecraft.getInstance().setLoadingGui(new ResourceLoadProgressGui(Minecraft.getInstance(), asyncReloader, error ->
+            Minecraft.getInstance().setOverlay(new ResourceLoadProgressGui(Minecraft.getInstance(), asyncReloader, error ->
             {
                 asyncReloader = null;
                 error.ifPresent(LOGGER::error);
             }, true));
-        return this.asyncReloader.onceDone().handle((unit, e) ->
+        return this.asyncReloader.done().handle((unit, e) ->
         {
             if (e != null)
                 LOGGER.error("Error reloading", e);

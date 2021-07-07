@@ -42,9 +42,9 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
 
     public BedrockGeometryModel(int textureWidth, int textureHeight, GeometryModelData.Bone[] bones)
     {
-        super(RenderType::getEntityCutoutNoCull);
-        this.textureWidth = textureWidth;
-        this.textureHeight = textureHeight;
+        super(RenderType::entityCutoutNoCull);
+        this.texWidth = textureWidth;
+        this.texHeight = textureHeight;
         this.modelParts = new HashMap<>();
 
         Set<String> textures = new HashSet<>();
@@ -113,7 +113,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     }
 
     @Override
-    public void render(MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
     }
 
@@ -140,7 +140,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     @Override
     public void copyAngles(@Nullable String parent, ModelRenderer limbRenderer)
     {
-        this.modelParts.values().stream().filter(part -> Objects.equals(part.getBone().getParent(), parent)).forEach(renderer -> renderer.copyModelAngles(limbRenderer));
+        this.modelParts.values().stream().filter(part -> Objects.equals(part.getBone().getParent(), parent)).forEach(renderer -> renderer.copyFrom(limbRenderer));
     }
 
     @Override
@@ -176,13 +176,13 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     @Override
     public float getTextureWidth()
     {
-        return textureWidth;
+        return texWidth;
     }
 
     @Override
     public float getTextureHeight()
     {
-        return textureHeight;
+        return texHeight;
     }
 
     @Override
@@ -216,7 +216,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
             get(animationTime, boneAnimation.getRotationFrames(), ROTATION);
             get(animationTime, boneAnimation.getScaleFrames(), SCALE);
 
-            this.modelParts.get(boneAnimation.getName()).applyAnimationAngles(POSITION.getX(), POSITION.getY(), POSITION.getZ(), ROTATION.getX(), ROTATION.getY(), ROTATION.getZ(), SCALE.getX(), SCALE.getY(), SCALE.getZ());
+            this.modelParts.get(boneAnimation.getName()).applyAnimationAngles(POSITION.x(), POSITION.y(), POSITION.z(), ROTATION.x(), ROTATION.y(), ROTATION.z(), SCALE.x(), SCALE.y(), SCALE.z());
         }
     }
 
@@ -246,9 +246,9 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
 
             AnimationData.KeyFrame from = i == 0 ? null : frames[i - 1];
             float progress = (from == null ? animationTime / to.getTime() : Math.min(1.0F, (animationTime - from.getTime()) / (to.getTime() - from.getTime())));
-            float fromX = from == null ? vector.getX() : from.getTransformPostX();
-            float fromY = from == null ? vector.getY() : from.getTransformPostY();
-            float fromZ = from == null ? vector.getZ() : from.getTransformPostZ();
+            float fromX = from == null ? vector.x() : from.getTransformPostX();
+            float fromY = from == null ? vector.y() : from.getTransformPostY();
+            float fromZ = from == null ? vector.z() : from.getTransformPostZ();
 
             float x = MathHelper.lerp(progress, fromX, to.getTransformPreX());
             float y = MathHelper.lerp(progress, fromY, to.getTransformPreY());

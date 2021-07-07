@@ -161,13 +161,13 @@ public class GeometryModelData
             public Description deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
             {
                 JsonObject jsonObject = json.getAsJsonObject();
-                String identifier = JSONUtils.getString(jsonObject, "identifier", "custom_model");
-                float visibleBoundsWidth = JSONUtils.getFloat(jsonObject, "visible_bounds_width", 0);
-                float visibleBoundsHeight = JSONUtils.getFloat(jsonObject, "visible_bounds_height", 0);
+                String identifier = JSONUtils.getAsString(jsonObject, "identifier", "custom_model");
+                float visibleBoundsWidth = JSONUtils.getAsFloat(jsonObject, "visible_bounds_width", 0);
+                float visibleBoundsHeight = JSONUtils.getAsFloat(jsonObject, "visible_bounds_height", 0);
                 float[] visibleBoundsOffset = JSONTupleParser.getFloat(jsonObject, "visible_bounds_offset", 3, () -> new float[3]);
-                int textureWidth = JSONUtils.getInt(jsonObject, "texture_width", 256);
-                int textureHeight = JSONUtils.getInt(jsonObject, "texture_height", 256);
-                boolean preserveModelPose2588 = JSONUtils.getBoolean(jsonObject, "preserve_model_pose2588", false);
+                int textureWidth = JSONUtils.getAsInt(jsonObject, "texture_width", 256);
+                int textureHeight = JSONUtils.getAsInt(jsonObject, "texture_height", 256);
+                boolean preserveModelPose2588 = JSONUtils.getAsBoolean(jsonObject, "preserve_model_pose2588", false);
                 if (textureWidth == 0)
                     throw new JsonSyntaxException("Texture width must not be zero");
                 if (textureHeight == 0)
@@ -335,21 +335,21 @@ public class GeometryModelData
             public Bone deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
             {
                 JsonObject boneJson = json.getAsJsonObject();
-                String name = JSONUtils.getString(boneJson, "name");
-                boolean reset2588 = JSONUtils.getBoolean(boneJson, "reset2588", false);
-                boolean neverRender2588 = JSONUtils.getBoolean(boneJson, "neverrender2588", false);
-                String parent = JSONUtils.getString(boneJson, "parent", null);
+                String name = JSONUtils.getAsString(boneJson, "name");
+                boolean reset2588 = JSONUtils.getAsBoolean(boneJson, "reset2588", false);
+                boolean neverRender2588 = JSONUtils.getAsBoolean(boneJson, "neverrender2588", false);
+                String parent = JSONUtils.getAsString(boneJson, "parent", null);
                 float[] pivot = JSONTupleParser.getFloat(boneJson, "pivot", 3, () -> new float[3]);
                 float[] rotation = JSONTupleParser.getFloat(boneJson, "rotation", 3, () -> new float[3]);
                 float[] bindPoseRotation2588 = JSONTupleParser.getFloat(boneJson, "bind_pose_rotation2588", 3, () -> new float[3]);
-                boolean mirror = JSONUtils.getBoolean(boneJson, "mirror", false);
-                float inflate = JSONUtils.getFloat(boneJson, "inflate", 0);
-                boolean debug = JSONUtils.getBoolean(boneJson, "debug", false);
+                boolean mirror = JSONUtils.getAsBoolean(boneJson, "mirror", false);
+                float inflate = JSONUtils.getAsFloat(boneJson, "inflate", 0);
+                boolean debug = JSONUtils.getAsBoolean(boneJson, "debug", false);
 
                 Cube[] cubes = new Cube[0];
                 if (boneJson.has("cubes"))
                 {
-                    JsonArray cubesJson = JSONUtils.getJsonArray(boneJson, "cubes");
+                    JsonArray cubesJson = JSONUtils.getAsJsonArray(boneJson, "cubes");
                     cubes = new Cube[cubesJson.size()];
                     for (int i = 0; i < cubesJson.size(); i++)
                         cubes[i] = context.deserialize(cubesJson.get(i), Cube.class);
@@ -358,7 +358,7 @@ public class GeometryModelData
                 Locator[] locators = new Locator[0];
                 if (boneJson.has("locators"))
                 {
-                    JsonObject locatorsJson = JSONUtils.getJsonObject(boneJson, "locators");
+                    JsonObject locatorsJson = JSONUtils.getAsJsonObject(boneJson, "locators");
                     locators = locatorsJson.entrySet().stream().map(entry ->
                     {
                         String locatorIdentifier = entry.getKey();
@@ -481,7 +481,7 @@ public class GeometryModelData
         @Nullable
         public CubeUV getUV(Direction direction)
         {
-            return this.uv[direction.getIndex()];
+            return this.uv[direction.get3DDataValue()];
         }
 
         /**
@@ -524,9 +524,9 @@ public class GeometryModelData
                 float[] rotation = JSONTupleParser.getFloat(cubeJson, "rotation", 3, () -> new float[3]);
                 float[] pivot = JSONTupleParser.getFloat(cubeJson, "pivot", 3, () -> new float[]{origin[0] + size[0], origin[1] + size[1], origin[2] + size[2]});
                 boolean overrideInflate = cubeJson.has("inflate");
-                float inflate = JSONUtils.getFloat(cubeJson, "inflate", 0);
+                float inflate = JSONUtils.getAsFloat(cubeJson, "inflate", 0);
                 boolean overrideMirror = cubeJson.has("mirror");
-                boolean mirror = JSONUtils.getBoolean(cubeJson, "mirror", false);
+                boolean mirror = JSONUtils.getAsBoolean(cubeJson, "mirror", false);
                 CubeUV[] uv = parseUV(cubeJson, size);
                 if (uv.length != Direction.values().length)
                     throw new JsonParseException("Expected uv to be of size " + Direction.values().length + ", was " + uv.length);
@@ -542,12 +542,12 @@ public class GeometryModelData
                 {
                     CubeUV[] uvs = new CubeUV[6];
                     float[] uv = JSONTupleParser.getFloat(cubeJson, "uv", 2, () -> new float[2]);
-                    uvs[Direction.NORTH.getIndex()] = new CubeUV(uv[0] + size[2], uv[1] + size[2], size[0], size[1], "texture");
-                    uvs[Direction.EAST.getIndex()] = new CubeUV(uv[0], uv[1] + size[2], size[2], size[1], "texture");
-                    uvs[Direction.SOUTH.getIndex()] = new CubeUV(uv[0] + size[0] + size[2] * 2, uv[1] + size[2], size[0], size[1], "texture");
-                    uvs[Direction.WEST.getIndex()] = new CubeUV(uv[0] + size[0] + size[2], uv[1] + size[2], size[2], size[1], "texture");
-                    uvs[Direction.UP.getIndex()] = new CubeUV(uv[0] + size[2], uv[1], size[0], size[2], "texture");
-                    uvs[Direction.DOWN.getIndex()] = new CubeUV(uv[0] + size[0] + size[2], uv[1], size[0], size[2], "texture");
+                    uvs[Direction.NORTH.get3DDataValue()] = new CubeUV(uv[0] + size[2], uv[1] + size[2], size[0], size[1], "texture");
+                    uvs[Direction.EAST.get3DDataValue()] = new CubeUV(uv[0], uv[1] + size[2], size[2], size[1], "texture");
+                    uvs[Direction.SOUTH.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2] * 2, uv[1] + size[2], size[0], size[1], "texture");
+                    uvs[Direction.WEST.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2], uv[1] + size[2], size[2], size[1], "texture");
+                    uvs[Direction.UP.get3DDataValue()] = new CubeUV(uv[0] + size[2], uv[1], size[0], size[2], "texture");
+                    uvs[Direction.DOWN.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2], uv[1], size[0], size[2], "texture");
                     return uvs;
                 }
                 if (cubeJson.get("uv").isJsonObject())
@@ -556,18 +556,18 @@ public class GeometryModelData
                     CubeUV[] uvs = new CubeUV[6];
                     for (Direction direction : Direction.values())
                     {
-                        if (!uvJson.has(direction.getName2()))
+                        if (!uvJson.has(direction.getName()))
                             continue;
 
-                        JsonObject faceJson = JSONUtils.getJsonObject(uvJson, direction.getName2());
+                        JsonObject faceJson = JSONUtils.getAsJsonObject(uvJson, direction.getName());
                         float[] uv = JSONTupleParser.getFloat(faceJson, "uv", 2, null);
                         float[] uvSize = JSONTupleParser.getFloat(faceJson, "uv_size", 2, () -> new float[2]);
-                        String material = JSONUtils.getString(faceJson, "material_instance", "texture");
-                        uvs[direction.getIndex()] = new CubeUV(uv[0], uv[1], uvSize[0], uvSize[1], material);
+                        String material = JSONUtils.getAsString(faceJson, "material_instance", "texture");
+                        uvs[direction.get3DDataValue()] = new CubeUV(uv[0], uv[1], uvSize[0], uvSize[1], material);
                     }
                     return uvs;
                 }
-                throw new JsonSyntaxException("Expected uv to be a JsonArray or JsonObject, was " + JSONUtils.toString(cubeJson.get("uv")));
+                throw new JsonSyntaxException("Expected uv to be a JsonArray or JsonObject, was " + JSONUtils.getType(cubeJson.get("uv")));
             }
         }
     }
@@ -738,7 +738,7 @@ public class GeometryModelData
             public PolyMesh deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
             {
                 JsonObject jsonObject = json.getAsJsonObject();
-                boolean normalizedUvs = JSONUtils.getBoolean(jsonObject, "normalized_uvs", false);
+                boolean normalizedUvs = JSONUtils.getAsBoolean(jsonObject, "normalized_uvs", false);
                 Vector3f[] positions = parsePositions(jsonObject, "positions", 3, Vector3f[]::new, j -> new Vector3f(j.get(0).getAsFloat(), j.get(1).getAsFloat(), j.get(2).getAsFloat()));
                 Vector3f[] normals = parsePositions(jsonObject, "normals", 3, Vector3f[]::new, j -> new Vector3f(j.get(0).getAsFloat(), j.get(1).getAsFloat(), j.get(2).getAsFloat()));
                 Vector2f[] uvs = parsePositions(jsonObject, "uvs", 2, Vector2f[]::new, j -> new Vector2f(j.get(0).getAsFloat(), j.get(1).getAsFloat()));
@@ -748,7 +748,7 @@ public class GeometryModelData
 
                 JsonElement polysJson = jsonObject.get("polys");
                 if (!polysJson.isJsonArray() && !(polysJson.isJsonPrimitive() && polysJson.getAsJsonPrimitive().isString()))
-                    throw new JsonSyntaxException("Expected polys to be a JsonArray or String, was " + JSONUtils.toString(polysJson));
+                    throw new JsonSyntaxException("Expected polys to be a JsonArray or String, was " + JSONUtils.getType(polysJson));
 
                 Poly[] polys = polysJson.isJsonArray() ? context.deserialize(polysJson, Poly[].class) : new Poly[0];
                 PolyType polyType = polysJson.isJsonPrimitive() ? parseType(polysJson) : parseType(polys);
@@ -769,7 +769,7 @@ public class GeometryModelData
             private static PolyType parseType(JsonElement json) throws JsonParseException
             {
                 if (!json.isJsonPrimitive())
-                    throw new JsonSyntaxException("Expected String, was " + JSONUtils.toString(json));
+                    throw new JsonSyntaxException("Expected String, was " + JSONUtils.getType(json));
                 for (PolyType polyType : PolyType.values())
                     if (polyType.name.equalsIgnoreCase(json.getAsString()))
                         return polyType;
@@ -786,7 +786,7 @@ public class GeometryModelData
 
             private static <T> T[] parsePositions(JsonObject json, String name, int size, Function<Integer, T[]> arrayGenerator, Function<JsonArray, T> generator) throws JsonParseException
             {
-                JsonArray positionsJson = JSONUtils.getJsonArray(json, name, null);
+                JsonArray positionsJson = JSONUtils.getAsJsonArray(json, name, null);
                 if (positionsJson == null)
                     return arrayGenerator.apply(0);
 
@@ -795,7 +795,7 @@ public class GeometryModelData
                 {
                     JsonElement element = positionsJson.get(i);
                     if (!element.isJsonArray())
-                        throw new JsonSyntaxException("Expected " + name + " to be a JsonArray, was " + JSONUtils.toString(element));
+                        throw new JsonSyntaxException("Expected " + name + " to be a JsonArray, was " + JSONUtils.getType(element));
 
                     JsonArray array = element.getAsJsonArray();
                     if (array.size() != size)
@@ -885,7 +885,7 @@ public class GeometryModelData
             private static int[] parseVertex(JsonElement element) throws JsonParseException
             {
                 if (!element.isJsonArray())
-                    throw new JsonSyntaxException("Expected vertex to be a JsonArray, was " + JSONUtils.toString(element));
+                    throw new JsonSyntaxException("Expected vertex to be a JsonArray, was " + JSONUtils.getType(element));
                 JsonArray array = element.getAsJsonArray();
                 if (array.size() != 3)
                     throw new JsonParseException("Expected 3 vertex values, was " + array.size());

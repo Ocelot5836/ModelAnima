@@ -27,13 +27,13 @@ public class DebugInputs
     @SubscribeEvent
     public static void onEvent(InputEvent.KeyInputEvent event)
     {
-        if (FMLLoader.isProduction() || Minecraft.getInstance().currentScreen != null)
+        if (FMLLoader.isProduction() || Minecraft.getInstance().screen != null)
             return;
         if (event.getKey() == GLFW.GLFW_KEY_P)
         {
             try
             {
-                Path outputFolder = Paths.get(Minecraft.getInstance().gameDir.toURI()).resolve("debug-out");
+                Path outputFolder = Paths.get(Minecraft.getInstance().gameDirectory.toURI()).resolve("debug-out");
                 if (!Files.exists(outputFolder))
                     Files.createDirectories(outputFolder);
 
@@ -56,9 +56,9 @@ public class DebugInputs
                     ByteBuffer image = BufferUtils.createByteBuffer(width * height * componentsCount);
                     glGetTexImage(GL_TEXTURE_2D, 0, components, GL_UNSIGNED_BYTE, image);
 
-                    Util.getRenderingService().execute(() -> stbi_write_png(outputFile.toString(), width, height, componentsCount, image, 0));
+                    Util.ioPool().execute(() -> stbi_write_png(outputFile.toString(), width, height, componentsCount, image, 0));
                 }
-                Util.getOSType().openFile(outputFolder.toFile());
+                Util.getPlatform().openFile(outputFolder.toFile());
             }
             catch (Exception e)
             {

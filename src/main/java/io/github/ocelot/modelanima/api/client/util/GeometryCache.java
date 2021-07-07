@@ -37,7 +37,7 @@ public class GeometryCache
 {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
-    private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDir.toURI()).resolve(ModelAnima.DOMAIN + "-cache");
+    private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDirectory.toURI()).resolve(ModelAnima.DOMAIN + "-cache");
     private static final Object METADATA_LOCK = new Object();
     private static final Object IO_LOCK = new Object();
 
@@ -268,7 +268,7 @@ public class GeometryCache
         if (System.currentTimeMillis() - nextWriteTime > 0)
         {
             nextWriteTime = Long.MAX_VALUE;
-            Util.getServerExecutor().execute(GeometryCache::writeMetadata);
+            Util.backgroundExecutor().execute(GeometryCache::writeMetadata);
         }
     }
 }

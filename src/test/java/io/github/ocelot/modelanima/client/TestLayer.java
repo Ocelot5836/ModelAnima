@@ -34,10 +34,10 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     {
         GeometryModel geometryModel = GeometryModelManager.getModel(MODEL);
         geometryModel.resetTransformation();
-        GeometryModelRenderer.copyModelAngles(this.getEntityModel(), geometryModel);
+        GeometryModelRenderer.copyModelAngles(this.getParentModel(), geometryModel);
 
-        float ticks = player.ticksExisted + partialTicks;
-        if (player.isSneaking())
+        float ticks = player.tickCount + partialTicks;
+        if (player.isShiftKeyDown())
         {
             if (this.sneakStart == -1)
                 this.sneakStart = ticks;

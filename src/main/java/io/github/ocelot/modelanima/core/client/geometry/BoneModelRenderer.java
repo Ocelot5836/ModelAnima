@@ -74,18 +74,18 @@ public class BoneModelRenderer extends ModelRenderer
         Vector3f size = cube.getSize();
         Vector3f rotation = cube.getRotation();
         Vector3f pivot = cube.getPivotX();
-        float x = origin.getX() / 16f;
-        float y = origin.getY() / 16f;
-        float z = origin.getZ() / 16f;
-        float sizeX = size.getX() / 16f;
-        float sizeY = size.getY() / 16f;
-        float sizeZ = size.getZ() / 16f;
-        float rotationX = rotation.getX();
-        float rotationY = rotation.getY();
-        float rotationZ = rotation.getZ();
-        float pivotX = pivot.getX() / 16f;
-        float pivotY = -pivot.getY() / 16f;
-        float pivotZ = pivot.getZ() / 16f;
+        float x = origin.x() / 16f;
+        float y = origin.y() / 16f;
+        float z = origin.z() / 16f;
+        float sizeX = size.x() / 16f;
+        float sizeY = size.y() / 16f;
+        float sizeZ = size.z() / 16f;
+        float rotationX = rotation.x();
+        float rotationY = rotation.y();
+        float rotationZ = rotation.z();
+        float pivotX = pivot.x() / 16f;
+        float pivotY = -pivot.y() / 16f;
+        float pivotZ = pivot.z() / 16f;
         float inflate = (cube.isOverrideInflate() ? cube.getInflate() : this.bone.getInflate()) / 16f;
         boolean mirror = cube.isOverrideMirror() ? cube.isMirror() : this.bone.isMirror();
 
@@ -107,13 +107,13 @@ public class BoneModelRenderer extends ModelRenderer
 
         MatrixStack matrixStack = new MatrixStack();
         matrixStack.translate(pivotX, pivotY, pivotZ);
-        matrixStack.rotate(Vector3f.ZP.rotationDegrees(rotationZ));
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(rotationY));
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(rotationX));
+        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(rotationZ));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(rotationY));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotationX));
         matrixStack.translate(-pivotX, -pivotY, -pivotZ);
-        MatrixStack.Entry entry = matrixStack.getLast();
-        Matrix4f matrix4f = entry.getMatrix();
-        Matrix3f matrix3f = entry.getNormal();
+        MatrixStack.Entry entry = matrixStack.last();
+        Matrix4f matrix4f = entry.pose();
+        Matrix3f matrix3f = entry.normal();
 
         this.addFace(cube, matrix4f, matrix3f, x1, y1, z, x, y1, z, x, y, z, x1, y, z, Direction.NORTH);
         this.addFace(cube, matrix4f, matrix3f, x, y1, z, x, y1, z1, x, y, z1, x, y, z, Direction.EAST);
@@ -145,7 +145,7 @@ public class BoneModelRenderer extends ModelRenderer
     {
         Vector3f position = polyMesh.getPositions()[poly.getPositions()[index]];
         Vector2f uv = polyMesh.getUvs()[poly.getUVs()[index]];
-        return new Vertex(matrix4f, position.getX(), -position.getY(), position.getZ(), polyMesh.isNormalizedUvs() ? uv.x : uv.x / this.parent.getTextureWidth(), 1 - (polyMesh.isNormalizedUvs() ? uv.y : uv.y / this.parent.getTextureHeight()));
+        return new Vertex(matrix4f, position.x(), -position.y(), position.z(), polyMesh.isNormalizedUvs() ? uv.x : uv.x / this.parent.getTextureWidth(), 1 - (polyMesh.isNormalizedUvs() ? uv.y : uv.y / this.parent.getTextureHeight()));
     }
 
     private void addFace(GeometryModelData.Cube cube, Matrix4f matrix4f, Matrix3f matrix3f, float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, Direction face)
@@ -171,12 +171,12 @@ public class BoneModelRenderer extends ModelRenderer
     {
         Vector3f rotation = this.bone.getRotation();
         Vector3f pivot = this.bone.getPivot();
-        this.rotateAngleX = (float) (Math.PI / 180f) * rotation.getX();
-        this.rotateAngleY = (float) (Math.PI / 180f) * rotation.getY();
-        this.rotateAngleZ = (float) (Math.PI / 180f) * rotation.getZ();
-        this.rotationPointX = pivot.getX();
-        this.rotationPointY = -pivot.getY();
-        this.rotationPointZ = pivot.getZ();
+        this.xRot = (float) (Math.PI / 180f) * rotation.x();
+        this.yRot = (float) (Math.PI / 180f) * rotation.y();
+        this.zRot = (float) (Math.PI / 180f) * rotation.z();
+        this.x = pivot.x();
+        this.y = -pivot.y();
+        this.z = pivot.z();
         this.copyPosition.setIdentity();
         this.copyNormal.setIdentity();
         this.animPos.set(0, 0, 0);
@@ -205,21 +205,21 @@ public class BoneModelRenderer extends ModelRenderer
     {
         super.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
 
-        if (this.showModel && (!this.quads.isEmpty() || !this.polygons.isEmpty() || !this.children.isEmpty()))
+        if (this.visible && (!this.quads.isEmpty() || !this.polygons.isEmpty() || !this.children.isEmpty()))
         {
-            matrixStack.push();
-            this.translateRotate(matrixStack);
+            matrixStack.pushPose();
+            this.translateAndRotate(matrixStack);
 
             if (this.copyVanilla)
-                matrixStack.translate(-this.rotationPointX / 16.0F, -this.rotationPointY / 16.0F, -this.rotationPointZ / 16.0F);
+                matrixStack.translate(-this.x / 16.0F, -this.y / 16.0F, -this.z / 16.0F);
 
-            Matrix4f matrix4f = matrixStack.getLast().getMatrix();
-            Matrix3f matrix3f = matrixStack.getLast().getNormal();
+            Matrix4f matrix4f = matrixStack.last().pose();
+            Matrix3f matrix3f = matrixStack.last().normal();
             for (Quad quad : this.quads)
             {
                 if (!quad.material.equals(this.parent.getActiveMaterial()))
                     continue;
-                NORMAL_VECTOR.set(quad.normal.getX(), quad.normal.getY(), quad.normal.getZ());
+                NORMAL_VECTOR.set(quad.normal.x(), quad.normal.y(), quad.normal.z());
                 NORMAL_VECTOR.transform(matrix3f);
                 for (Vertex vertex : quad.vertices)
                 {
@@ -235,7 +235,7 @@ public class BoneModelRenderer extends ModelRenderer
                         int index = MathHelper.clamp(i, 0, polygon.vertices.length - 1);
                         Vertex vertex = polygon.vertices[index];
                         Vector3f normal = polygon.normals[index];
-                        NORMAL_VECTOR.set(normal.getX(), normal.getY(), normal.getZ());
+                        NORMAL_VECTOR.set(normal.x(), normal.y(), normal.z());
                         NORMAL_VECTOR.transform(matrix3f);
                         addVertex(builder, packedLight, packedOverlay, red, green, blue, alpha, matrix4f, vertex);
                     }
@@ -244,7 +244,7 @@ public class BoneModelRenderer extends ModelRenderer
 
             this.children.forEach(renderer -> renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha));
 
-            matrixStack.pop();
+            matrixStack.popPose();
         }
     }
 
@@ -252,36 +252,36 @@ public class BoneModelRenderer extends ModelRenderer
     {
         TRANSFORM_VECTOR.set(vertex.x, vertex.y, vertex.z, 1);
         TRANSFORM_VECTOR.transform(matrix4f);
-        builder.addVertex(TRANSFORM_VECTOR.getX(), TRANSFORM_VECTOR.getY(), TRANSFORM_VECTOR.getZ(), red, green, blue, alpha, vertex.u, vertex.v, packedOverlay, packedLight, NORMAL_VECTOR.getX(), NORMAL_VECTOR.getY(), NORMAL_VECTOR.getZ());
+        builder.vertex(TRANSFORM_VECTOR.x(), TRANSFORM_VECTOR.y(), TRANSFORM_VECTOR.z(), red, green, blue, alpha, vertex.u, vertex.v, packedOverlay, packedLight, NORMAL_VECTOR.x(), NORMAL_VECTOR.y(), NORMAL_VECTOR.z());
     }
 
     @Override
-    public void copyModelAngles(ModelRenderer modelRenderer)
+    public void copyFrom(ModelRenderer modelRenderer)
     {
         this.copyPosition.setIdentity();
         this.copyNormal.setIdentity();
         MatrixStack matrixStack = new MatrixStack();
-        modelRenderer.translateRotate(matrixStack);
-        this.copyPosition.mul(matrixStack.getLast().getMatrix());
-        this.copyNormal.mul(matrixStack.getLast().getNormal());
+        modelRenderer.translateAndRotate(matrixStack);
+        this.copyPosition.multiply(matrixStack.last().pose());
+        this.copyNormal.mul(matrixStack.last().normal());
         this.copyVanilla = !BoneModelRenderer.class.isAssignableFrom(modelRenderer.getClass());
     }
 
     @Override
-    public void translateRotate(MatrixStack matrixStack)
+    public void translateAndRotate(MatrixStack matrixStack)
     {
-        matrixStack.translate((this.animPos.getX() + this.rotationPointX) / 16.0F, (this.animPos.getY() + this.rotationPointY) / 16.0F, (this.animPos.getZ() + this.rotationPointZ) / 16.0F);
-        if (this.animScale.getX() != 1 || this.animScale.getY() != 1 || this.animScale.getZ() != 1)
-            matrixStack.scale(this.animScale.getX(), this.animScale.getY(), this.animScale.getZ());
-        if (this.rotateAngleZ + this.animRotation.getZ() != 0)
-            matrixStack.rotate(Vector3f.ZP.rotation(this.rotateAngleZ + this.animRotation.getZ()));
-        if (this.rotateAngleY + this.animRotation.getY() != 0)
-            matrixStack.rotate(Vector3f.YP.rotation(this.rotateAngleY + this.animRotation.getY()));
-        if (this.rotateAngleX + this.animRotation.getX() != 0)
-            matrixStack.rotate(Vector3f.XP.rotation(this.rotateAngleX + this.animRotation.getX()));
-        matrixStack.translate(-this.rotationPointX / 16.0F, -this.rotationPointY / 16.0F, -this.rotationPointZ / 16.0F);
-        matrixStack.getLast().getMatrix().mul(this.copyPosition);
-        matrixStack.getLast().getNormal().mul(this.copyNormal);
+        matrixStack.translate((this.animPos.x() + this.x) / 16.0F, (this.animPos.y() + this.y) / 16.0F, (this.animPos.z() + this.z) / 16.0F);
+        if (this.animScale.x() != 1 || this.animScale.y() != 1 || this.animScale.z() != 1)
+            matrixStack.scale(this.animScale.x(), this.animScale.y(), this.animScale.z());
+        if (this.zRot + this.animRotation.z() != 0)
+            matrixStack.mulPose(Vector3f.ZP.rotation(this.zRot + this.animRotation.z()));
+        if (this.yRot + this.animRotation.y() != 0)
+            matrixStack.mulPose(Vector3f.YP.rotation(this.yRot + this.animRotation.y()));
+        if (this.xRot + this.animRotation.x() != 0)
+            matrixStack.mulPose(Vector3f.XP.rotation(this.xRot + this.animRotation.x()));
+        matrixStack.translate(-this.x / 16.0F, -this.y / 16.0F, -this.z / 16.0F);
+        matrixStack.last().pose().multiply(this.copyPosition);
+        matrixStack.last().normal().mul(this.copyNormal);
     }
 
     /**
@@ -324,9 +324,9 @@ public class BoneModelRenderer extends ModelRenderer
         {
             TRANSFORM_VECTOR.set(x, y, z, 1.0F);
             TRANSFORM_VECTOR.transform(matrix4f);
-            this.x = TRANSFORM_VECTOR.getX();
-            this.y = TRANSFORM_VECTOR.getY();
-            this.z = TRANSFORM_VECTOR.getZ();
+            this.x = TRANSFORM_VECTOR.x();
+            this.y = TRANSFORM_VECTOR.y();
+            this.z = TRANSFORM_VECTOR.z();
             this.u = u;
             this.v = v;
         }
@@ -354,7 +354,7 @@ public class BoneModelRenderer extends ModelRenderer
                 }
             }
 
-            this.normal = direction.toVector3f();
+            this.normal = direction.step();
             if (mirror)
             {
                 this.normal.mul(-1.0F, 1.0F, 1.0F);

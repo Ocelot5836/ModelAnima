@@ -64,7 +64,7 @@ public class GeometryModelTexture
 
     public GeometryModelTexture(PacketBuffer buf)
     {
-        this(buf.readEnumValue(Type.class), buf.readEnumValue(TextureLayer.class), buf.readString(), buf.readBoolean(), buf.readInt(), buf.readBoolean(), buf.readBoolean());
+        this(buf.readEnum(Type.class), buf.readEnum(TextureLayer.class), buf.readUtf(), buf.readBoolean(), buf.readInt(), buf.readBoolean(), buf.readBoolean());
     }
 
     /**
@@ -74,9 +74,9 @@ public class GeometryModelTexture
      */
     public void write(PacketBuffer buf)
     {
-        buf.writeEnumValue(this.type);
-        buf.writeEnumValue(this.layer);
-        buf.writeString(this.data);
+        buf.writeEnum(this.type);
+        buf.writeEnum(this.layer);
+        buf.writeUtf(this.data);
         buf.writeBoolean(this.cache);
         buf.writeInt(this.color);
         buf.writeBoolean(this.glowing);

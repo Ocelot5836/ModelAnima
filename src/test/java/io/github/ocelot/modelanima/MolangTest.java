@@ -1,10 +1,9 @@
 package io.github.ocelot.modelanima;
 
 import com.google.common.base.Stopwatch;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.github.ocelot.modelanima.api.common.molang.MolangCompiler;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
-import io.github.ocelot.modelanima.api.common.molang.MolangCompiler;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 
 public class MolangTest

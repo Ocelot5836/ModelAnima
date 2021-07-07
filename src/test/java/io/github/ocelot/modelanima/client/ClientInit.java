@@ -10,7 +10,7 @@ public class ClientInit
     {
         event.enqueueWork(() ->
         {
-            for (PlayerRenderer renderer : Minecraft.getInstance().getRenderManager().getSkinMap().values())
+            for (PlayerRenderer renderer : Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap().values())
             {
                 renderer.addLayer(new TestLayer(renderer));
             }

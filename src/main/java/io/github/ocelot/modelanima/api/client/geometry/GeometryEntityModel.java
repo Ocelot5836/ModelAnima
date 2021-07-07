@@ -35,7 +35,7 @@ public class GeometryEntityModel<T extends Entity> extends EntityModel<T>
     }
 
     @Override
-    public void setRotationAngles(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
+    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
     {
         this.getModel().resetTransformation();
 
@@ -47,9 +47,9 @@ public class GeometryEntityModel<T extends Entity> extends EntityModel<T>
     }
 
     @Override
-    public void render(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-        GeometryModelRenderer.render(this.getModel(), this.texture, matrixStack, Minecraft.getInstance().getRenderTypeBuffers().getBufferSource(), packedLight, packedOverlay, red, green, blue, alpha);
+        GeometryModelRenderer.render(this.getModel(), this.texture, matrixStack, Minecraft.getInstance().renderBuffers().bufferSource(), packedLight, packedOverlay, red, green, blue, alpha);
     }
 
     /**
