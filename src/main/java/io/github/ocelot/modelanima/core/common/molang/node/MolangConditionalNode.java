@@ -21,9 +21,9 @@ public class MolangConditionalNode implements MolangExpression
     }
 
     @Override
-    public MolangExpression.Result resolve(MolangRuntime runtime) throws MolangException
+    public float resolve(MolangRuntime runtime) throws MolangException
     {
-        return (this.condition.resolve(runtime).getAsBoolean() ? this.first : this.branch).resolve(runtime);
+        return (this.condition.resolve(runtime) != 0 ? this.first : this.branch).resolve(runtime);
     }
 
     @Override

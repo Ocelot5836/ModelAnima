@@ -29,7 +29,7 @@ public class MolangTest
                 .create();
 
         Stopwatch runTime = Stopwatch.createStarted();
-        MolangExpression.Result result = expression.resolve(runtime);
+        float result = expression.resolve(runtime);
         runTime.stop();
         System.out.println("Took " + runTime + " to execute. Result: " + result);
     }

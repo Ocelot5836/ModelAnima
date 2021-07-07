@@ -2,7 +2,6 @@ package io.github.ocelot.modelanima.core.common.molang.node;
 
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
-import io.github.ocelot.modelanima.core.common.molang.result.MolangNumericalResult;
 
 /**
  * @author Ocelot
@@ -17,9 +16,9 @@ public class MolangConstantNode implements MolangExpression
     }
 
     @Override
-    public MolangExpression.Result resolve(MolangRuntime runtime)
+    public float resolve(MolangRuntime runtime)
     {
-        return new MolangNumericalResult(this.value);
+        return value;
     }
 
     @Override

@@ -19,18 +19,5 @@ public interface MolangExpression
      * @return The resulting value
      * @throws MolangException If any error occurs when resolving the value
      */
-    Result resolve(MolangRuntime runtime) throws MolangException;
-
-    interface Result
-    {
-        float getAsFloat();
-
-        boolean getAsBoolean();
-
-        String getAsString();
-
-        boolean isNumeric();
-
-        boolean isString();
-    }
+    float resolve(MolangRuntime runtime) throws MolangException;
 }

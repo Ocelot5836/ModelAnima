@@ -3,7 +3,6 @@ package io.github.ocelot.modelanima.core.common.molang.node;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
-import io.github.ocelot.modelanima.core.common.molang.result.MolangNumericalResult;
 
 public class MolangMathOperatorNode implements MolangExpression
 {
@@ -19,9 +18,9 @@ public class MolangMathOperatorNode implements MolangExpression
     }
 
     @Override
-    public Result resolve(MolangRuntime runtime) throws MolangException
+    public float resolve(MolangRuntime runtime) throws MolangException
     {
-        return new MolangNumericalResult(this.operation.op.apply(this.a, this.b, runtime));
+        return this.operation.op.apply(this.a, this.b, runtime);
     }
 
     @Override
@@ -32,16 +31,16 @@ public class MolangMathOperatorNode implements MolangExpression
 
     public enum MathOperation
     {
-        MULTIPLY('*', (a, b, runtime) -> a.resolve(runtime).getAsFloat() * b.resolve(runtime).getAsFloat()),
+        MULTIPLY('*', (a, b, runtime) -> a.resolve(runtime) * b.resolve(runtime)),
         DIVIDE('/', (a, b, runtime) ->
         {
-            float second = b.resolve(runtime).getAsFloat();
+            float second = b.resolve(runtime);
             if (second == 0) // This is to prevent a divide by zero exception
                 return 0;
-            return a.resolve(runtime).getAsFloat() / second;
+            return a.resolve(runtime) / second;
         }),
-        ADD('+', (a, b, runtime) -> a.resolve(runtime).getAsFloat() + b.resolve(runtime).getAsFloat()),
-        SUBTRACT('-', (a, b, runtime) -> a.resolve(runtime).getAsFloat() - b.resolve(runtime).getAsFloat());
+        ADD('+', (a, b, runtime) -> a.resolve(runtime) + b.resolve(runtime)),
+        SUBTRACT('-', (a, b, runtime) -> a.resolve(runtime) - b.resolve(runtime));
 
         private final char sign;
         private final MathOp op;

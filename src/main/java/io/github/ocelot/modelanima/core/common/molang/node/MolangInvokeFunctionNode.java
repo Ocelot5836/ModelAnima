@@ -19,14 +19,14 @@ public class MolangInvokeFunctionNode implements MolangExpression
     }
 
     @Override
-    public Result resolve(MolangRuntime runtime) throws MolangException
+    public float resolve(MolangRuntime runtime) throws MolangException
     {
         MolangObject object = runtime.get(this.object);
         if (!object.has(this.name + "$"+this.parameters.length))
             throw new IllegalStateException("Unknown function: " + this.object + "." + this.name + "() with " + this.parameters.length + " parameters");
         for (int i = 0; i < this.parameters.length; i++)
             runtime.loadParameter(i, this.parameters[i]);
-        Result result = runtime.get(this.object).get(this.name +"$"+ this.parameters.length).resolve(runtime);
+        float result = runtime.get(this.object).get(this.name +"$"+ this.parameters.length).resolve(runtime);
         runtime.clearParameters();
         return result;
     }
