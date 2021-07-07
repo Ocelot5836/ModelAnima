@@ -1,12 +1,16 @@
 package io.github.ocelot.modelanima.core.common.molang.object;
 
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
+import io.github.ocelot.modelanima.api.common.molang.MolangJavaFunction;
 import io.github.ocelot.modelanima.api.common.molang.MolangObject;
-import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.function.Function;
+import javax.annotation.Nullable;
+import java.util.Locale;
 
+/**
+ * @author Ocelot
+ */
 public class MolangMath implements MolangObject
 {
     @Override
@@ -18,95 +22,90 @@ public class MolangMath implements MolangObject
     @Override
     public MolangExpression get(String name)
     {
-        for (MathFunction function : MathFunction.values())
-            if (function.name().equals(name))
-                return function;
-        return MolangExpression.ZERO;
+        MathFunction function = MathFunction.byName(name);
+        return function != null ? function.expression : MolangExpression.ZERO;
     }
 
     @Override
     public boolean has(String name)
     {
-        for (MathFunction function : MathFunction.values())
-            if (function.name().equals(name))
-                return true;
-        return false;
+        return MathFunction.byName(name) != null;
     }
 
-    public enum MathFunction implements MolangExpression
+    public enum MathFunction
     {
-        ABS(1, (runtime) ->
-                Math.abs(runtime.resolveParameter(0))),
-        SIN(1, (runtime) ->
-                (float) Math.sin(runtime.resolveParameter(0) * Math.PI / 180.0)),
-        COS(1, (runtime) ->
-                (float) Math.cos(runtime.resolveParameter(0) * Math.PI / 180.0)),
-        EXP(1, (runtime) ->
-                (float) Math.exp(runtime.resolveParameter(0))),
-        LN(1, (runtime) ->
-                (float) Math.log(runtime.resolveParameter(0))),
-        POW(2, (runtime) ->
-                (float) Math.pow(runtime.resolveParameter(0), runtime.resolveParameter(1))),
-        SQRT(1, (runtime) ->
-                (float) Math.sqrt(runtime.resolveParameter(0))),
-        RANDOM(2, (runtime) ->
+        ABS(1, parameters ->
+                Math.abs(parameters.apply(0))),
+        SIN(1, parameters ->
+                (float) Math.sin(parameters.apply(0) * Math.PI / 180.0)),
+        COS(1, parameters ->
+                (float) Math.cos(parameters.apply(0) * Math.PI / 180.0)),
+        EXP(1, parameters ->
+                (float) Math.exp(parameters.apply(0))),
+        LN(1, parameters ->
+                (float) Math.log(parameters.apply(0))),
+        POW(2, parameters ->
+                (float) Math.pow(parameters.apply(0), parameters.apply(1))),
+        SQRT(1, parameters ->
+                (float) Math.sqrt(parameters.apply(0))),
+        RANDOM(2, parameters ->
         {
             double rand = Math.random();
-            float min = runtime.resolveParameter(0);
-            float max = runtime.resolveParameter(1);
+            float min = parameters.apply(0);
+            float max = parameters.apply(1);
             if (min > max)
                 throw new RuntimeException("Invalid random range: " + min + " to " + max);
             return (float) MathHelper.lerp(rand, min, max);
         }),
-        CEIL(1, (runtime) ->
-                (float) Math.ceil(runtime.resolveParameter(0))),
-        ROUND(1, (runtime) ->
-                (float) Math.round(runtime.resolveParameter(0))),
-        TRUNC(1, (runtime) ->
+        CEIL(1, parameters ->
+                (float) Math.ceil(parameters.apply(0))),
+        ROUND(1, parameters ->
+                (float) Math.round(parameters.apply(0))),
+        TRUNC(1, parameters ->
         {
-            float value = runtime.resolveParameter(0);
+            float value = parameters.apply(0);
             if (value < 0)
                 return (float) Math.ceil(value);
             if (value > 0)
                 return (float) Math.floor(value);
             return value;
         }),
-        FLOOR(1, (runtime) ->
-                (float) Math.floor(runtime.resolveParameter(0))),
-        MOD(2, (runtime) ->
-                runtime.resolveParameter(0) % runtime.resolveParameter(1)),
-        MIN(2, (runtime) ->
-                Math.min(runtime.resolveParameter(0), runtime.resolveParameter(1))),
-        MAX(2, (runtime) ->
-                Math.max(runtime.resolveParameter(0), runtime.resolveParameter(1))),
-        CLAMP(3, (runtime) ->
+        FLOOR(1, parameters ->
+                (float) Math.floor(parameters.apply(0))),
+        MOD(2, parameters ->
+                parameters.apply(0) % parameters.apply(1)),
+        MIN(2, parameters ->
+                Math.min(parameters.apply(0), parameters.apply(1))),
+        MAX(2, parameters ->
+                Math.max(parameters.apply(0), parameters.apply(1))),
+        CLAMP(3, parameters ->
         {
-            float value = runtime.resolveParameter(0);
-            float min = runtime.resolveParameter(0);
+            float value = parameters.apply(0);
+            float min = parameters.apply(0);
             if (value <= min)
                 return min;
-            return Math.min(value, runtime.resolveParameter(0));
+            return Math.min(value, parameters.apply(0));
         }),
-        LERP(3, (runtime) ->
+        LERP(3, parameters ->
         {
-            float pct = runtime.resolveParameter(2);
+            float pct = parameters.apply(2);
             if (pct <= 0)
-                return runtime.resolveParameter(0);
+                return parameters.apply(0);
             if (pct >= 1)
-                return runtime.resolveParameter(1);
-            float min = runtime.resolveParameter(0);
-            return min + (runtime.resolveParameter(1) - min) * pct;
+                return parameters.apply(1);
+            float min = parameters.apply(0);
+            return min + (parameters.apply(1) - min) * pct;
         }),
-        LERPROTATE(3, (runtime) ->
+        LERPROTATE(3, parameters ->
         {
-            float pct = runtime.resolveParameter(2);
+            float pct = parameters.apply(2);
             if (pct <= 0)
-                return runtime.resolveParameter(0);
+                return parameters.apply(0);
             if (pct >= 1)
-                return runtime.resolveParameter(1);
+                return parameters.apply(1);
 
-            float min = runtime.resolveParameter(0);
-            float max = runtime.resolveParameter(1);
+            float min = parameters.apply(0);
+            float max = parameters.apply(1);
 
             float difference = max - min;
             while (difference < -180.0F)
@@ -118,18 +117,28 @@ public class MolangMath implements MolangObject
         });
 
         private final int parameters;
-        private final Function<MolangRuntime, Float> op;
+        private final String functionName;
+        private final MolangExpression expression;
 
-        MathFunction(int parameters, Function<MolangRuntime, Float> op)
+        MathFunction(int parameters, MolangJavaFunction op)
         {
             this.parameters = parameters;
-            this.op = op;
+            this.functionName = this.name().toLowerCase(Locale.ROOT) + "$" + parameters;
+            this.expression = new MolangFunction(parameters, op);
         }
 
-        @Override
-        public float resolve(MolangRuntime runtime)
+        public int getParameters()
         {
-            return this.op.apply(runtime);
+            return parameters;
+        }
+
+        @Nullable
+        public static MolangMath.MathFunction byName(String name)
+        {
+            for (MathFunction function : MathFunction.values())
+                if (function.functionName.equals(name))
+                    return function;
+            return null;
         }
     }
 }

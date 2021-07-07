@@ -8,13 +8,19 @@ import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import io.github.ocelot.modelanima.core.common.molang.node.*;
+import io.github.ocelot.modelanima.core.common.molang.object.MolangMath;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
+/**
+ * <p>Compiles a {@link MolangExpression} from a string input.</p>
+ *
+ * @author Ocelot
+ * @since 1.0.0
+ */
 public class MolangParser
 {
     private static final SimpleCommandExceptionType UNEXPECTED_TOKEN = new SimpleCommandExceptionType(new LiteralMessage("Unexpected token"));
@@ -24,7 +30,6 @@ public class MolangParser
     private static final Dynamic2CommandExceptionType NOT_ENOUGH_PARAMETERS = new Dynamic2CommandExceptionType((obj, obj2) -> new LiteralMessage("Not enough parameters. Expected at least " + obj + ", got " + obj2));
     private static final Dynamic2CommandExceptionType TOO_MANY_PARAMETERS = new Dynamic2CommandExceptionType((obj, obj2) -> new LiteralMessage("Too many parameters. Expected at most " + obj + ", got " + obj2));
 
-    private static final Set<String> VARIABLE_SCOPES = ImmutableSet.of("query", "global", "temp", "variable");
     private static final Set<Character> MATH_OPERATORS = ImmutableSet.of('(', ')', '*', '/', '+', '-');
 
     public static MolangExpression parse(String input) throws CommandSyntaxException
@@ -51,12 +56,35 @@ public class MolangParser
 
         MolangExpression[] expressions = new MolangExpression[lines.length];
         for (int i = 0; i < lines.length; i++)
-            expressions[i] = parseExpression(new StringReader(lines[i]), i >= lines.length - 1, true);
+        {
+            StringReader reader = new StringReader(lines[i]);
+            reader.skipWhitespace();
+
+            // Check for return
+            if (reader.getRemaining().startsWith("return"))
+            {
+                if (i < lines.length - 1)
+                {
+                    reader.setCursor(reader.getString().indexOf("return") + 6);
+                    throw UNEXPECTED_TOKEN.createWithContext(reader);
+                }
+                for (int j = 0; j < 7; j++)
+                    reader.skip();
+                MolangExpression expression = parseExpression(reader, false, true);
+                if (reader.canRead())
+                    throw TRAILING_STATEMENT.createWithContext(reader);
+                expressions[i] = expression;
+            }
+            else
+            {
+                expressions[i] = parseExpression(new StringReader(lines[i]), i == 1, true);
+            }
+        }
 
         return expressions.length == 1 ? expressions[0] : new MolangCompoundNode(expressions);
     }
 
-    private static MolangExpression parseExpression(StringReader reader, boolean allowReturn, boolean allowMath) throws CommandSyntaxException
+    private static MolangExpression parseExpression(StringReader reader, boolean simple, boolean allowMath) throws CommandSyntaxException
     {
         if (!reader.canRead())
             throw UNEXPECTED_TOKEN.createWithContext(reader);
@@ -65,43 +93,27 @@ public class MolangParser
         if (!reader.canRead())
             throw UNEXPECTED_TOKEN.createWithContext(reader);
 
-        // Check for return
-        if (reader.getRemaining().startsWith("return"))
-        {
-            if (!allowReturn)
-            {
-                reader.setCursor(reader.getString().indexOf("return") + 6);
-                throw UNEXPECTED_TOKEN.createWithContext(reader);
-            }
-            for (int i = 0; i < 7; i++)
-                reader.skip();
-            MolangExpression expression = parseExpression(reader, false, allowMath);
-            if (reader.canRead())
-                throw TRAILING_STATEMENT.createWithContext(reader);
-            return expression;
-        }
+        System.out.println(reader.getRemaining());
+        if (reader.peek() == '?')
+            System.out.println("TEST");
 
         // Check for math. This will not happen if reading from math because operators are removed
-        if (!reader.getRemaining().contains("=") && allowMath)
+        if (!reader.getRemaining().contains("=") && !reader.getRemaining().contains("?") && !reader.getRemaining().contains(":") && allowMath)
         {
             for (char operator : MATH_OPERATORS)
             {
                 if (reader.getRemaining().chars().anyMatch(a -> a == operator))
                 {
-//                MolangExpression mathExpression = parseMath(reader.getRemaining());
-//                reader.skipWhitespace();
-//                if (reader.canRead())
-//                    throw TRAILING_STATEMENT.createWithContext(reader);
                     return eval(reader);
                 }
             }
         }
 
-        String[] currentKeyword = parseKeyword(reader, !allowReturn); // This handles 'abc.def' etc
+        String[] currentKeyword = parseKeyword(reader, simple); // This handles 'abc.def' etc
         String fullWord = currentKeyword[0] + (currentKeyword.length > 1 ? "." + currentKeyword[1] : "");
 
         // Check for number
-        if (NumberUtils.isCreatable(fullWord))
+        if (NumberUtils.isParsable(fullWord))
         {
             reader.skipWhitespace();
             if (reader.canRead())
@@ -109,34 +121,12 @@ public class MolangParser
             return new MolangConstantNode(Float.parseFloat(fullWord));
         }
 
-        if (NumberUtils.isCreatable(currentKeyword[0].substring(0, 1)))
-        {
-            reader.setCursor(reader.getString().indexOf(currentKeyword[0].substring(0, 1)) + currentKeyword[0].length());
-            throw INVALID_KEYWORD.createWithContext(reader, fullWord);
-        }
-
-        // Check for variables
-        if (VARIABLE_SCOPES.contains(currentKeyword[0]))
-        {
-            if (currentKeyword.length <= 1)
-                throw UNEXPECTED_TOKEN.createWithContext(reader);
-            reader.skipWhitespace();
-            if (reader.canRead() && reader.peek() == '=')
-            {
-                reader.skip();
-                MolangExpression expression = parseExpression(reader, false, allowMath);
-                return new MolangSetVariableNode(currentKeyword[0], currentKeyword[1], expression);
-            }
-            return new MolangGetVariableNode(currentKeyword[0], currentKeyword[1]);
-        }
-
-        // Expect something else
-        reader.skipWhitespace();
-        if (!reader.canRead())
+        // methods and params require at least both parts
+        if (currentKeyword.length <= 1)
             throw UNEXPECTED_TOKEN.createWithContext(reader);
 
         // Check for methods
-        if (reader.peek() == '(')
+        if (reader.canRead() && reader.peek() == '(')
         {
             int start = reader.getCursor();
             MolangExpression[] parameters = null;
@@ -144,10 +134,17 @@ public class MolangParser
             {
                 if (reader.peek() == ')')
                 {
-                    String[] parameterStrings = reader.getRead().substring(start + 1).split(",");
-                    parameters = new MolangExpression[parameterStrings.length];
-                    for (int i = 0; i < parameterStrings.length; i++)
-                        parameters[i] = parseExpression(new StringReader(parameterStrings[i].trim()), false, true);
+                    if (reader.getCursor() == start + 1)
+                    {
+                        parameters = new MolangExpression[0];
+                    }
+                    else
+                    {
+                        String[] parameterStrings = reader.getRead().substring(start + 1).split(",");
+                        parameters = new MolangExpression[parameterStrings.length];
+                        for (int i = 0; i < parameterStrings.length; i++)
+                            parameters[i] = parseExpression(new StringReader(parameterStrings[i].trim()), true, true);
+                    }
 
                     start = -1;
                 }
@@ -155,10 +152,50 @@ public class MolangParser
             }
             if (start != -1)
                 throw EXPECTED.createWithContext(reader, ')');
-            return parseMethod(currentKeyword, parameters);
-        }
 
-        throw UNEXPECTED_TOKEN.createWithContext(reader);
+            reader.skipWhitespace();
+            return parseCondition(reader, parseMethod(currentKeyword, parameters), allowMath);
+        }
+        else
+        {
+            // Check for variables
+            reader.skipWhitespace();
+            if (reader.canRead())
+            {
+                if (reader.peek() == '=')
+                {
+                    reader.skip();
+                    MolangExpression expression = parseExpression(reader, true, allowMath);
+                    return new MolangSetVariableNode(currentKeyword[0], currentKeyword[1], expression);
+                }
+            }
+            return parseCondition(reader, new MolangGetVariableNode(currentKeyword[0], currentKeyword[1]), allowMath);
+        }
+    }
+
+    private static MolangExpression parseCondition(StringReader reader, MolangExpression expression, boolean allowMath) throws CommandSyntaxException
+    {
+        if (reader.canRead() && reader.peek() == '?')
+        {
+            reader.skip();
+            reader.skipWhitespace();
+
+            int start = reader.getCursor();
+            while (reader.canRead() && reader.peek() != ':')
+                reader.skip();
+
+            if (!reader.canRead())
+                throw TRAILING_STATEMENT.createWithContext(reader);
+
+            MolangExpression first = parseExpression(new StringReader(reader.getRead().substring(start)), true, allowMath);
+            if (!reader.canRead())
+                throw TRAILING_STATEMENT.createWithContext(reader);
+            reader.skip();
+
+            MolangExpression branch = parseExpression(reader, true, allowMath);
+            return new MolangConditionalNode(expression, first, branch);
+        }
+        return expression;
     }
 
     private static String[] parseKeyword(StringReader reader, boolean simple) throws CommandSyntaxException
@@ -223,81 +260,20 @@ public class MolangParser
 
     private static MolangExpression parseMethod(String[] methodName, MolangExpression[] parameters) throws CommandSyntaxException
     {
-        if (methodName.length == 2 && "math".equalsIgnoreCase(methodName[0]))
+        // Special case for math to check if it's valid
+        if ("math".equalsIgnoreCase(methodName[0]))
         {
-            for (MolangMathNode.MathFunction function : MolangMathNode.MathFunction.values())
-                if (function.name().toLowerCase(Locale.ROOT).equals(methodName[1]))
-                    return new MolangMathNode(function, parameters);
-            throw UNEXPECTED_TOKEN.create();
+            MolangMath.MathFunction function = MolangMath.MathFunction.byName(methodName[1] + "$" + parameters.length);
+            if (function == null)
+                throw INVALID_KEYWORD.create(methodName[1]);
+            if (parameters.length < function.getParameters())
+                throw NOT_ENOUGH_PARAMETERS.create(function.getParameters(), parameters.length);
+            if (function.getParameters() >= 0 && parameters.length > function.getParameters())
+                throw TOO_MANY_PARAMETERS.create(function.getParameters(), parameters.length);
         }
+        // Other functions may or may not work, the runtime determines if they will
         return new MolangInvokeFunctionNode(methodName[0], methodName[1], parameters);
     }
-
-//    private static MolangExpression parseMath(String data) throws CommandSyntaxException
-//    {
-//        List<Object> parts = new LinkedList<>();
-//        parts.add(data);
-//
-//        int operationState = 0; // MD -> AS
-//
-//        while (operationState < 2)
-//        {
-//            for (Object obj : parts)
-//            {
-//                if (!(obj instanceof String))
-//                    continue;
-//
-//                StringReader reader = new StringReader((String) obj);
-//                int start = reader.getCursor();
-//                while (reader.canRead())
-//                {
-//                    reader.skipWhitespace();
-//
-//                    if (reader.peek() == '*')
-//                    {
-//                        if (operationState == 1)
-//                        {
-//                            reader.skip();
-//                            start = reader.getCursor();
-//                            continue;
-//                        }
-//                        StringReader partReader = new StringReader(reader.getRead().substring(start));
-//                        result = parseExpression(partReader, false);
-//                    }
-//                    else if (reader.peek() == '/')
-//                    {
-//                        if (operationState == 1)
-//                        {
-//                            reader.skip();
-//                            start = reader.getCursor();
-//                            continue;
-//                        }
-//                    }
-//                    else if (reader.peek() == '+')
-//                    {
-//                        if (operationState == 0)
-//                        {
-//                            reader.skip();
-//                            start = reader.getCursor();
-//                            continue;
-//                        }
-//                    }
-//                    else if (reader.peek() == '-')
-//                    {
-//                        if (operationState == 0)
-//                        {
-//                            reader.skip();
-//                            start = reader.getCursor();
-//                            continue;
-//                        }
-//                    }
-//                    reader.skip();
-//                }
-//            }
-//            operationState++;
-//        }
-//        return null;
-//    }
 
     private static MolangExpression eval(StringReader reader) throws CommandSyntaxException
     {
@@ -327,13 +303,9 @@ public class MolangParser
             {
                 MolangExpression x = parseTerm();
                 if (eat('+'))
-                {
                     return new MolangMathOperatorNode(MolangMathOperatorNode.MathOperation.ADD, x, parseTerm()); // addition
-                }
-                else if (eat('-'))
-                {
+                if (eat('-'))
                     return new MolangMathOperatorNode(MolangMathOperatorNode.MathOperation.SUBTRACT, x, parseTerm()); // subtraction
-                }
                 return x;
             }
 
@@ -341,13 +313,9 @@ public class MolangParser
             {
                 MolangExpression x = parseFactor();
                 if (eat('*'))
-                {
                     return new MolangMathOperatorNode(MolangMathOperatorNode.MathOperation.MULTIPLY, x, parseFactor()); // multiplication
-                }
-                else if (eat('/'))
-                {
+                if (eat('/'))
                     return new MolangMathOperatorNode(MolangMathOperatorNode.MathOperation.DIVIDE, x, parseFactor()); // division
-                }
                 return x;
             }
 
@@ -387,7 +355,7 @@ public class MolangParser
                     reader.skip();
                 }
 
-                return MolangParser.parseExpression(new StringReader(reader.getRead().substring(start)), false, false);
+                return MolangParser.parseExpression(new StringReader(reader.getRead().substring(start)), true, false);
             }
         }.parse();
     }

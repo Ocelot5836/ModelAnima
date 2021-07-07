@@ -1,5 +1,6 @@
 package io.github.ocelot.modelanima.core.common.molang.node;
 
+import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 
@@ -20,7 +21,7 @@ public class MolangSetVariableNode implements MolangExpression
     }
 
     @Override
-    public float resolve(MolangRuntime runtime)
+    public Result resolve(MolangRuntime runtime) throws MolangException
     {
         runtime.get(this.object).set(this.name, this.expression);
         return this.expression.resolve(runtime);

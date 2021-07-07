@@ -1,5 +1,6 @@
 package io.github.ocelot.modelanima.core.common.molang.object;
 
+import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.api.common.molang.MolangJavaFunction;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
@@ -16,7 +17,7 @@ public class MolangFunction implements MolangExpression
     }
 
     @Override
-    public float resolve(MolangRuntime runtime)
+    public float resolve(MolangRuntime runtime) throws MolangException
     {
         float[] parameters = new float[this.params];
         for (int i = 0; i < parameters.length; i++)
@@ -25,6 +26,11 @@ public class MolangFunction implements MolangExpression
                 throw new IllegalStateException("Function requires " + parameters.length + " parameters");
             parameters[i] = runtime.getParameter(i).resolve(runtime);
         }
-        return this.consumer.resolve(parameters);
+        return this.consumer.resolve(i ->
+        {
+            if (i < 0 || i >= parameters.length)
+                return 0F;
+            return parameters[i];
+        });
     }
 }

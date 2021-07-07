@@ -1,13 +1,22 @@
 package io.github.ocelot.modelanima.api.common.molang;
 
 import io.github.ocelot.modelanima.core.common.molang.node.MolangConstantNode;
-import io.github.ocelot.modelanima.core.common.molang.object.*;
+import io.github.ocelot.modelanima.core.common.molang.object.ImmutableMolangObject;
+import io.github.ocelot.modelanima.core.common.molang.object.MolangFunction;
+import io.github.ocelot.modelanima.core.common.molang.object.MolangMath;
+import io.github.ocelot.modelanima.core.common.molang.object.MolangVariableStorage;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * <p>The runtime for MoLang to create and access data from.</p>
+ *
+ * @author Ocelot
+ * @since 1.0.0
+ */
 public class MolangRuntime
 {
     private final Map<String, MolangObject> objects;
@@ -40,11 +49,6 @@ public class MolangRuntime
         if (!this.objects.containsKey(name))
             throw new RuntimeException("Unknown MoLang object: " + name);
         return this.objects.get(name);
-    }
-
-    public float resolveParameter(int parameter)
-    {
-        return this.getParameter(parameter).resolve(this);
     }
 
     public MolangExpression getParameter(int parameter)
@@ -81,7 +85,7 @@ public class MolangRuntime
 
         public Builder setQuery(String name, int params, MolangJavaFunction function)
         {
-            this.query.set(name + params, new MolangFunction(params, function));
+            this.query.set(name + "$" + params, new MolangFunction(params, function));
             return this;
         }
 
@@ -93,7 +97,7 @@ public class MolangRuntime
 
         public Builder setGlobal(String name, int params, MolangJavaFunction function)
         {
-            this.global.set(name + params, new MolangFunction(params, function));
+            this.global.set(name + "$" + params, new MolangFunction(params, function));
             return this;
         }
 
