@@ -30,6 +30,27 @@ public class MolangCompiler
     private static final Dynamic2CommandExceptionType NOT_ENOUGH_PARAMETERS = new Dynamic2CommandExceptionType((obj, obj2) -> new LiteralMessage("Not enough parameters. Expected at least " + obj + ", got " + obj2));
     private static final Dynamic2CommandExceptionType TOO_MANY_PARAMETERS = new Dynamic2CommandExceptionType((obj, obj2) -> new LiteralMessage("Too many parameters. Expected at most " + obj + ", got " + obj2));
 
+    /**
+     * Whether or not to reduce math to constant values if possible. Eg. <code>4 * 4 + 2</code> would become <code>18</code>. This should almost always be on.
+     */
+    public static final int REDUCE_FLAG = 1;
+    /**
+     * Whether or not to check for 'this' keyword.
+     */
+    private static final int CHECK_THIS_FLAG = 2;
+    /**
+     * Whether or not to check for variables.
+     */
+    private static final int CHECK_VARIABLE_FLAG = 4;
+    /**
+     * Whether or not to check for methods.
+     */
+    private static final int CHECK_METHOD_FLAG = 8;
+    /**
+     * Whether or not to check for math operations.
+     */
+    private static final int CHECK_OPERATORS_FLAG = 16;
+
     private static final MolangEnvironment ENVIRONMENT = new CompileEnvironment();
     private static final Set<Character> MATH_OPERATORS = ImmutableSet.of('(', ')', '*', '/', '+', '-');
 
@@ -42,18 +63,18 @@ public class MolangCompiler
      */
     public static MolangExpression compile(String input) throws MolangParseException
     {
-        return compile(input, true);
+        return compile(input, REDUCE_FLAG);
     }
 
     /**
      * Compiles a {@link MolangExpression} from the specified string input.
      *
-     * @param input           The data to compile
-     * @param reduceConstants Whether or not to reduce math to constant values if possible. Eg. <code>4 * 4 + 2</code> would become <code>18</code>. This should almost always be on
+     * @param input The data to compile
+     * @param flags Additional flags to use when compiling
      * @return The compiled expression
      * @throws MolangParseException If any error occurs
      */
-    public static MolangExpression compile(String input, boolean reduceConstants) throws MolangParseException
+    public static MolangExpression compile(String input, int flags) throws MolangParseException
     {
         try
         {
@@ -83,6 +104,28 @@ public class MolangCompiler
                 StringReader reader = new StringReader(lines[i]);
                 reader.skipWhitespace();
 
+                // Set initial flags
+                int additionalFlags = 0;
+                if (reader.getString().contains("."))
+                {
+                    additionalFlags |= CHECK_VARIABLE_FLAG;
+                    if (reader.getString().contains("("))
+                        additionalFlags |= CHECK_METHOD_FLAG | CHECK_OPERATORS_FLAG;
+                }
+                if (reader.getString().contains("this"))
+                    additionalFlags |= CHECK_THIS_FLAG;
+                if (!checkFlag(additionalFlags, CHECK_OPERATORS_FLAG))
+                {
+                    for (char operator : MATH_OPERATORS)
+                    {
+                        if (reader.getString().indexOf(operator) != -1)
+                        {
+                            additionalFlags |= CHECK_OPERATORS_FLAG;
+                            break;
+                        }
+                    }
+                }
+
                 // Check for return
                 if (reader.getRemaining().startsWith("return"))
                 {
@@ -93,14 +136,14 @@ public class MolangCompiler
                     }
                     for (int j = 0; j < 7; j++)
                         reader.skip();
-                    MolangExpression expression = parseExpression(reader, reduceConstants, false, true);
+                    MolangExpression expression = parseExpression(reader, flags | additionalFlags, false, true);
                     if (reader.canRead())
                         throw TRAILING_STATEMENT.createWithContext(reader);
                     expressions[i] = expression;
                 }
                 else
                 {
-                    expressions[i] = parseExpression(new StringReader(lines[i]), reduceConstants, i == 1, true);
+                    expressions[i] = parseExpression(new StringReader(lines[i]), flags | additionalFlags, i == 1, true);
                 }
             }
 
@@ -112,7 +155,7 @@ public class MolangCompiler
         }
     }
 
-    private static MolangExpression parseExpression(StringReader reader, boolean reduceConstants, boolean simple, boolean allowMath) throws CommandSyntaxException
+    private static MolangExpression parseExpression(StringReader reader, int flags, boolean simple, boolean allowMath) throws CommandSyntaxException
     {
         if (!reader.canRead())
             throw UNEXPECTED_TOKEN.createWithContext(reader);
@@ -122,13 +165,13 @@ public class MolangCompiler
             throw UNEXPECTED_TOKEN.createWithContext(reader);
 
         // Check for math. This will not happen if reading from math because operators are removed
-        if (!reader.getRemaining().contains("=") && !reader.getRemaining().contains("?") && !reader.getRemaining().contains(":") && allowMath)
+        if (checkFlag(flags, CHECK_OPERATORS_FLAG) && !reader.getRemaining().contains("=") && !reader.getRemaining().contains("?") && !reader.getRemaining().contains(":") && allowMath)
         {
             for (char operator : MATH_OPERATORS)
             {
                 if (reader.getRemaining().chars().anyMatch(a -> a == operator))
                 {
-                    return compute(reader, reduceConstants);
+                    return compute(reader, flags);
                 }
             }
         }
@@ -137,12 +180,12 @@ public class MolangCompiler
         String fullWord = currentKeyword[0] + (currentKeyword.length > 1 ? "." + currentKeyword[1] : "");
 
         // Check for 'this' keyword
-        if ("this".equals(fullWord))
+        if (checkFlag(flags, CHECK_THIS_FLAG) && "this".equals(fullWord))
         {
             reader.skipWhitespace();
             if (reader.canRead() && reader.peek() != '?' && reader.peek() != ':' && !MATH_OPERATORS.contains(reader.peek()))
                 throw TRAILING_STATEMENT.createWithContext(reader);
-            return parseCondition(reader, new MolangThisNode(), reduceConstants, allowMath);
+            return parseCondition(reader, new MolangThisNode(), flags, allowMath);
         }
 
         // Check for number
@@ -151,7 +194,7 @@ public class MolangCompiler
             reader.skipWhitespace();
             if (reader.canRead() && reader.peek() != '?' && reader.peek() != ':' && !MATH_OPERATORS.contains(reader.peek()))
                 throw TRAILING_STATEMENT.createWithContext(reader);
-            return parseCondition(reader, new MolangConstantNode(Float.parseFloat(fullWord)), reduceConstants, allowMath);
+            return parseCondition(reader, new MolangConstantNode(Float.parseFloat(fullWord)), flags, allowMath);
         }
 
         // methods and params require at least both parts
@@ -159,7 +202,7 @@ public class MolangCompiler
             throw UNEXPECTED_TOKEN.createWithContext(reader);
 
         // Check for methods
-        if (reader.canRead() && reader.peek() == '(')
+        if (checkFlag(flags, CHECK_METHOD_FLAG) && reader.canRead() && reader.peek() == '(')
         {
             int start = reader.getCursor();
             MolangExpression[] parameters = null;
@@ -176,7 +219,7 @@ public class MolangCompiler
                         String[] parameterStrings = reader.getRead().substring(start + 1).split(",");
                         parameters = new MolangExpression[parameterStrings.length];
                         for (int i = 0; i < parameterStrings.length; i++)
-                            parameters[i] = parseExpression(new StringReader(parameterStrings[i].trim()), reduceConstants, true, true);
+                            parameters[i] = parseExpression(new StringReader(parameterStrings[i].trim()), flags, true, true);
                     }
 
                     start = -1;
@@ -187,9 +230,9 @@ public class MolangCompiler
                 throw EXPECTED.createWithContext(reader, ')');
 
             reader.skipWhitespace();
-            return parseCondition(reader, parseMethod(currentKeyword, parameters, reduceConstants), reduceConstants, allowMath);
+            return parseCondition(reader, parseMethod(currentKeyword, parameters, flags), flags, allowMath);
         }
-        else
+        else if (checkFlag(flags, CHECK_VARIABLE_FLAG))
         {
             // Check for variables
             reader.skipWhitespace();
@@ -198,15 +241,16 @@ public class MolangCompiler
                 if (reader.peek() == '=')
                 {
                     reader.skip();
-                    MolangExpression expression = parseExpression(reader, reduceConstants, true, allowMath);
+                    MolangExpression expression = parseExpression(reader, flags, true, allowMath);
                     return new MolangSetVariableNode(currentKeyword[0], currentKeyword[1], expression);
                 }
             }
-            return parseCondition(reader, new MolangGetVariableNode(currentKeyword[0], currentKeyword[1]), reduceConstants, allowMath);
+            return parseCondition(reader, new MolangGetVariableNode(currentKeyword[0], currentKeyword[1]), flags, allowMath);
         }
+        throw TRAILING_STATEMENT.createWithContext(reader);
     }
 
-    private static MolangExpression parseCondition(StringReader reader, MolangExpression expression, boolean reduceConstants, boolean allowMath) throws CommandSyntaxException
+    private static MolangExpression parseCondition(StringReader reader, MolangExpression expression, int flags, boolean allowMath) throws CommandSyntaxException
     {
         if (reader.canRead() && reader.peek() == '?')
         {
@@ -220,14 +264,14 @@ public class MolangCompiler
             if (!reader.canRead())
                 throw TRAILING_STATEMENT.createWithContext(reader);
 
-            MolangExpression first = parseExpression(new StringReader(reader.getRead().substring(start)), reduceConstants, true, allowMath);
+            MolangExpression first = parseExpression(new StringReader(reader.getRead().substring(start)), flags, true, allowMath);
             if (!reader.canRead())
                 throw TRAILING_STATEMENT.createWithContext(reader);
             reader.skip();
 
-            MolangExpression branch = parseExpression(reader, reduceConstants, true, allowMath);
+            MolangExpression branch = parseExpression(reader, flags, true, allowMath);
             MolangExpression condition = new MolangConditionalNode(expression, first, branch);
-            if (reduceConstants && expression instanceof MolangConstantNode)
+            if (checkFlag(flags, REDUCE_FLAG) && expression instanceof MolangConstantNode)
             {
                 try
                 {
@@ -301,7 +345,7 @@ public class MolangCompiler
         return success && parenthesis == 0;
     }
 
-    private static MolangExpression parseMethod(String[] methodName, MolangExpression[] parameters, boolean reduceConstants) throws CommandSyntaxException
+    private static MolangExpression parseMethod(String[] methodName, MolangExpression[] parameters, int flags) throws CommandSyntaxException
     {
         // Special case for math to check if it's valid
         if ("math".equalsIgnoreCase(methodName[0]))
@@ -314,7 +358,7 @@ public class MolangCompiler
             if (function.getParameters() >= 0 && parameters.length > function.getParameters())
                 throw TOO_MANY_PARAMETERS.create(function.getParameters(), parameters.length);
 
-            if (reduceConstants)
+            if (checkFlag(flags, REDUCE_FLAG))
             {
                 // Math functions are constant so these can be compiled down to raw numbers if all parameters are constants
                 boolean reduceFunction = true;
@@ -362,11 +406,11 @@ public class MolangCompiler
 
     // Based on https://stackoverflow.com/questions/3422673/how-to-evaluate-a-math-expression-given-in-string-form
     // Stack Overflow! Every programmer's best friend!
-    private static MolangExpression compute(StringReader reader, boolean reduceConstants) throws CommandSyntaxException
+    private static MolangExpression compute(StringReader reader, int flags) throws CommandSyntaxException
     {
         return new Object()
         {
-            private boolean canReduce = reduceConstants;
+            private boolean canReduce = checkFlag(flags, REDUCE_FLAG);
 
             boolean accept(int charToEat)
             {
@@ -483,14 +527,19 @@ public class MolangCompiler
                 }
 
                 System.out.println("Parse: " + reader.getRead().substring(start));
-                MolangExpression expression = MolangCompiler.parseExpression(new StringReader(reader.getRead().substring(start)), reduceConstants, true, false);
-                if (!reduceConstants)
+                MolangExpression expression = MolangCompiler.parseExpression(new StringReader(reader.getRead().substring(start)), flags, true, false);
+                if (!checkFlag(flags, REDUCE_FLAG))
                     return expression;
                 if (this.canReduce && (expression instanceof MolangSetVariableNode || expression instanceof MolangInvokeFunctionNode || expression instanceof MolangGetVariableNode))
                     this.canReduce = false;
                 return expression;
             }
         }.parse();
+    }
+
+    private static boolean checkFlag(int flags, int flag)
+    {
+        return (flags & flag) > 0;
     }
 
     private static boolean isValidKeywordChar(final char c)
