@@ -22,7 +22,7 @@ public class MolangTest
 //                "return temp.my_temp_var * temp.my_temp_var + temp.my_other_temp_var;");
         compileTime.stop();
 
-        MolangRuntime runtime = MolangRuntime.runtime()
+        MolangRuntime runtime = MolangRuntime.runtime(0)
                 .setQuery("life_time", 0)
                 .setVariable("attack_time", 0)
                 .create();

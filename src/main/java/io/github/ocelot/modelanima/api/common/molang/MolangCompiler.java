@@ -136,6 +136,15 @@ public class MolangCompiler
         String[] currentKeyword = parseKeyword(reader, simple); // This handles 'abc.def' etc
         String fullWord = currentKeyword[0] + (currentKeyword.length > 1 ? "." + currentKeyword[1] : "");
 
+        // Check for 'this' keyword
+        if ("this".equals(fullWord))
+        {
+            reader.skipWhitespace();
+            if (reader.canRead() && reader.peek() != '?' && reader.peek() != ':' && !MATH_OPERATORS.contains(reader.peek()))
+                throw TRAILING_STATEMENT.createWithContext(reader);
+            return parseCondition(reader, new MolangThisNode(), reduceConstants, allowMath);
+        }
+
         // Check for number
         if (NumberUtils.isParsable(fullWord))
         {
@@ -502,6 +511,12 @@ public class MolangCompiler
 
         @Override
         public void clearParameters() throws MolangException
+        {
+            throw new MolangException("Invalid Call");
+        }
+
+        @Override
+        public float getThis() throws MolangException
         {
             throw new MolangException("Invalid Call");
         }

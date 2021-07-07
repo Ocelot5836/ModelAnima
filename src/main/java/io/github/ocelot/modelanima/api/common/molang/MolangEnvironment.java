@@ -22,6 +22,11 @@ public interface MolangEnvironment
     void clearParameters() throws MolangException;
 
     /**
+     * @return The value of <code>this</code> in MoLang
+     */
+    float getThis() throws MolangException;
+
+    /**
      * Retrieves a {@link MolangObject} by the specified domain name.
      *
      * @param name The name to fetch by, case insensitive

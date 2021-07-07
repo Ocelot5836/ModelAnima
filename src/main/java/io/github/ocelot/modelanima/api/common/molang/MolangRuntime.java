@@ -20,11 +20,13 @@ import java.util.Map;
  */
 public class MolangRuntime implements MolangEnvironment
 {
+    private final float thisValue;
     private final Map<String, MolangObject> objects;
     private final Map<Integer, MolangExpression> parameters;
 
-    private MolangRuntime(MolangObject query, MolangObject global, MolangObject variable)
+    private MolangRuntime(float thisValue, MolangObject query, MolangObject global, MolangObject variable)
     {
+        this.thisValue = thisValue;
         this.objects = new HashMap<>();
         this.objects.put("query", query); // This is static accesses
         this.objects.put("math", new MolangMath()); // The MoLang math "library"
@@ -67,6 +69,12 @@ public class MolangRuntime implements MolangEnvironment
     }
 
     @Override
+    public float getThis()
+    {
+        return this.thisValue;
+    }
+
+    @Override
     public MolangObject get(String name) throws MolangException
     {
         name = name.toLowerCase(Locale.ROOT);
@@ -90,20 +98,22 @@ public class MolangRuntime implements MolangEnvironment
     /**
      * @return A new runtime builder.
      */
-    public static Builder runtime()
+    public static Builder runtime(float thisValue)
     {
-        return new Builder();
+        return new Builder(thisValue);
     }
 
     // TODO docs
     public static class Builder
     {
+        private final float thisValue;
         private final MolangObject query;
         private final MolangObject global;
         private final MolangObject variable;
 
-        public Builder()
+        public Builder(float thisValue)
         {
+            this.thisValue = thisValue;
             this.query = new MolangVariableStorage(true);
             this.global = new MolangVariableStorage(true);
             this.variable = new MolangVariableStorage(false);
@@ -141,7 +151,7 @@ public class MolangRuntime implements MolangEnvironment
 
         public MolangRuntime create()
         {
-            return new MolangRuntime(new ImmutableMolangObject(this.query), new ImmutableMolangObject(this.global), this.variable);
+            return new MolangRuntime(this.thisValue, new ImmutableMolangObject(this.query), new ImmutableMolangObject(this.global), this.variable);
         }
 
         public MolangObject getQuery()
