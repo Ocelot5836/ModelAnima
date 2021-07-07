@@ -36,4 +36,24 @@ public class MolangVariableStorage implements MolangObject
     {
         return this.storage.containsKey(name);
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder("MoLang Object\n");
+        for (Map.Entry<String, MolangExpression> entry : this.storage.entrySet())
+        {
+            builder.append('\t').append(entry.getKey());
+            if (entry.getValue() instanceof MolangFunction)
+            {
+                builder.append("()");
+            }
+            else
+            {
+                builder.append('=').append(entry.getValue());
+            }
+            builder.append('\n');
+        }
+        return builder.toString();
+    }
 }

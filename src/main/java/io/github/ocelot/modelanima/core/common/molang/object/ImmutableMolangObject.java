@@ -29,4 +29,10 @@ public class ImmutableMolangObject implements MolangObject
     {
         return this.parent.has(name);
     }
+
+    @Override
+    public String toString()
+    {
+        return String.valueOf(this.parent);
+    }
 }

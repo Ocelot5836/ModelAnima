@@ -32,6 +32,15 @@ public class MolangMath implements MolangObject
         return MathFunction.byName(name) != null;
     }
 
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder("MoLang Math\n");
+        for (MathFunction function : MathFunction.values())
+            builder.append('\t').append(function.functionName).append("()").append('\n');
+        return builder.toString();
+    }
+
     public enum MathFunction
     {
         ABS(1, parameters ->

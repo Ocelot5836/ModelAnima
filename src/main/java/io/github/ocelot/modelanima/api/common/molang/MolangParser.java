@@ -93,10 +93,6 @@ public class MolangParser
         if (!reader.canRead())
             throw UNEXPECTED_TOKEN.createWithContext(reader);
 
-        System.out.println(reader.getRemaining());
-        if (reader.peek() == '?')
-            System.out.println("TEST");
-
         // Check for math. This will not happen if reading from math because operators are removed
         if (!reader.getRemaining().contains("=") && !reader.getRemaining().contains("?") && !reader.getRemaining().contains(":") && allowMath)
         {
@@ -219,7 +215,7 @@ public class MolangParser
         if (keywords.stream().allMatch(String::isEmpty))
         {
             if (simple)
-                return new String[]{"return"};
+                return new String[0];
             throw UNEXPECTED_TOKEN.createWithContext(reader);
         }
         return keywords.toArray(new String[0]);

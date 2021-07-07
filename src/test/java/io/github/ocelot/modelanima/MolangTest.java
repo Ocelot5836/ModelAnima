@@ -12,7 +12,8 @@ public class MolangTest
     public static void main(String[] args) throws CommandSyntaxException, MolangException
     {
         Stopwatch compileTime = Stopwatch.createStarted();
-        MolangExpression expression =// MolangParser.parse("temp.my_temp_var = math.sin(90) / 2");
+        MolangExpression expression =
+//                MolangParser.parse("temp.my_temp_var = math.sin(90) / 2");
 //                MolangParser.parse("global.test ? 1 : 20");
 //        MolangParser.parse("return math.sin(global.anim_time * 1.23)");
 //        MolangParser.parse("math.sin(global.anim_time * 1.23)");
@@ -32,5 +33,6 @@ public class MolangTest
         float result = expression.resolve(runtime);
         runTime.stop();
         System.out.println("Took " + runTime + " to execute. Result: " + result);
+        System.out.println("\n" + runtime.dump());
     }
 }
