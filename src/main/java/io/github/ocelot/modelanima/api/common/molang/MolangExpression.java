@@ -1,15 +1,16 @@
 package io.github.ocelot.modelanima.api.common.molang;
 
+import io.github.ocelot.modelanima.core.common.molang.node.MolangConstantNode;
+
+/**
+ * <p></p>
+ *
+ * @author Ocelot
+ * @since 1.0.0
+ */
 public interface MolangExpression
 {
-    float resolve(Scope scope);
+    MolangExpression ZERO = new MolangConstantNode(0);
 
-    interface Scope
-    {
-        void setValue(String name, float value);
-
-        float getValue(String name);
-
-        boolean hasValue(String name);
-    }
+    float resolve(MolangRuntime runtime);
 }
