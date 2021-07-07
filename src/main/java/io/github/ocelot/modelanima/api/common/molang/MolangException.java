@@ -12,4 +12,9 @@ public class MolangException extends Exception
     {
         super(message, null, true, true);
     }
+
+    public MolangException(Throwable cause)
+    {
+        super(null, cause, true, true);
+    }
 }

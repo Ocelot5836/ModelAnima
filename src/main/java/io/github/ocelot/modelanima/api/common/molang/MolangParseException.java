@@ -10,6 +10,6 @@ public class MolangParseException extends MolangException
 {
     public MolangParseException(Exception exception)
     {
-        super(exception.getMessage());
+        super(exception);
     }
 }

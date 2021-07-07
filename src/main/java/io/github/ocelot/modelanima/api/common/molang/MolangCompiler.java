@@ -178,7 +178,7 @@ public class MolangCompiler
                 throw EXPECTED.createWithContext(reader, ')');
 
             reader.skipWhitespace();
-            return parseCondition(reader, parseMethod(currentKeyword, parameters), reduceConstants, allowMath);
+            return parseCondition(reader, parseMethod(currentKeyword, parameters, reduceConstants), reduceConstants, allowMath);
         }
         else
         {
@@ -218,7 +218,7 @@ public class MolangCompiler
 
             MolangExpression branch = parseExpression(reader, reduceConstants, true, allowMath);
             MolangExpression condition = new MolangConditionalNode(expression, first, branch);
-            if (expression instanceof MolangConstantNode)
+            if (reduceConstants && expression instanceof MolangConstantNode)
             {
                 try
                 {
@@ -292,7 +292,7 @@ public class MolangCompiler
         return success && parenthesis == 0;
     }
 
-    private static MolangExpression parseMethod(String[] methodName, MolangExpression[] parameters) throws CommandSyntaxException
+    private static MolangExpression parseMethod(String[] methodName, MolangExpression[] parameters, boolean reduceConstants) throws CommandSyntaxException
     {
         // Special case for math to check if it's valid
         if ("math".equalsIgnoreCase(methodName[0]))
@@ -305,42 +305,45 @@ public class MolangCompiler
             if (function.getParameters() >= 0 && parameters.length > function.getParameters())
                 throw TOO_MANY_PARAMETERS.create(function.getParameters(), parameters.length);
 
-            // Math functions are constant so these can be compiled down to raw numbers if all parameters are constants
-            boolean reduceFunction = true;
-            for (int i = 0; i < parameters.length; i++)
+            if (reduceConstants)
             {
-                if (parameters[i] instanceof MolangConstantNode)
-                    continue;
-                try
+                // Math functions are constant so these can be compiled down to raw numbers if all parameters are constants
+                boolean reduceFunction = true;
+                for (int i = 0; i < parameters.length; i++)
                 {
-                    parameters[i] = new MolangConstantNode(parameters[i].resolve(ENVIRONMENT));
-                }
-                catch (MolangException e)
-                {
-                    // The parameter is runtime dependent, so the entire function is blocked from being computed.
-                    // Parameters can still be computed so there is no reason to stop trying to reduce
-                    reduceFunction = false;
-                }
-            }
-
-            if (reduceFunction)
-            {
-                try
-                {
-                    float[] parameterValues = new float[parameters.length];
-                    for (int i = 0; i < parameterValues.length; i++)
-                        parameterValues[i] = parameters[i].resolve(ENVIRONMENT);
-                    return new MolangConstantNode(function.getOp().resolve(i ->
+                    if (parameters[i] instanceof MolangConstantNode)
+                        continue;
+                    try
                     {
-                        if (i < 0 || i >= parameters.length)
-                            return 0F;
-                        return parameterValues[i];
-                    }));
+                        parameters[i] = new MolangConstantNode(parameters[i].resolve(ENVIRONMENT));
+                    }
+                    catch (MolangException e)
+                    {
+                        // The parameter is runtime dependent, so the entire function is blocked from being computed.
+                        // Parameters can still be computed so there is no reason to stop trying to reduce
+                        reduceFunction = false;
+                    }
                 }
-                catch (MolangException e)
+
+                if (reduceFunction)
                 {
-                    // Something went horribly wrong with the above checks
-                    e.printStackTrace();
+                    try
+                    {
+                        float[] parameterValues = new float[parameters.length];
+                        for (int i = 0; i < parameterValues.length; i++)
+                            parameterValues[i] = parameters[i].resolve(ENVIRONMENT);
+                        return new MolangConstantNode(function.getOp().resolve(i ->
+                        {
+                            if (i < 0 || i >= parameters.length)
+                                return 0F;
+                            return parameterValues[i];
+                        }));
+                    }
+                    catch (MolangException e)
+                    {
+                        // Something went horribly wrong with the above checks
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -402,7 +405,7 @@ public class MolangCompiler
                     {
                         x = new MolangMathOperatorNode(MolangMathOperatorNode.MathOperation.ADD, x, parseTerm()); // addition
                     }
-                    if (accept('-'))
+                    else if (accept('-'))
                     {
                         x = new MolangMathOperatorNode(MolangMathOperatorNode.MathOperation.SUBTRACT, x, parseTerm()); // subtraction
                     }
@@ -418,11 +421,12 @@ public class MolangCompiler
                 MolangExpression x = parseFactor();
                 while (true)
                 {
-                    if (accept('*'))
+                    boolean accept = accept('*');
+                    if (accept)
                     {
                         x = new MolangMathOperatorNode(MolangMathOperatorNode.MathOperation.MULTIPLY, x, parseFactor()); // multiplication
                     }
-                    if (accept('/'))
+                    else if (accept('/'))
                     {
                         x = new MolangMathOperatorNode(MolangMathOperatorNode.MathOperation.DIVIDE, x, parseFactor()); // division
                     }
@@ -469,6 +473,7 @@ public class MolangCompiler
                     reader.skip();
                 }
 
+                System.out.println("Parse: " + reader.getRead().substring(start));
                 MolangExpression expression = MolangCompiler.parseExpression(new StringReader(reader.getRead().substring(start)), reduceConstants, true, false);
                 if (!reduceConstants)
                     return expression;
