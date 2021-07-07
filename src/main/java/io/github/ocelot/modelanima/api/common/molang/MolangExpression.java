@@ -15,9 +15,9 @@ public interface MolangExpression
     /**
      * Resolves the float value of this runtime.
      *
-     * @param runtime The runtime to execute in
+     * @param environment The environment to execute in
      * @return The resulting value
      * @throws MolangException If any error occurs when resolving the value
      */
-    float resolve(MolangRuntime runtime) throws MolangException;
+    float resolve(MolangEnvironment environment) throws MolangException;
 }

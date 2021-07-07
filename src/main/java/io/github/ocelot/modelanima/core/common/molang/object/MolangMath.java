@@ -128,17 +128,24 @@ public class MolangMath implements MolangObject
         private final int parameters;
         private final String functionName;
         private final MolangExpression expression;
+        private final MolangJavaFunction op;
 
         MathFunction(int parameters, MolangJavaFunction op)
         {
             this.parameters = parameters;
             this.functionName = this.name().toLowerCase(Locale.ROOT) + "$" + parameters;
             this.expression = new MolangFunction(parameters, op);
+            this.op = op ;
         }
 
         public int getParameters()
         {
             return parameters;
+        }
+
+        public MolangJavaFunction getOp()
+        {
+            return op;
         }
 
         @Nullable

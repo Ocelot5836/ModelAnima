@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.core.common.molang.node;
 
+import io.github.ocelot.modelanima.api.common.molang.MolangEnvironment;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
-import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 
 /**
  * @author Ocelot
@@ -21,9 +21,9 @@ public class MolangConditionalNode implements MolangExpression
     }
 
     @Override
-    public float resolve(MolangRuntime runtime) throws MolangException
+    public float resolve(MolangEnvironment environment) throws MolangException
     {
-        return (this.condition.resolve(runtime) != 0 ? this.first : this.branch).resolve(runtime);
+        return (this.condition.resolve(environment) != 0 ? this.first : this.branch).resolve(environment);
     }
 
     @Override

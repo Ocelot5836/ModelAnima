@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.core.common.molang.node;
 
+import io.github.ocelot.modelanima.api.common.molang.MolangEnvironment;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
-import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 
 /**
  * @author Ocelot
@@ -17,11 +17,11 @@ public class MolangCompoundNode implements MolangExpression
     }
 
     @Override
-    public float resolve(MolangRuntime runtime) throws MolangException
+    public float resolve(MolangEnvironment environment) throws MolangException
     {
         for (int i = 0; i < this.expressions.length; i++)
         {
-            float result = this.expressions[i].resolve(runtime);
+            float result = this.expressions[i].resolve(environment);
             if (i >= this.expressions.length - 1) // The last expression is expected to have the `return`
                 return result;
         }

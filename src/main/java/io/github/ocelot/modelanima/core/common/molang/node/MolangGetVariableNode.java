@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.core.common.molang.node;
 
+import io.github.ocelot.modelanima.api.common.molang.MolangEnvironment;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
-import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 
 /**
  * @author Ocelot
@@ -19,14 +19,14 @@ public class MolangGetVariableNode implements MolangExpression
     }
 
     @Override
-    public float resolve(MolangRuntime runtime) throws MolangException
+    public float resolve(MolangEnvironment environment) throws MolangException
     {
-        return runtime.get(this.object).get(this.name).resolve(runtime);
+        return environment.get(this.object).get(this.name).resolve(environment);
     }
 
     @Override
     public String toString()
     {
-        return name;
+        return this.object + "." + this.name;
     }
 }

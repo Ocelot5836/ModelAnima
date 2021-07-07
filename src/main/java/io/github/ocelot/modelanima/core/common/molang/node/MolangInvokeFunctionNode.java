@@ -1,10 +1,10 @@
 package io.github.ocelot.modelanima.core.common.molang.node;
 
-import io.github.ocelot.modelanima.api.common.molang.MolangException;
-import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
-import io.github.ocelot.modelanima.api.common.molang.MolangObject;
-import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
+import io.github.ocelot.modelanima.api.common.molang.*;
 
+/**
+ * @author Ocelot
+ */
 public class MolangInvokeFunctionNode implements MolangExpression
 {
     private final String object;
@@ -19,15 +19,15 @@ public class MolangInvokeFunctionNode implements MolangExpression
     }
 
     @Override
-    public float resolve(MolangRuntime runtime) throws MolangException
+    public float resolve(MolangEnvironment environment) throws MolangException
     {
-        MolangObject object = runtime.get(this.object);
+        MolangObject object = environment.get(this.object);
         if (!object.has(this.name + "$"+this.parameters.length))
             throw new IllegalStateException("Unknown function: " + this.object + "." + this.name + "() with " + this.parameters.length + " parameters");
         for (int i = 0; i < this.parameters.length; i++)
-            runtime.loadParameter(i, this.parameters[i]);
-        float result = runtime.get(this.object).get(this.name +"$"+ this.parameters.length).resolve(runtime);
-        runtime.clearParameters();
+            environment.loadParameter(i, this.parameters[i]);
+        float result = environment.get(this.object).get(this.name +"$"+ this.parameters.length).resolve(environment);
+        environment.clearParameters();
         return result;
     }
 

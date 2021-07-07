@@ -1,9 +1,12 @@
 package io.github.ocelot.modelanima.core.common.molang.node;
 
+import io.github.ocelot.modelanima.api.common.molang.MolangEnvironment;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
-import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 
+/**
+ * @author Ocelot
+ */
 public class MolangMathOperatorNode implements MolangExpression
 {
     private final MathOperation operation;
@@ -18,9 +21,9 @@ public class MolangMathOperatorNode implements MolangExpression
     }
 
     @Override
-    public float resolve(MolangRuntime runtime) throws MolangException
+    public float resolve(MolangEnvironment environment) throws MolangException
     {
-        return this.operation.op.apply(this.a, this.b, runtime);
+        return this.operation.op.apply(this.a, this.b, environment);
     }
 
     @Override
@@ -31,16 +34,16 @@ public class MolangMathOperatorNode implements MolangExpression
 
     public enum MathOperation
     {
-        MULTIPLY('*', (a, b, runtime) -> a.resolve(runtime) * b.resolve(runtime)),
-        DIVIDE('/', (a, b, runtime) ->
+        MULTIPLY('*', (a, b, environment) -> a.resolve(environment) * b.resolve(environment)),
+        DIVIDE('/', (a, b, environment) ->
         {
-            float second = b.resolve(runtime);
+            float second = b.resolve(environment);
             if (second == 0) // This is to prevent a divide by zero exception
                 return 0;
-            return a.resolve(runtime) / second;
+            return a.resolve(environment) / second;
         }),
-        ADD('+', (a, b, runtime) -> a.resolve(runtime) + b.resolve(runtime)),
-        SUBTRACT('-', (a, b, runtime) -> a.resolve(runtime) - b.resolve(runtime));
+        ADD('+', (a, b, environment) -> a.resolve(environment) + b.resolve(environment)),
+        SUBTRACT('-', (a, b, environment) -> a.resolve(environment) - b.resolve(environment));
 
         private final char sign;
         private final MathOp op;
@@ -54,6 +57,6 @@ public class MolangMathOperatorNode implements MolangExpression
 
     private interface MathOp
     {
-        float apply(MolangExpression a, MolangExpression b, MolangRuntime runtime) throws MolangException;
+        float apply(MolangExpression a, MolangExpression b, MolangEnvironment environment) throws MolangException;
     }
 }

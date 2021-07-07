@@ -18,19 +18,19 @@ import java.util.Map;
  * @author Ocelot
  * @since 1.0.0
  */
-public class MolangRuntime
+public class MolangRuntime implements MolangEnvironment
 {
     private final Map<String, MolangObject> objects;
     private final Map<Integer, MolangExpression> parameters;
 
-    private MolangRuntime(MolangObject query, MolangObject global)
+    private MolangRuntime(MolangObject query, MolangObject global, MolangObject variable)
     {
         this.objects = new HashMap<>();
-        this.objects.put("query", query);
-        this.objects.put("math", new MolangMath());
-        this.objects.put("global", global);
-        this.objects.put("temp", new MolangVariableStorage(false));
-        this.objects.put("variable", new MolangVariableStorage(false));
+        this.objects.put("query", query); // This is static accesses
+        this.objects.put("math", new MolangMath()); // The MoLang math "library"
+        this.objects.put("global", global); // This is parameter access
+        this.objects.put("temp", new MolangVariableStorage(false)); // This is specifically for expression variables
+        this.objects.put("variable", variable); // This can be accessed by Java code
         this.parameters = new Int2ObjectArrayMap<>();
     }
 
@@ -54,32 +54,19 @@ public class MolangRuntime
         return builder.toString();
     }
 
-    /**
-     * Loads a parameter into the specified slot.
-     *
-     * @param index      The parameter slot to load into
-     * @param expression The expression to use as a parameter
-     */
+    @Override
     public void loadParameter(int index, MolangExpression expression)
     {
         this.parameters.put(index, expression);
     }
 
-    /**
-     * Clears all stored parameters.
-     */
+    @Override
     public void clearParameters()
     {
         this.parameters.clear();
     }
 
-    /**
-     * Retrieves a {@link MolangObject} by the specified domain name.
-     *
-     * @param name The name to fetch by, case insensitive
-     * @return The object with the name
-     * @throws MolangException If the object does not exist
-     */
+    @Override
     public MolangObject get(String name) throws MolangException
     {
         name = name.toLowerCase(Locale.ROOT);
@@ -88,23 +75,13 @@ public class MolangRuntime
         return this.objects.get(name);
     }
 
-    /**
-     * Retrieves an expression by the specified parameter index.
-     *
-     * @param parameter The parameter to fetch
-     * @return The parameter value or {@link MolangExpression#ZERO} if there is no parameter with that index
-     */
+    @Override
     public MolangExpression getParameter(int parameter)
     {
         return this.parameters.getOrDefault(parameter, MolangExpression.ZERO);
     }
 
-    /**
-     * Checks to see if a parameter is loaded under the specified index.
-     *
-     * @param parameter The parameter to check
-     * @return Whether or not a parameter is present
-     */
+    @Override
     public boolean hasParameter(int parameter)
     {
         return this.parameters.containsKey(parameter);
@@ -118,15 +95,18 @@ public class MolangRuntime
         return new Builder();
     }
 
+    // TODO docs
     public static class Builder
     {
         private final MolangObject query;
         private final MolangObject global;
+        private final MolangObject variable;
 
         public Builder()
         {
             this.query = new MolangVariableStorage(true);
             this.global = new MolangVariableStorage(true);
+            this.variable = new MolangVariableStorage(false);
         }
 
         public Builder setQuery(String name, float value)
@@ -135,15 +115,21 @@ public class MolangRuntime
             return this;
         }
 
-        public Builder setQuery(String name, int params, MolangJavaFunction function)
-        {
-            this.query.set(name + "$" + params, new MolangFunction(params, function));
-            return this;
-        }
-
         public Builder setGlobal(String name, float value)
         {
             this.global.set(name, new MolangConstantNode(value));
+            return this;
+        }
+
+        public Builder setVariable(String name, float value)
+        {
+            this.variable.set(name, new MolangConstantNode(value));
+            return this;
+        }
+
+        public Builder setQuery(String name, int params, MolangJavaFunction function)
+        {
+            this.query.set(name + "$" + params, new MolangFunction(params, function));
             return this;
         }
 
@@ -155,7 +141,22 @@ public class MolangRuntime
 
         public MolangRuntime create()
         {
-            return new MolangRuntime(new ImmutableMolangObject(this.query), new ImmutableMolangObject(this.global));
+            return new MolangRuntime(new ImmutableMolangObject(this.query), new ImmutableMolangObject(this.global), this.variable);
+        }
+
+        public MolangObject getQuery()
+        {
+            return query;
+        }
+
+        public MolangObject getGlobal()
+        {
+            return global;
+        }
+
+        public MolangObject getVariable()
+        {
+            return variable;
         }
     }
 }
