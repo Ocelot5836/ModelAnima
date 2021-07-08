@@ -5,8 +5,6 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
-import io.github.ocelot.modelanima.api.common.molang.MolangCompiler;
-import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 import io.github.ocelot.modelanima.core.client.geometry.BoneModelRenderer;
 import net.minecraft.client.renderer.RenderType;
@@ -35,6 +33,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     private static final Vector3f SCALE = new Vector3f();
 
     private final Map<String, BoneModelRenderer> modelParts;
+    private final Set<BoneModelRenderer> renderParts;
     private final String[] modelKeys;
     private final String[] textureKeys;
     private String activeMaterial;
@@ -50,6 +49,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         this.texWidth = textureWidth;
         this.texHeight = textureHeight;
         this.modelParts = new HashMap<>();
+        this.renderParts = new HashSet<>();
 
         Set<String> textures = new HashSet<>();
         for (GeometryModelData.Bone bone : bones)
@@ -107,10 +107,12 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         for (Pair<GeometryModelData.Bone, BoneModelRenderer> pair : boneLookup.values())
         {
             GeometryModelData.Bone currentBone = pair.getLeft();
-            if (!parts.isEmpty() && currentBone.getParent() != null && !currentBone.getParent().startsWith("parent."))
-                continue;
 
             this.modelParts.put(currentBone.getName(), pair.getRight());
+            if (parts.isEmpty() || currentBone.getParent() == null || currentBone.getParent().startsWith("parent."))
+            {
+                this.renderParts.add(pair.getRight());
+            }
         }
 
         this.modelKeys = parts.values().toArray(new String[0]);
@@ -125,7 +127,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     public void render(String material, GeometryModelTexture texture, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
         this.activeMaterial = material;
-        this.modelParts.values().forEach(renderer ->
+        this.renderParts.forEach(renderer ->
         {
             String parent = renderer.getBone().getParent();
             if (parent != null && !parent.startsWith("parent."))

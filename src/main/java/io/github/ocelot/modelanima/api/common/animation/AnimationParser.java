@@ -2,6 +2,7 @@ package io.github.ocelot.modelanima.api.common.animation;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
+import net.minecraft.util.JSONUtils;
 
 import java.io.Reader;
 
@@ -60,6 +61,6 @@ public class AnimationParser
     {
         if (!json.getAsJsonObject().get("format_version").getAsString().equals(VERSION))
             throw new JsonSyntaxException("Unsupported animation version. Only " + VERSION + " is supported."); // TODO support multiple versions
-        return GSON.fromJson(json.getAsJsonObject().getAsJsonObject("animations"), AnimationData[].class);
+        return GSON.fromJson(JSONUtils.getAsJsonObject(json.getAsJsonObject(), "animations"), AnimationData[].class);
     }
 }

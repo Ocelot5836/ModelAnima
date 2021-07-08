@@ -231,7 +231,6 @@ public class MolangCompiler
                         parameters = new MolangExpression[parameterStrings.length];
                         for (int i = 0; i < parameterStrings.length; i++)
                         {
-                            System.out.println("Param: " + parameterStrings[i]);
                             parameters[i] = parseExpression(new StringReader(parameterStrings[i]), flags, true, true);
                         }
                     }
@@ -539,7 +538,6 @@ public class MolangCompiler
                     reader.skip();
                 }
 
-                System.out.println("Parse: " + reader.getRead().substring(start));
                 MolangExpression expression = MolangCompiler.parseExpression(new StringReader(reader.getRead().substring(start)), flags, true, false);
                 if (!checkFlag(flags, REDUCE_FLAG))
                     return expression;

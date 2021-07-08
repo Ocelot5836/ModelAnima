@@ -3,6 +3,7 @@ package io.github.ocelot.modelanima.api.common.geometry;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
+import net.minecraft.util.JSONUtils;
 
 import java.io.Reader;
 
@@ -67,7 +68,7 @@ public class GeometryModelParser
     {
         if (!json.getAsJsonObject().get("format_version").getAsString().equals(VERSION))
             throw new JsonSyntaxException("Unsupported model version. Only " + VERSION + " is supported."); // TODO support multiple versions
-        return GSON.fromJson(json.getAsJsonObject().getAsJsonArray("minecraft:geometry"), GeometryModelData[].class);
+        return GSON.fromJson(JSONUtils.getAsJsonArray(json.getAsJsonObject(), "minecraft:geometry"), GeometryModelData[].class);
     }
 
     /**
