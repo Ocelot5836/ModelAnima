@@ -182,14 +182,7 @@ public class MolangMath implements MolangObject
         SQRT(1, parameters ->
                 (float) Math.sqrt(parameters.resolve(0))),
         TRUNC(1, parameters ->
-        {
-            float value = parameters.resolve(0);
-            if (value < 0)
-                return (float) Math.ceil(value);
-            if (value > 0)
-                return (float) Math.floor(value);
-            return value;
-        });
+                (int) parameters.resolve(0));
 
         private final int parameters;
         private final String functionName;
