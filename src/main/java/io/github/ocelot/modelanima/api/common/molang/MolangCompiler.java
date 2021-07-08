@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import io.github.ocelot.modelanima.core.common.molang.MolangJavaFunctionContext;
 import io.github.ocelot.modelanima.core.common.molang.node.*;
 import io.github.ocelot.modelanima.core.common.molang.object.MolangMath;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -352,11 +353,18 @@ public class MolangCompiler
         {
             MolangMath.MathFunction function = MolangMath.MathFunction.byName(methodName[1] + "$" + parameters.length);
             if (function == null)
-                throw INVALID_KEYWORD.create(methodName[1]);
-            if (parameters.length < function.getParameters())
-                throw NOT_ENOUGH_PARAMETERS.create(function.getParameters(), parameters.length);
-            if (function.getParameters() >= 0 && parameters.length > function.getParameters())
-                throw TOO_MANY_PARAMETERS.create(function.getParameters(), parameters.length);
+            {
+                function = MolangMath.MathFunction.byName(methodName[1]);
+                if (function == null)
+                    throw INVALID_KEYWORD.create(methodName[1]);
+            }
+            if (function.getParameters() >= 0)
+            {
+                if (parameters.length < function.getParameters())
+                    throw NOT_ENOUGH_PARAMETERS.create(function.getParameters(), parameters.length);
+                if (parameters.length > function.getParameters())
+                    throw TOO_MANY_PARAMETERS.create(function.getParameters(), parameters.length);
+            }
 
             if (checkFlag(flags, REDUCE_FLAG))
             {
@@ -382,15 +390,7 @@ public class MolangCompiler
                 {
                     try
                     {
-                        float[] parameterValues = new float[parameters.length];
-                        for (int i = 0; i < parameterValues.length; i++)
-                            parameterValues[i] = parameters[i].resolve(ENVIRONMENT);
-                        return new MolangConstantNode(function.getOp().resolve(i ->
-                        {
-                            if (i < 0 || i >= parameters.length)
-                                return 0F;
-                            return parameterValues[i];
-                        }));
+                        return new MolangConstantNode(function.getOp().resolve(new MolangJavaFunctionContext(ENVIRONMENT, parameters)));
                     }
                     catch (MolangException e)
                     {

@@ -44,35 +44,35 @@ public class MolangMath implements MolangObject
     public enum MathFunction
     {
         ABS(1, parameters ->
-                Math.abs(parameters.apply(0))),
+                Math.abs(parameters.resolve(0))),
         SIN(1, parameters ->
-                (float) Math.sin(parameters.apply(0) * Math.PI / 180.0)),
+                (float) Math.sin(parameters.resolve(0) * Math.PI / 180.0)),
         COS(1, parameters ->
-                (float) Math.cos(parameters.apply(0) * Math.PI / 180.0)),
+                (float) Math.cos(parameters.resolve(0) * Math.PI / 180.0)),
         EXP(1, parameters ->
-                (float) Math.exp(parameters.apply(0))),
+                (float) Math.exp(parameters.resolve(0))),
         LN(1, parameters ->
-                (float) Math.log(parameters.apply(0))),
+                (float) Math.log(parameters.resolve(0))),
         POW(2, parameters ->
-                (float) Math.pow(parameters.apply(0), parameters.apply(1))),
+                (float) Math.pow(parameters.resolve(0), parameters.resolve(1))),
         SQRT(1, parameters ->
-                (float) Math.sqrt(parameters.apply(0))),
+                (float) Math.sqrt(parameters.resolve(0))),
         RANDOM(2, parameters ->
         {
             double rand = Math.random();
-            float min = parameters.apply(0);
-            float max = parameters.apply(1);
+            float min = parameters.resolve(0);
+            float max = parameters.resolve(1);
             if (min > max)
                 throw new RuntimeException("Invalid random range: " + min + " to " + max);
             return (float) MathHelper.lerp(rand, min, max);
         }),
         CEIL(1, parameters ->
-                (float) Math.ceil(parameters.apply(0))),
+                (float) Math.ceil(parameters.resolve(0))),
         ROUND(1, parameters ->
-                (float) Math.round(parameters.apply(0))),
+                (float) Math.round(parameters.resolve(0))),
         TRUNC(1, parameters ->
         {
-            float value = parameters.apply(0);
+            float value = parameters.resolve(0);
             if (value < 0)
                 return (float) Math.ceil(value);
             if (value > 0)
@@ -80,41 +80,41 @@ public class MolangMath implements MolangObject
             return value;
         }),
         FLOOR(1, parameters ->
-                (float) Math.floor(parameters.apply(0))),
+                (float) Math.floor(parameters.resolve(0))),
         MOD(2, parameters ->
-                parameters.apply(0) % parameters.apply(1)),
+                parameters.resolve(0) % parameters.resolve(1)),
         MIN(2, parameters ->
-                Math.min(parameters.apply(0), parameters.apply(1))),
+                Math.min(parameters.resolve(0), parameters.resolve(1))),
         MAX(2, parameters ->
-                Math.max(parameters.apply(0), parameters.apply(1))),
+                Math.max(parameters.resolve(0), parameters.resolve(1))),
         CLAMP(3, parameters ->
         {
-            float value = parameters.apply(0);
-            float min = parameters.apply(0);
+            float value = parameters.resolve(0);
+            float min = parameters.resolve(0);
             if (value <= min)
                 return min;
-            return Math.min(value, parameters.apply(0));
+            return Math.min(value, parameters.resolve(0));
         }),
         LERP(3, parameters ->
         {
-            float pct = parameters.apply(2);
+            float pct = parameters.resolve(2);
             if (pct <= 0)
-                return parameters.apply(0);
+                return parameters.resolve(0);
             if (pct >= 1)
-                return parameters.apply(1);
-            float min = parameters.apply(0);
-            return min + (parameters.apply(1) - min) * pct;
+                return parameters.resolve(1);
+            float min = parameters.resolve(0);
+            return min + (parameters.resolve(1) - min) * pct;
         }),
         LERPROTATE(3, parameters ->
         {
-            float pct = parameters.apply(2);
+            float pct = parameters.resolve(2);
             if (pct <= 0)
-                return parameters.apply(0);
+                return parameters.resolve(0);
             if (pct >= 1)
-                return parameters.apply(1);
+                return parameters.resolve(1);
 
-            float min = parameters.apply(0);
-            float max = parameters.apply(1);
+            float min = parameters.resolve(0);
+            float max = parameters.resolve(1);
 
             float difference = max - min;
             while (difference < -180.0F)

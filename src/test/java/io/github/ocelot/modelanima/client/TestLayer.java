@@ -8,6 +8,10 @@ import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelManager;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
+import io.github.ocelot.modelanima.api.common.molang.MolangCompiler;
+import io.github.ocelot.modelanima.api.common.molang.MolangException;
+import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
+import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
@@ -22,6 +26,8 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     private static final ResourceLocation TEXTURE = new ResourceLocation(TestMod.MOD_ID, "llama_trader");
     private static final ResourceLocation ANIMATION = new ResourceLocation(TestMod.MOD_ID, "llama_trader_pump");
 
+    private MolangExpression expression;
+    private String lastExpression;
     private float sneakStart;
 
     public TestLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer)
@@ -29,9 +35,36 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
         super(entityRenderer);
     }
 
+    private void setExpression(String expression)
+    {
+        if (expression.equals(this.lastExpression))
+            return;
+        this.lastExpression = expression;
+        try
+        {
+            this.expression = MolangCompiler.compile(expression);
+        }
+        catch (MolangException e)
+        {
+            e.printStackTrace();
+            this.expression = MolangExpression.ZERO;
+        }
+    }
+
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
+        this.setExpression("query.above_top_solid(0, 0)");
+
+        try
+        {
+            System.out.println(this.expression.resolve(MolangRuntime.runtime(0).fillQueries(player, partialTicks).create()));
+        }
+        catch (MolangException e)
+        {
+            e.printStackTrace();
+        }
+
         GeometryModel geometryModel = GeometryModelManager.getModel(MODEL);
         geometryModel.resetTransformation();
         GeometryModelRenderer.copyModelAngles(this.getParentModel(), geometryModel);

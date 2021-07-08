@@ -139,13 +139,13 @@ public class MolangRuntime implements MolangEnvironment
 
         public Builder setQuery(String name, int params, MolangJavaFunction function)
         {
-            this.query.set(name + "$" + params, new MolangFunction(params, function));
+            this.query.set(params < 0 ? name : (name + "$" + params), new MolangFunction(params, function));
             return this;
         }
 
         public Builder setGlobal(String name, int params, MolangJavaFunction function)
         {
-            this.global.set(name + "$" + params, new MolangFunction(params, function));
+            this.global.set(params < 0 ? name : (name + "$" + params), new MolangFunction(params, function));
             return this;
         }
 

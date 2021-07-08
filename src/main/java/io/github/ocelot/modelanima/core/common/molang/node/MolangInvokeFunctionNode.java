@@ -25,11 +25,24 @@ public class MolangInvokeFunctionNode implements MolangExpression
     public float resolve(MolangEnvironment environment) throws MolangException
     {
         MolangObject object = environment.get(this.object);
-        if (!object.has(this.name + "$"+this.parameters.length))
+        MolangExpression function;
+
+        if (object.has(this.name + "$" + this.parameters.length))
+        {
+            function = object.get(this.name + "$" + this.parameters.length);
+        }
+        else if (object.has(this.name))
+        {
+            function = object.get(this.name);
+        }
+        else
+        {
             throw new IllegalStateException("Unknown function: " + this.object + "." + this.name + "() with " + this.parameters.length + " parameters");
+        }
+
         for (int i = 0; i < this.parameters.length; i++)
             environment.loadParameter(i, this.parameters[i]);
-        float result = environment.get(this.object).get(this.name +"$"+ this.parameters.length).resolve(environment);
+        float result = function.resolve(environment);
         environment.clearParameters();
         return result;
     }
