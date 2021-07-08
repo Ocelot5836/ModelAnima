@@ -46,9 +46,9 @@ public class MolangMath implements MolangObject
         ABS(1, parameters ->
                 Math.abs(parameters.resolve(0))),
         SIN(1, parameters ->
-                (float) Math.sin(parameters.resolve(0) * Math.PI / 180.0)),
+                MathHelper.sin((float) (parameters.resolve(0) * Math.PI / 180.0F))),
         COS(1, parameters ->
-                (float) Math.cos(parameters.resolve(0) * Math.PI / 180.0)),
+                MathHelper.cos((float) (parameters.resolve(0) * Math.PI / 180.0F))),
         EXP(1, parameters ->
                 (float) Math.exp(parameters.resolve(0))),
         LN(1, parameters ->
@@ -135,7 +135,7 @@ public class MolangMath implements MolangObject
             this.parameters = parameters;
             this.functionName = this.name().toLowerCase(Locale.ROOT) + "$" + parameters;
             this.expression = new MolangFunction(parameters, op);
-            this.op = op ;
+            this.op = op;
         }
 
         public int getParameters()
