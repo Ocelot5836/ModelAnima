@@ -270,15 +270,15 @@ public class BoneModelRenderer extends ModelRenderer
     @Override
     public void translateAndRotate(MatrixStack matrixStack)
     {
-        matrixStack.translate((this.animPos.x() + this.x) / 16.0F, (this.animPos.y() + this.y) / 16.0F, (this.animPos.z() + this.z) / 16.0F);
+        matrixStack.translate((this.animPos.x() + this.x) / 16.0F, (-this.animPos.y() + this.y) / 16.0F, (this.animPos.z() + this.z) / 16.0F);
         if (this.animScale.x() != 1 || this.animScale.y() != 1 || this.animScale.z() != 1)
             matrixStack.scale(this.animScale.x(), this.animScale.y(), this.animScale.z());
         if (this.zRot + this.animRotation.z() != 0)
-            matrixStack.mulPose(Vector3f.ZP.rotation(this.zRot + this.animRotation.z()));
+            matrixStack.mulPose(Vector3f.ZP.rotation(this.zRot + (float) (this.animRotation.z() / 180.0F * Math.PI)));
         if (this.yRot + this.animRotation.y() != 0)
-            matrixStack.mulPose(Vector3f.YP.rotation(this.yRot + this.animRotation.y()));
+            matrixStack.mulPose(Vector3f.YP.rotation(this.yRot + (float) (this.animRotation.y() / 180.0F * Math.PI)));
         if (this.xRot + this.animRotation.x() != 0)
-            matrixStack.mulPose(Vector3f.XP.rotation(this.xRot + this.animRotation.x()));
+            matrixStack.mulPose(Vector3f.XP.rotation(this.xRot + (float) (this.animRotation.x() / 180.0F * Math.PI)));
         matrixStack.translate(-this.x / 16.0F, -this.y / 16.0F, -this.z / 16.0F);
         matrixStack.last().pose().multiply(this.copyPosition);
         matrixStack.last().normal().mul(this.copyNormal);
@@ -299,8 +299,8 @@ public class BoneModelRenderer extends ModelRenderer
      */
     public void applyAnimationAngles(float x, float y, float z, float rotationX, float rotationY, float rotationZ, float scaleX, float scaleY, float scaleZ)
     {
-        this.animPos.set(x, -y, z);
-        this.animRotation.set((float) (rotationX / 180F * Math.PI), (float) (rotationY / 180F * Math.PI), (float) (rotationZ / 180F * Math.PI));
+        this.animPos.set(x, y, z);
+        this.animRotation.set(rotationX, rotationY, rotationZ);
         this.animScale.set(scaleX, scaleY, scaleZ);
     }
 
@@ -310,6 +310,30 @@ public class BoneModelRenderer extends ModelRenderer
     public GeometryModelData.Bone getBone()
     {
         return this.bone;
+    }
+
+    /**
+     * @return The current offset of this bone for the current animation
+     */
+    public Vector3f getAnimPos()
+    {
+        return animPos;
+    }
+
+    /**
+     * @return The current rotation offset of this bone for the current animation
+     */
+    public Vector3f getAnimRotation()
+    {
+        return animRotation;
+    }
+
+    /**
+     * @return The current scale of this bone for the current animation
+     */
+    public Vector3f getAnimScale()
+    {
+        return animScale;
     }
 
     private static class Vertex

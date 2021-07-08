@@ -5,6 +5,9 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.api.common.molang.MolangCompiler;
+import io.github.ocelot.modelanima.api.common.molang.MolangException;
+import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 import io.github.ocelot.modelanima.core.client.geometry.BoneModelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
@@ -12,6 +15,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraftforge.client.model.animation.Animation;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -186,8 +190,11 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     }
 
     @Override
-    public void applyAnimation(float animationTime, AnimationData animation)
+    public void applyAnimation(float animationTime, AnimationData animation, MolangRuntime.Builder runtime)
     {
+        runtime.setQuery("delta_time", Animation.getPartialTickTime());
+        runtime.setQuery("life_time", animationTime);
+
         if (animationTime > animation.getAnimationLength())
         {
             switch (animation.getLoop())
@@ -209,14 +216,15 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
             if (!this.modelParts.containsKey(boneAnimation.getName()))
                 continue;
 
+            BoneModelRenderer renderer = this.modelParts.get(boneAnimation.getName());
             POSITION.set(0, 0, 0);
             ROTATION.set(0, 0, 0);
             SCALE.set(1, 1, 1);
-            get(animationTime, boneAnimation.getPositionFrames(), POSITION);
-            get(animationTime, boneAnimation.getRotationFrames(), ROTATION);
-            get(animationTime, boneAnimation.getScaleFrames(), SCALE);
+            get(animationTime, runtime, boneAnimation.getPositionFrames(), renderer.getAnimPos(), POSITION);
+            get(animationTime, runtime, boneAnimation.getRotationFrames(), renderer.getAnimRotation(), ROTATION);
+            get(animationTime, runtime, boneAnimation.getScaleFrames(), renderer.getAnimScale(), SCALE);
 
-            this.modelParts.get(boneAnimation.getName()).applyAnimationAngles(POSITION.x(), POSITION.y(), POSITION.z(), ROTATION.x(), ROTATION.y(), ROTATION.z(), SCALE.x(), SCALE.y(), SCALE.z());
+            renderer.applyAnimationAngles(POSITION.x(), POSITION.y(), POSITION.z(), ROTATION.x(), ROTATION.y(), ROTATION.z(), SCALE.x(), SCALE.y(), SCALE.z());
         }
     }
 
@@ -236,8 +244,17 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         return activeMaterial;
     }
 
-    private static void get(float animationTime, AnimationData.KeyFrame[] frames, Vector3f vector)
+    private static void get(float animationTime, MolangRuntime.Builder runtime, AnimationData.KeyFrame[] frames, Vector3f currentPos, Vector3f vector)
     {
+        if (frames.length == 1)
+        {
+            float x = frames[0].getTransformPostX().safeResolve(runtime.create(currentPos.x()));
+            float y = frames[0].getTransformPostY().safeResolve(runtime.create(currentPos.y()));
+            float z = frames[0].getTransformPostZ().safeResolve(runtime.create(currentPos.z()));
+            vector.set(x, y, z);
+            return;
+        }
+
         for (int i = 0; i < frames.length; i++)
         {
             AnimationData.KeyFrame to = frames[i];
@@ -246,13 +263,13 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
 
             AnimationData.KeyFrame from = i == 0 ? null : frames[i - 1];
             float progress = (from == null ? animationTime / to.getTime() : Math.min(1.0F, (animationTime - from.getTime()) / (to.getTime() - from.getTime())));
-            float fromX = from == null ? vector.x() : from.getTransformPostX();
-            float fromY = from == null ? vector.y() : from.getTransformPostY();
-            float fromZ = from == null ? vector.z() : from.getTransformPostZ();
+            float fromX = from == null ? vector.x() : from.getTransformPostX().safeResolve(runtime.create(currentPos.x()));
+            float fromY = from == null ? vector.y() : from.getTransformPostY().safeResolve(runtime.create(currentPos.y()));
+            float fromZ = from == null ? vector.z() : from.getTransformPostZ().safeResolve(runtime.create(currentPos.z()));
 
-            float x = MathHelper.lerp(progress, fromX, to.getTransformPreX());
-            float y = MathHelper.lerp(progress, fromY, to.getTransformPreY());
-            float z = MathHelper.lerp(progress, fromZ, to.getTransformPreZ());
+            float x = MathHelper.lerp(progress, fromX, to.getTransformPreX().safeResolve(runtime.create(currentPos.x())));
+            float y = MathHelper.lerp(progress, fromY, to.getTransformPreY().safeResolve(runtime.create(currentPos.y())));
+            float z = MathHelper.lerp(progress, fromZ, to.getTransformPreZ().safeResolve(runtime.create(currentPos.z())));
             vector.set(x, y, z);
             break;
         }

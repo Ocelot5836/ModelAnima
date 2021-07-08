@@ -20,4 +20,23 @@ public interface MolangExpression
      * @throws MolangException If any error occurs when resolving the value
      */
     float resolve(MolangEnvironment environment) throws MolangException;
+
+    /**
+     * Resolves the float value of this runtime. Safely catches any exception thrown and returns <code>0</code>.
+     *
+     * @param environment The environment to execute in
+     * @return The resulting value
+     */
+    default float safeResolve(MolangEnvironment environment)
+    {
+        try
+        {
+            return this.resolve(environment);
+        }
+        catch (MolangException e)
+        {
+            e.printStackTrace();
+            return 0.0F;
+        }
+    }
 }

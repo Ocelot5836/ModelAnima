@@ -1,7 +1,9 @@
 package io.github.ocelot.modelanima.api.common.animation;
 
 import com.google.gson.*;
+import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.api.common.util.JSONTupleParser;
+import io.github.ocelot.modelanima.core.common.molang.node.MolangConstantNode;
 import net.minecraft.util.JSONUtils;
 
 import java.lang.reflect.Type;
@@ -197,14 +199,14 @@ public class AnimationData
     {
         private final float time;
         private final LerpMode lerpMode;
-        private final float transformPreX;
-        private final float transformPreY;
-        private final float transformPreZ;
-        private final float transformPostX;
-        private final float transformPostY;
-        private final float transformPostZ;
+        private final MolangExpression transformPreX;
+        private final MolangExpression transformPreY;
+        private final MolangExpression transformPreZ;
+        private final MolangExpression transformPostX;
+        private final MolangExpression transformPostY;
+        private final MolangExpression transformPostZ;
 
-        public KeyFrame(float time, LerpMode lerpMode, float transformPreX, float transformPreY, float transformPreZ, float transformPostX, float transformPostY, float transformPostZ)
+        public KeyFrame(float time, LerpMode lerpMode, MolangExpression transformPreX, MolangExpression transformPreY, MolangExpression transformPreZ, MolangExpression transformPostX, MolangExpression transformPostY, MolangExpression transformPostZ)
         {
             this.time = time;
             this.lerpMode = lerpMode;
@@ -235,7 +237,7 @@ public class AnimationData
         /**
          * @return The position to use when transitioning to this frame in the x-axis
          */
-        public float getTransformPreX()
+        public MolangExpression getTransformPreX()
         {
             return transformPreX;
         }
@@ -243,7 +245,7 @@ public class AnimationData
         /**
          * @return The position to use when transitioning to this frame in the y-axis
          */
-        public float getTransformPreY()
+        public MolangExpression getTransformPreY()
         {
             return transformPreY;
         }
@@ -251,7 +253,7 @@ public class AnimationData
         /**
          * @return The position to use when transitioning to this frame in the z-axis
          */
-        public float getTransformPreZ()
+        public MolangExpression getTransformPreZ()
         {
             return transformPreZ;
         }
@@ -259,7 +261,7 @@ public class AnimationData
         /**
          * @return The position to use when transitioning away from this frame in the x-axis
          */
-        public float getTransformPostX()
+        public MolangExpression getTransformPostX()
         {
             return transformPostX;
         }
@@ -267,7 +269,7 @@ public class AnimationData
         /**
          * @return The position to use when transitioning away from this frame in the y-axis
          */
-        public float getTransformPostY()
+        public MolangExpression getTransformPostY()
         {
             return transformPostY;
         }
@@ -275,7 +277,7 @@ public class AnimationData
         /**
          * @return The position to use when transitioning away from this frame in the z-axis
          */
-        public float getTransformPostZ()
+        public MolangExpression getTransformPostZ()
         {
             return transformPostZ;
         }
@@ -440,9 +442,9 @@ public class AnimationData
                 {
                     JsonObject boneAnimationObject = boneAnimationEntry.getValue().getAsJsonObject();
 
-                    parseTransform(positions, boneAnimationObject, "position", () -> new float[3]);
-                    parseTransform(rotations, boneAnimationObject, "rotation", () -> new float[3]);
-                    parseTransform(scales, boneAnimationObject, "scale", () -> new float[]{1, 1, 1});
+                    parseTransform(positions, boneAnimationObject, "position", () -> new MolangExpression[]{MolangExpression.ZERO, MolangExpression.ZERO, MolangExpression.ZERO});
+                    parseTransform(rotations, boneAnimationObject, "rotation", () -> new MolangExpression[]{MolangExpression.ZERO, MolangExpression.ZERO, MolangExpression.ZERO});
+                    parseTransform(scales, boneAnimationObject, "scale", () -> new MolangExpression[]{new MolangConstantNode(1), new MolangConstantNode(1), new MolangConstantNode(1)});
 
                     positions.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
                     rotations.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
@@ -500,7 +502,7 @@ public class AnimationData
             }
         }
 
-        private static void parseTransform(Collection<KeyFrame> frames, JsonObject json, String name, Supplier<float[]> defaultValue) throws JsonParseException
+        private static void parseTransform(Collection<KeyFrame> frames, JsonObject json, String name, Supplier<MolangExpression[]> defaultValue) throws JsonParseException
         {
             if (!json.has(name))
                 return;
@@ -527,12 +529,12 @@ public class AnimationData
             }
             else
             {
-                float[] values = JSONTupleParser.getFloat(json, name, 3, defaultValue);
+                MolangExpression[] values = JSONTupleParser.getExpression(json, name, 3, defaultValue);
                 frames.add(new KeyFrame(0, LerpMode.LINEAR, values[0], values[1], values[2], values[0], values[1], values[2]));
             }
         }
 
-        private static ChannelData parseChannel(JsonObject json, String name, Supplier<float[]> defaultValue) throws JsonSyntaxException
+        private static ChannelData parseChannel(JsonObject json, String name, Supplier<MolangExpression[]> defaultValue) throws JsonSyntaxException
         {
             if (!json.has(name) && !json.get(name).isJsonObject() && !json.get(name).isJsonArray())
                 throw new JsonSyntaxException("Missing " + name + ", expected to find a JsonObject or JsonArray");
@@ -563,21 +565,21 @@ public class AnimationData
                 }
 
                 // Parse channels. Pre will default to post if not present
-                float[] post = JSONTupleParser.getFloat(transformationObject, "post", 3, null);
-                return new ChannelData(JSONTupleParser.getFloat(transformationObject, "pre", 3, () -> post), post, lerpMode);
+                MolangExpression[] post = JSONTupleParser.getExpression(transformationObject, "post", 3, null);
+                return new ChannelData(JSONTupleParser.getExpression(transformationObject, "pre", 3, () -> post), post, lerpMode);
             }
 
-            float[] transformation = JSONTupleParser.getFloat(json, name, 3, defaultValue);
+            MolangExpression[] transformation = JSONTupleParser.getExpression(json, name, 3, defaultValue);
             return new ChannelData(transformation, transformation, LerpMode.LINEAR);
         }
 
         private static class ChannelData
         {
-            private final float[] pre;
-            private final float[] post;
+            private final MolangExpression[] pre;
+            private final MolangExpression[] post;
             private final LerpMode lerpMode;
 
-            private ChannelData(float[] pre, float[] post, LerpMode lerpMode)
+            private ChannelData(MolangExpression[] pre, MolangExpression[] post, LerpMode lerpMode)
             {
                 this.pre = pre;
                 this.post = post;

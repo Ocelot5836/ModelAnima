@@ -2,6 +2,7 @@ package io.github.ocelot.modelanima.api.client.geometry;
 
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
+import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
 
 /**
  * <p>Transforms model parts according to {@link AnimationData} over time.</p>
@@ -16,8 +17,9 @@ public interface AnimatedModel
      *
      * @param animationTime The time of the animation in seconds
      * @param animation     The animation
+     * @param runtime       The runtime to execute MoLang instructions in. This is generally going to be {@link MolangRuntime.Builder}
      */
-    void applyAnimation(float animationTime, AnimationData animation);
+    void applyAnimation(float animationTime, AnimationData animation, MolangRuntime.Builder runtime);
 
     /**
      * Fetches all locators for the specified part.

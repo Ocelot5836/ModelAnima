@@ -98,22 +98,20 @@ public class MolangRuntime implements MolangEnvironment
     /**
      * @return A new runtime builder.
      */
-    public static Builder runtime(float thisValue)
+    public static Builder runtime()
     {
-        return new Builder(thisValue);
+        return new Builder();
     }
 
     // TODO docs
     public static class Builder
     {
-        private final float thisValue;
         private final MolangObject query;
         private final MolangObject global;
         private final MolangObject variable;
 
-        public Builder(float thisValue)
+        public Builder()
         {
-            this.thisValue = thisValue;
             this.query = new MolangVariableStorage(true);
             this.global = new MolangVariableStorage(true);
             this.variable = new MolangVariableStorage(false);
@@ -149,9 +147,9 @@ public class MolangRuntime implements MolangEnvironment
             return this;
         }
 
-        public MolangRuntime create()
+        public MolangRuntime create(float thisValue)
         {
-            return new MolangRuntime(this.thisValue, new ImmutableMolangObject(this.query), new ImmutableMolangObject(this.global), this.variable);
+            return new MolangRuntime(thisValue, new ImmutableMolangObject(this.query), new ImmutableMolangObject(this.global), this.variable);
         }
 
         public MolangObject getQuery()
