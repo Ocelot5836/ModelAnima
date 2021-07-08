@@ -205,22 +205,35 @@ public class MolangCompiler
         // Check for methods
         if (checkFlag(flags, CHECK_METHOD_FLAG) && reader.canRead() && reader.peek() == '(')
         {
+            reader.skip();
             int start = reader.getCursor();
             MolangExpression[] parameters = null;
+            int parentheses = 0;
             while (reader.canRead() && start != -1)
             {
+                if (reader.peek() == '(')
+                    parentheses++;
                 if (reader.peek() == ')')
                 {
+                    if (parentheses > 0)
+                    {
+                        parentheses--;
+                        reader.skip();
+                        continue;
+                    }
                     if (reader.getCursor() == start + 1)
                     {
                         parameters = new MolangExpression[0];
                     }
                     else
                     {
-                        String[] parameterStrings = reader.getRead().substring(start + 1).split(",");
+                        String[] parameterStrings = reader.getRead().substring(start).split(",");
                         parameters = new MolangExpression[parameterStrings.length];
                         for (int i = 0; i < parameterStrings.length; i++)
-                            parameters[i] = parseExpression(new StringReader(parameterStrings[i].trim()), flags, true, true);
+                        {
+                            System.out.println("Param: " + parameterStrings[i]);
+                            parameters[i] = parseExpression(new StringReader(parameterStrings[i]), flags, true, true);
+                        }
                     }
 
                     start = -1;
