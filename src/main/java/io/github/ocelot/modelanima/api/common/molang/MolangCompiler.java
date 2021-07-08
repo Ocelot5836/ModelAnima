@@ -258,6 +258,13 @@ public class MolangCompiler
                     return new MolangSetVariableNode(currentKeyword[0], currentKeyword[1], expression);
                 }
             }
+            if (checkFlag(flags, REDUCE_FLAG) && "math".equalsIgnoreCase(currentKeyword[0])) // Attempt to reduce math constants
+            {
+                MolangMath.MathFunction function = MolangMath.MathFunction.byName(currentKeyword[1]);
+                if (function == null || function.getOp() != null)
+                    throw INVALID_KEYWORD.create(currentKeyword[1]);
+                return function.getExpression();
+            }
             return parseCondition(reader, new MolangGetVariableNode(currentKeyword[0], currentKeyword[1]), flags, allowMath);
         }
         throw TRAILING_STATEMENT.createWithContext(reader);
@@ -370,6 +377,8 @@ public class MolangCompiler
                 if (function == null)
                     throw INVALID_KEYWORD.create(methodName[1]);
             }
+            if (function.getOp() == null) // Not a function
+                throw UNEXPECTED_TOKEN.create();
             if (function.getParameters() >= 0)
             {
                 if (parameters.length < function.getParameters())

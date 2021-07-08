@@ -24,7 +24,7 @@ public class MolangTest
 //        MolangCompiler.compile("temp.my_temp_var = Math.sin(query.anim_time * 1.23);\n" +
 //                "temp.my_other_temp_var = Math.cos(query.life_time + 2.0);\n" +
 //                "return temp.my_temp_var * temp.my_temp_var + temp.my_other_temp_var;");
-                MolangCompiler.compile("2.0 + math.cos((query.life_time * 20.0) * 14.32)");
+                MolangCompiler.compile("math.pi");
         compileTime.stop();
 
         MolangRuntime runtime = MolangRuntime.runtime()
