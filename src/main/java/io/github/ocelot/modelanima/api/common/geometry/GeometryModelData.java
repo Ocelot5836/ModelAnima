@@ -155,26 +155,26 @@ public class GeometryModelData
                     '}';
         }
 
-        public static class Deserializer implements JsonDeserializer<Description>
-        {
-            @Override
-            public Description deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
-            {
-                JsonObject jsonObject = json.getAsJsonObject();
-                String identifier = JSONUtils.getAsString(jsonObject, "identifier", "custom_model");
-                float visibleBoundsWidth = JSONUtils.getAsFloat(jsonObject, "visible_bounds_width", 0);
-                float visibleBoundsHeight = JSONUtils.getAsFloat(jsonObject, "visible_bounds_height", 0);
-                float[] visibleBoundsOffset = JSONTupleParser.getFloat(jsonObject, "visible_bounds_offset", 3, () -> new float[3]);
-                int textureWidth = JSONUtils.getAsInt(jsonObject, "texture_width", 256);
-                int textureHeight = JSONUtils.getAsInt(jsonObject, "texture_height", 256);
-                boolean preserveModelPose2588 = JSONUtils.getAsBoolean(jsonObject, "preserve_model_pose2588", false);
-                if (textureWidth == 0)
-                    throw new JsonSyntaxException("Texture width must not be zero");
-                if (textureHeight == 0)
-                    throw new JsonSyntaxException("Texture height must not be zero");
-                return new Description(identifier, visibleBoundsWidth, visibleBoundsHeight, new Vector3f(visibleBoundsOffset), textureWidth, textureHeight, preserveModelPose2588);
-            }
-        }
+//        public static class Deserializer implements JsonDeserializer<Description>
+//        {
+//            @Override
+//            public Description deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
+//            {
+//                JsonObject jsonObject = json.getAsJsonObject();
+//                String identifier = JSONUtils.getAsString(jsonObject, "identifier", "custom_model");
+//                float visibleBoundsWidth = JSONUtils.getAsFloat(jsonObject, "visible_bounds_width", 0);
+//                float visibleBoundsHeight = JSONUtils.getAsFloat(jsonObject, "visible_bounds_height", 0);
+//                float[] visibleBoundsOffset = JSONTupleParser.getFloat(jsonObject, "visible_bounds_offset", 3, () -> new float[3]);
+//                int textureWidth = JSONUtils.getAsInt(jsonObject, "texture_width", 256);
+//                int textureHeight = JSONUtils.getAsInt(jsonObject, "texture_height", 256);
+//                boolean preserveModelPose2588 = JSONUtils.getAsBoolean(jsonObject, "preserve_model_pose2588", false);
+//                if (textureWidth == 0)
+//                    throw new JsonSyntaxException("Texture width must not be zero");
+//                if (textureHeight == 0)
+//                    throw new JsonSyntaxException("Texture height must not be zero");
+//                return new Description(identifier, visibleBoundsWidth, visibleBoundsHeight, new Vector3f(visibleBoundsOffset), textureWidth, textureHeight, preserveModelPose2588);
+//            }
+//        }
     }
 
     /**
@@ -329,51 +329,51 @@ public class GeometryModelData
                     '}';
         }
 
-        public static class Deserializer implements JsonDeserializer<Bone>
-        {
-            @Override
-            public Bone deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
-            {
-                JsonObject boneJson = json.getAsJsonObject();
-                String name = JSONUtils.getAsString(boneJson, "name");
-                boolean reset2588 = JSONUtils.getAsBoolean(boneJson, "reset2588", false);
-                boolean neverRender2588 = JSONUtils.getAsBoolean(boneJson, "neverrender2588", false);
-                String parent = JSONUtils.getAsString(boneJson, "parent", null);
-                float[] pivot = JSONTupleParser.getFloat(boneJson, "pivot", 3, () -> new float[3]);
-                float[] rotation = JSONTupleParser.getFloat(boneJson, "rotation", 3, () -> new float[3]);
-                float[] bindPoseRotation2588 = JSONTupleParser.getFloat(boneJson, "bind_pose_rotation2588", 3, () -> new float[3]);
-                boolean mirror = JSONUtils.getAsBoolean(boneJson, "mirror", false);
-                float inflate = JSONUtils.getAsFloat(boneJson, "inflate", 0);
-                boolean debug = JSONUtils.getAsBoolean(boneJson, "debug", false);
-
-                Cube[] cubes = new Cube[0];
-                if (boneJson.has("cubes"))
-                {
-                    JsonArray cubesJson = JSONUtils.getAsJsonArray(boneJson, "cubes");
-                    cubes = new Cube[cubesJson.size()];
-                    for (int i = 0; i < cubesJson.size(); i++)
-                        cubes[i] = context.deserialize(cubesJson.get(i), Cube.class);
-                }
-
-                Locator[] locators = new Locator[0];
-                if (boneJson.has("locators"))
-                {
-                    JsonObject locatorsJson = JSONUtils.getAsJsonObject(boneJson, "locators");
-                    locators = locatorsJson.entrySet().stream().map(entry ->
-                    {
-                        String locatorIdentifier = entry.getKey();
-                        float[] locatorPosition = JSONTupleParser.getFloat(locatorsJson, locatorIdentifier, 3, () -> new float[3]);
-                        return new Locator(locatorIdentifier, new Vector3f(locatorPosition));
-                    }).toArray(Locator[]::new);
-                }
-
-                PolyMesh polyMesh = boneJson.has("poly_mesh") ? context.deserialize(boneJson.get("poly_mesh"), PolyMesh.class) : null;
-
-                // TODO texture_mesh
-
-                return new Bone(name, reset2588, neverRender2588, parent, new Vector3f(pivot), new Vector3f(rotation), new Vector3f(bindPoseRotation2588), mirror, inflate, debug, cubes, locators, polyMesh);
-            }
-        }
+//        public static class Deserializer implements JsonDeserializer<Bone>
+//        {
+//            @Override
+//            public Bone deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
+//            {
+//                JsonObject boneJson = json.getAsJsonObject();
+//                String name = JSONUtils.getAsString(boneJson, "name");
+//                boolean reset2588 = JSONUtils.getAsBoolean(boneJson, "reset2588", false);
+//                boolean neverRender2588 = JSONUtils.getAsBoolean(boneJson, "neverrender2588", false);
+//                String parent = JSONUtils.getAsString(boneJson, "parent", null);
+//                float[] pivot = JSONTupleParser.getFloat(boneJson, "pivot", 3, () -> new float[3]);
+//                float[] rotation = JSONTupleParser.getFloat(boneJson, "rotation", 3, () -> new float[3]);
+//                float[] bindPoseRotation2588 = JSONTupleParser.getFloat(boneJson, "bind_pose_rotation2588", 3, () -> new float[3]);
+//                boolean mirror = JSONUtils.getAsBoolean(boneJson, "mirror", false);
+//                float inflate = JSONUtils.getAsFloat(boneJson, "inflate", 0);
+//                boolean debug = JSONUtils.getAsBoolean(boneJson, "debug", false);
+//
+//                Cube[] cubes = new Cube[0];
+//                if (boneJson.has("cubes"))
+//                {
+//                    JsonArray cubesJson = JSONUtils.getAsJsonArray(boneJson, "cubes");
+//                    cubes = new Cube[cubesJson.size()];
+//                    for (int i = 0; i < cubesJson.size(); i++)
+//                        cubes[i] = context.deserialize(cubesJson.get(i), Cube.class);
+//                }
+//
+//                Locator[] locators = new Locator[0];
+//                if (boneJson.has("locators"))
+//                {
+//                    JsonObject locatorsJson = JSONUtils.getAsJsonObject(boneJson, "locators");
+//                    locators = locatorsJson.entrySet().stream().map(entry ->
+//                    {
+//                        String locatorIdentifier = entry.getKey();
+//                        float[] locatorPosition = JSONTupleParser.getFloat(locatorsJson, locatorIdentifier, 3, () -> new float[3]);
+//                        return new Locator(locatorIdentifier, new Vector3f(locatorPosition));
+//                    }).toArray(Locator[]::new);
+//                }
+//
+//                PolyMesh polyMesh = boneJson.has("poly_mesh") ? context.deserialize(boneJson.get("poly_mesh"), PolyMesh.class) : null;
+//
+//                // TODO texture_mesh
+//
+//                return new Bone(name, reset2588, neverRender2588, parent, new Vector3f(pivot), new Vector3f(rotation), new Vector3f(bindPoseRotation2588), mirror, inflate, debug, cubes, locators, polyMesh);
+//            }
+//        }
     }
 
     /**
@@ -513,63 +513,63 @@ public class GeometryModelData
                     '}';
         }
 
-        public static class Deserializer implements JsonDeserializer<Cube>
-        {
-            @Override
-            public Cube deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
-            {
-                JsonObject cubeJson = json.getAsJsonObject();
-                float[] origin = JSONTupleParser.getFloat(cubeJson, "origin", 3, () -> new float[3]);
-                float[] size = JSONTupleParser.getFloat(cubeJson, "size", 3, () -> new float[3]);
-                float[] rotation = JSONTupleParser.getFloat(cubeJson, "rotation", 3, () -> new float[3]);
-                float[] pivot = JSONTupleParser.getFloat(cubeJson, "pivot", 3, () -> new float[]{origin[0] + size[0], origin[1] + size[1], origin[2] + size[2]});
-                boolean overrideInflate = cubeJson.has("inflate");
-                float inflate = JSONUtils.getAsFloat(cubeJson, "inflate", 0);
-                boolean overrideMirror = cubeJson.has("mirror");
-                boolean mirror = JSONUtils.getAsBoolean(cubeJson, "mirror", false);
-                CubeUV[] uv = parseUV(cubeJson, size);
-                if (uv.length != Direction.values().length)
-                    throw new JsonParseException("Expected uv to be of size " + Direction.values().length + ", was " + uv.length);
-                return new Cube(new Vector3f(origin), new Vector3f(size), new Vector3f(rotation), new Vector3f(pivot), overrideInflate, inflate, overrideMirror, mirror, uv);
-            }
-
-            private static CubeUV[] parseUV(JsonObject cubeJson, float[] size)
-            {
-                if (!cubeJson.has("uv"))
-                    return new CubeUV[6];
-
-                if (cubeJson.get("uv").isJsonArray())
-                {
-                    CubeUV[] uvs = new CubeUV[6];
-                    float[] uv = JSONTupleParser.getFloat(cubeJson, "uv", 2, () -> new float[2]);
-                    uvs[Direction.NORTH.get3DDataValue()] = new CubeUV(uv[0] + size[2], uv[1] + size[2], size[0], size[1], "texture");
-                    uvs[Direction.EAST.get3DDataValue()] = new CubeUV(uv[0], uv[1] + size[2], size[2], size[1], "texture");
-                    uvs[Direction.SOUTH.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2] * 2, uv[1] + size[2], size[0], size[1], "texture");
-                    uvs[Direction.WEST.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2], uv[1] + size[2], size[2], size[1], "texture");
-                    uvs[Direction.UP.get3DDataValue()] = new CubeUV(uv[0] + size[2], uv[1], size[0], size[2], "texture");
-                    uvs[Direction.DOWN.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2], uv[1], size[0], size[2], "texture");
-                    return uvs;
-                }
-                if (cubeJson.get("uv").isJsonObject())
-                {
-                    JsonObject uvJson = cubeJson.getAsJsonObject("uv");
-                    CubeUV[] uvs = new CubeUV[6];
-                    for (Direction direction : Direction.values())
-                    {
-                        if (!uvJson.has(direction.getName()))
-                            continue;
-
-                        JsonObject faceJson = JSONUtils.getAsJsonObject(uvJson, direction.getName());
-                        float[] uv = JSONTupleParser.getFloat(faceJson, "uv", 2, null);
-                        float[] uvSize = JSONTupleParser.getFloat(faceJson, "uv_size", 2, () -> new float[2]);
-                        String material = JSONUtils.getAsString(faceJson, "material_instance", "texture");
-                        uvs[direction.get3DDataValue()] = new CubeUV(uv[0], uv[1], uvSize[0], uvSize[1], material);
-                    }
-                    return uvs;
-                }
-                throw new JsonSyntaxException("Expected uv to be a JsonArray or JsonObject, was " + JSONUtils.getType(cubeJson.get("uv")));
-            }
-        }
+//        public static class Deserializer implements JsonDeserializer<Cube>
+//        {
+//            @Override
+//            public Cube deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
+//            {
+//                JsonObject cubeJson = json.getAsJsonObject();
+//                float[] origin = JSONTupleParser.getFloat(cubeJson, "origin", 3, () -> new float[3]);
+//                float[] size = JSONTupleParser.getFloat(cubeJson, "size", 3, () -> new float[3]);
+//                float[] rotation = JSONTupleParser.getFloat(cubeJson, "rotation", 3, () -> new float[3]);
+//                float[] pivot = JSONTupleParser.getFloat(cubeJson, "pivot", 3, () -> new float[]{origin[0] + size[0], origin[1] + size[1], origin[2] + size[2]});
+//                boolean overrideInflate = cubeJson.has("inflate");
+//                float inflate = JSONUtils.getAsFloat(cubeJson, "inflate", 0);
+//                boolean overrideMirror = cubeJson.has("mirror");
+//                boolean mirror = JSONUtils.getAsBoolean(cubeJson, "mirror", false);
+//                CubeUV[] uv = parseUV(cubeJson, size);
+//                if (uv.length != Direction.values().length)
+//                    throw new JsonParseException("Expected uv to be of size " + Direction.values().length + ", was " + uv.length);
+//                return new Cube(new Vector3f(origin), new Vector3f(size), new Vector3f(rotation), new Vector3f(pivot), overrideInflate, inflate, overrideMirror, mirror, uv);
+//            }
+//
+//            private static CubeUV[] parseUV(JsonObject cubeJson, float[] size)
+//            {
+//                if (!cubeJson.has("uv"))
+//                    return new CubeUV[6];
+//
+//                if (cubeJson.get("uv").isJsonArray())
+//                {
+//                    CubeUV[] uvs = new CubeUV[6];
+//                    float[] uv = JSONTupleParser.getFloat(cubeJson, "uv", 2, () -> new float[2]);
+//                    uvs[Direction.NORTH.get3DDataValue()] = new CubeUV(uv[0] + size[2], uv[1] + size[2], size[0], size[1], "texture");
+//                    uvs[Direction.EAST.get3DDataValue()] = new CubeUV(uv[0], uv[1] + size[2], size[2], size[1], "texture");
+//                    uvs[Direction.SOUTH.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2] * 2, uv[1] + size[2], size[0], size[1], "texture");
+//                    uvs[Direction.WEST.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2], uv[1] + size[2], size[2], size[1], "texture");
+//                    uvs[Direction.UP.get3DDataValue()] = new CubeUV(uv[0] + size[2], uv[1], size[0], size[2], "texture");
+//                    uvs[Direction.DOWN.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2], uv[1], size[0], size[2], "texture");
+//                    return uvs;
+//                }
+//                if (cubeJson.get("uv").isJsonObject())
+//                {
+//                    JsonObject uvJson = cubeJson.getAsJsonObject("uv");
+//                    CubeUV[] uvs = new CubeUV[6];
+//                    for (Direction direction : Direction.values())
+//                    {
+//                        if (!uvJson.has(direction.getName()))
+//                            continue;
+//
+//                        JsonObject faceJson = JSONUtils.getAsJsonObject(uvJson, direction.getName());
+//                        float[] uv = JSONTupleParser.getFloat(faceJson, "uv", 2, null);
+//                        float[] uvSize = JSONTupleParser.getFloat(faceJson, "uv_size", 2, () -> new float[2]);
+//                        String material = JSONUtils.getAsString(faceJson, "material_instance", "texture");
+//                        uvs[direction.get3DDataValue()] = new CubeUV(uv[0], uv[1], uvSize[0], uvSize[1], material);
+//                    }
+//                    return uvs;
+//                }
+//                throw new JsonSyntaxException("Expected uv to be a JsonArray or JsonObject, was " + JSONUtils.getType(cubeJson.get("uv")));
+//            }
+//        }
     }
 
     /**

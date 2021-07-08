@@ -3,6 +3,9 @@ package io.github.ocelot.modelanima.api.common.geometry;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.core.common.geometry.Geometry110Parser;
+import io.github.ocelot.modelanima.core.common.geometry.Geometry1120Parser;
+import io.github.ocelot.modelanima.core.common.geometry.Geometry180Parser;
 import net.minecraft.util.JSONUtils;
 
 import java.io.Reader;
@@ -16,14 +19,7 @@ import java.io.Reader;
 public class GeometryModelParser
 {
     private static final String VERSION = "1.12.0";
-    private static final Gson GSON = new GsonBuilder().
-            registerTypeAdapter(GeometryModelData.Description.class, new GeometryModelData.Description.Deserializer()).
-            registerTypeAdapter(GeometryModelData.Bone.class, new GeometryModelData.Bone.Deserializer()).
-            registerTypeAdapter(GeometryModelData.Cube.class, new GeometryModelData.Cube.Deserializer()).
-            registerTypeAdapter(GeometryModelData.Poly.class, new GeometryModelData.Poly.Deserializer()).
-            registerTypeAdapter(GeometryModelData.PolyMesh.class, new GeometryModelData.PolyMesh.Deserializer()).
-            registerTypeAdapter(GeometryModelTextureTable.class, new GeometryModelTextureTable.Serializer()).
-            create();
+    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(GeometryModelTextureTable.class, new GeometryModelTextureTable.Serializer()).create();
 
     /**
      * Creates a new geometry model from the specified reader.
@@ -31,7 +27,7 @@ public class GeometryModelParser
      * @param reader The reader to get data from
      * @return A new geometry model from the reader
      */
-    public static GeometryModelData[] parseModel(Reader reader) throws JsonSyntaxException, JsonIOException
+    public static GeometryModelData[] parseModel(Reader reader) throws JsonParseException
     {
         return parseModel(new JsonParser().parse(reader));
     }
@@ -42,7 +38,7 @@ public class GeometryModelParser
      * @param reader The reader to get data from
      * @return A new geometry model from the reader
      */
-    public static GeometryModelData[] parseModel(JsonReader reader) throws JsonSyntaxException, JsonIOException
+    public static GeometryModelData[] parseModel(JsonReader reader) throws JsonParseException
     {
         return parseModel(new JsonParser().parse(reader));
     }
@@ -53,7 +49,7 @@ public class GeometryModelParser
      * @param json The raw json string
      * @return A new geometry model from the json
      */
-    public static GeometryModelData[] parseModel(String json) throws JsonSyntaxException
+    public static GeometryModelData[] parseModel(String json) throws JsonParseException
     {
         return parseModel(new JsonParser().parse(json));
     }
@@ -64,11 +60,16 @@ public class GeometryModelParser
      * @param json The parsed json element
      * @return A new geometry model from the json
      */
-    public static GeometryModelData[] parseModel(JsonElement json) throws JsonSyntaxException
+    public static GeometryModelData[] parseModel(JsonElement json) throws JsonParseException
     {
-        if (!json.getAsJsonObject().get("format_version").getAsString().equals(VERSION))
-            throw new JsonSyntaxException("Unsupported model version. Only " + VERSION + " is supported."); // TODO support multiple versions
-        return GSON.fromJson(JSONUtils.getAsJsonArray(json.getAsJsonObject(), "minecraft:geometry"), GeometryModelData[].class);
+        String formatVersion = JSONUtils.getAsString(json.getAsJsonObject(), "format_version");
+        if (formatVersion.equals("1.12.0"))
+            return Geometry1120Parser.parseModel(json);
+        if (formatVersion.equals("1.8.0"))
+            return Geometry180Parser.parseModel(json);
+        if (formatVersion.equals("1.1.0"))
+            return Geometry110Parser.parseModel(json);
+        throw new JsonSyntaxException("Unsupported geometry version: " + formatVersion);
     }
 
     /**
@@ -77,7 +78,7 @@ public class GeometryModelParser
      * @param reader The reader to get data from
      * @return A new texture table from the reader
      */
-    public static GeometryModelTextureTable parseTextures(Reader reader) throws JsonSyntaxException, JsonIOException
+    public static GeometryModelTextureTable parseTextures(Reader reader) throws JsonParseException
     {
         return parseTextures(new JsonParser().parse(reader));
     }
@@ -88,7 +89,7 @@ public class GeometryModelParser
      * @param reader The reader to get data from
      * @return A new texture table from the reader
      */
-    public static GeometryModelTextureTable parseTextures(JsonReader reader) throws JsonSyntaxException, JsonIOException
+    public static GeometryModelTextureTable parseTextures(JsonReader reader) throws JsonParseException
     {
         return parseTextures(new JsonParser().parse(reader));
     }
@@ -99,7 +100,7 @@ public class GeometryModelParser
      * @param json The raw json string
      * @return A new texture table from the json
      */
-    public static GeometryModelTextureTable parseTextures(String json) throws JsonSyntaxException
+    public static GeometryModelTextureTable parseTextures(String json) throws JsonParseException
     {
         return parseTextures(new JsonParser().parse(json));
     }
@@ -110,7 +111,7 @@ public class GeometryModelParser
      * @param json The parsed json element
      * @return A new texture table from the json
      */
-    public static GeometryModelTextureTable parseTextures(JsonElement json) throws JsonSyntaxException
+    public static GeometryModelTextureTable parseTextures(JsonElement json) throws JsonParseException
     {
         return GSON.fromJson(json, GeometryModelTextureTable.class);
     }

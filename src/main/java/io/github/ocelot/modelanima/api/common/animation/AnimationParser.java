@@ -59,8 +59,9 @@ public class AnimationParser
      */
     public static AnimationData[] parse(JsonElement json) throws JsonSyntaxException
     {
-        if (!json.getAsJsonObject().get("format_version").getAsString().equals(VERSION))
-            throw new JsonSyntaxException("Unsupported animation version. Only " + VERSION + " is supported."); // TODO support multiple versions
+        String formatVersion = JSONUtils.getAsString(json.getAsJsonObject(), "format_version");
+        if (!formatVersion.equals(VERSION))
+            throw new JsonSyntaxException("Unsupported animation version: " + formatVersion);
         return GSON.fromJson(JSONUtils.getAsJsonObject(json.getAsJsonObject(), "animations"), AnimationData[].class);
     }
 }
