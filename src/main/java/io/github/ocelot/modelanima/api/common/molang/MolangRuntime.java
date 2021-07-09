@@ -29,11 +29,13 @@ public class MolangRuntime implements MolangEnvironment
         this.thisValue = thisValue;
         this.objects = new HashMap<>();
         MolangObject temp = new MolangVariableStorage(false);
+        this.objects.put("context", query); // This is static accesses
         this.objects.put("query", query); // This is static accesses
         this.objects.put("math", new MolangMath()); // The MoLang math "library"
         this.objects.put("global", global); // This is parameter access
         this.objects.put("temp", temp); // This is specifically for expression variables
         this.objects.put("variable", variable); // This can be accessed by Java code
+        this.objects.put("c", query); // Alias
         this.objects.put("q", query); // Alias
         this.objects.put("t", temp); // Alias
         this.objects.put("v", variable); // Alias
