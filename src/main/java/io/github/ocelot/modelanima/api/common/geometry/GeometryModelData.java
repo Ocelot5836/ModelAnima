@@ -1,7 +1,6 @@
 package io.github.ocelot.modelanima.api.common.geometry;
 
 import com.google.gson.*;
-import io.github.ocelot.modelanima.api.common.util.JSONTupleParser;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;

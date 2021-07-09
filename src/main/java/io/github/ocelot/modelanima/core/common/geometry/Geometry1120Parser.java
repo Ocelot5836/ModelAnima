@@ -3,7 +3,6 @@ package io.github.ocelot.modelanima.core.common.geometry;
 import com.google.gson.*;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.util.JSONTupleParser;
-import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.vector.Vector3f;
 
