@@ -194,7 +194,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     @Override
     public void applyAnimation(float animationTime, AnimationData animation, MolangRuntime.Builder runtime)
     {
-        runtime.setQuery("delta_time", Animation.getPartialTickTime());
+        runtime.setQuery("delta_time", Animation::getPartialTickTime);
         runtime.setQuery("life_time", animationTime);
 
         if (animationTime > animation.getAnimationLength())

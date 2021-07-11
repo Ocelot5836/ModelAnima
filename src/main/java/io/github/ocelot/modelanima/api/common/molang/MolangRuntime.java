@@ -1,6 +1,7 @@
 package io.github.ocelot.modelanima.api.common.molang;
 
 import io.github.ocelot.modelanima.core.common.molang.node.MolangConstantNode;
+import io.github.ocelot.modelanima.core.common.molang.node.MolangLazyNode;
 import io.github.ocelot.modelanima.core.common.molang.object.ImmutableMolangObject;
 import io.github.ocelot.modelanima.core.common.molang.object.MolangFunction;
 import io.github.ocelot.modelanima.core.common.molang.object.MolangMath;
@@ -11,6 +12,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * <p>The runtime for MoLang to create and access data from.</p>
@@ -129,15 +131,27 @@ public class MolangRuntime implements MolangEnvironment
             return this;
         }
 
+        public Builder setQuery(String name, Supplier<Float> value)
+        {
+            this.query.set(name, new MolangLazyNode(() -> new MolangConstantNode(value.get())));
+            return this;
+        }
+
         public Builder setGlobal(String name, float value)
         {
             this.global.set(name, new MolangConstantNode(value));
             return this;
         }
 
+        public Builder setGlobal(String name, Supplier<Float> value)
+        {
+            this.global.set(name, new MolangLazyNode(() -> new MolangConstantNode(value.get())));
+            return this;
+        }
+
         public Builder setVariable(String name, float value)
         {
-            this.variable.set(name, new MolangConstantNode(value));
+            this.variable.set(name, new MolangConstantNode(value)); // Variables are assumed to be used later
             return this;
         }
 
