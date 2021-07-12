@@ -199,7 +199,11 @@ public class MolangCompiler
         }
 
         // methods and params require at least both parts
-        if (currentKeyword.length <= 1)
+        if (currentKeyword.length <= 1 || currentKeyword[0].isEmpty())
+            throw UNEXPECTED_TOKEN.createWithContext(reader);
+
+        // objects are not allowed to start with numbers
+        if (NumberUtils.isCreatable(currentKeyword[0].substring(0, 1)))
             throw UNEXPECTED_TOKEN.createWithContext(reader);
 
         // Check for methods
