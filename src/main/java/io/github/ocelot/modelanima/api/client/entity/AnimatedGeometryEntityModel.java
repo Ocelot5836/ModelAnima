@@ -1,8 +1,12 @@
-package io.github.ocelot.modelanima.api.client.geometry;
+package io.github.ocelot.modelanima.api.client.entity;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import io.github.ocelot.modelanima.api.client.animation.AnimationManager;
+import io.github.ocelot.modelanima.api.client.geometry.AnimatedModel;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModelManager;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
@@ -46,12 +50,14 @@ import java.util.stream.LongStream;
 public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T>
 {
     private final ResourceLocation model;
+    private ResourceLocation texture;
     private ResourceLocation[] animations;
     private MolangVariableProvider variableProvider;
 
     public AnimatedGeometryEntityModel(ResourceLocation model)
     {
         this.model = model;
+        this.texture = null;
         this.animations = new ResourceLocation[0];
         this.variableProvider = null;
     }
@@ -193,7 +199,6 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
             });
         // Skip has_biome_tag
         // Skip has_block_property
-        // Skip has_cape
         if (entity instanceof AbstractClientPlayerEntity)
             builder.setQuery("has_cape", () -> ((AbstractClientPlayerEntity) entity).getCloakTextureLocation() != null ? 1.0F : 0.0F);
         builder.setQuery("has_collision", () -> entity.noPhysics ? 0.0F : 1.0F);
@@ -497,14 +502,10 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
         }
     }
 
-    public void render(MatrixStack poseStack, ResourceLocation texture, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
-    {
-        GeometryModelRenderer.render(this.getModel(), texture, poseStack, Minecraft.getInstance().renderBuffers().bufferSource(), packedLight, packedOverlay, red, green, blue, alpha);
-    }
-
     @Override
     public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
+        GeometryModelRenderer.render(this.getModel(), this.texture, matrixStack, Minecraft.getInstance().renderBuffers().bufferSource(), packedLight, packedOverlay, red, green, blue, alpha);
     }
 
     /**
@@ -516,11 +517,30 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
     }
 
     /**
+     * @return The name of the texture table to render with
+     */
+    @Nullable
+    public ResourceLocation getTexture()
+    {
+        return texture;
+    }
+
+    /**
      * @return The animations
      */
     public AnimationData[] getAnimations()
     {
         return Arrays.stream(this.animations).map(AnimationManager::getAnimation).filter(animation -> animation != AnimationData.EMPTY).toArray(AnimationData[]::new);
+    }
+
+    /**
+     * Sets the texture table to render with.
+     *
+     * @param texture The new texture
+     */
+    public void setTexture(@Nullable ResourceLocation texture)
+    {
+        this.texture = texture;
     }
 
     /**

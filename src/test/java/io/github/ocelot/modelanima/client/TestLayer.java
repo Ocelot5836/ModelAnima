@@ -2,7 +2,7 @@ package io.github.ocelot.modelanima.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.TestMod;
-import io.github.ocelot.modelanima.api.client.geometry.AnimatedGeometryEntityModel;
+import io.github.ocelot.modelanima.api.client.entity.AnimatedGeometryEntityModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
 
@@ -31,14 +30,16 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
             AnimatedGeometryEntityModel<AbstractClientPlayerEntity> model = new AnimatedGeometryEntityModel<>(new ResourceLocation(TestMod.MOD_ID, "yeti"));
             model.setVariableProvider(context ->
             {
-                context.add("walkAmount", 1.5F * MathHelper.triangleWave(limbSwing, 13.0F) * limbSwingAmount * (float) (180F / Math.PI));
+                context.add("limb_swing", limbSwing);
+                context.add("limb_swing_amount", limbSwingAmount);
             });
-            model.setAnimations(new ResourceLocation(TestMod.MOD_ID, "yeti.setup"), new ResourceLocation(TestMod.MOD_ID, "yeti.throw_snowball"));
+            model.setTexture(new ResourceLocation(TestMod.MOD_ID, "yeti"));
+            model.setAnimations(new ResourceLocation(TestMod.MOD_ID, "yeti.setup"), (player.isCrouching() ? new ResourceLocation(TestMod.MOD_ID, "yeti.attack") : new ResourceLocation(TestMod.MOD_ID, "yeti.swing_arms")));
             this.getParentModel().copyPropertiesTo(model);
             model.prepareMobModel(player, limbSwing, limbSwingAmount, partialTicks);
             model.setupAnim(player, limbSwing, limbSwingAmount, (ageInTicks / 20F) % (float) Arrays.stream(model.getAnimations()).mapToDouble(AnimationData::getAnimationLength).max().orElse(0), netHeadYaw, headPitch);
             GeometryModelRenderer.copyModelAngles(this.getParentModel(), model.getModel());
-            model.render(matrixStack, new ResourceLocation(TestMod.MOD_ID, "yeti"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+            model.renderToBuffer(matrixStack, buffer.getBuffer(model.renderType(this.getTextureLocation(player))), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 }
