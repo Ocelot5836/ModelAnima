@@ -27,17 +27,17 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     {
         if (!player.isInvisible())
         {
-            AnimatedGeometryEntityModel<AbstractClientPlayerEntity> model = new AnimatedGeometryEntityModel<>(new ResourceLocation(TestMod.MOD_ID, "guardian"));
+            AnimatedGeometryEntityModel<AbstractClientPlayerEntity> model = new AnimatedGeometryEntityModel<>(new ResourceLocation(TestMod.MOD_ID, "yeti"));
             model.setVariableProvider(context ->
             {
 
             });
-            model.setAnimations(new ResourceLocation(TestMod.MOD_ID, "animation.guardian.setup"), new ResourceLocation(TestMod.MOD_ID, "animation.guardian.spikes"), new ResourceLocation(TestMod.MOD_ID, "animation.guardian.swim"));
+            model.setAnimations(new ResourceLocation(TestMod.MOD_ID, "yeti.throw_snowball"));
             this.getParentModel().copyPropertiesTo(model);
             model.prepareMobModel(player, limbSwing, limbSwingAmount, partialTicks);
             model.setupAnim(player, limbSwing, limbSwingAmount, (ageInTicks / 20F) % (float) Arrays.stream(model.getAnimations()).mapToDouble(AnimationData::getAnimationLength).max().orElse(0), netHeadYaw, headPitch);
             GeometryModelRenderer.copyModelAngles(this.getParentModel(), model.getModel());
-            model.render(matrixStack, new ResourceLocation(TestMod.MOD_ID, "guardian"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+            model.render(matrixStack, new ResourceLocation(TestMod.MOD_ID, "yeti"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 }
