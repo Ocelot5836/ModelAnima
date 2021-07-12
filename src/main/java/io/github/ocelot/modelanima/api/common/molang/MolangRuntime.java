@@ -62,6 +62,17 @@ public class MolangRuntime implements MolangEnvironment
         return builder.toString();
     }
 
+    /**
+     * Loads a library under the specified name.
+     *
+     * @param name   The name of the library to load
+     * @param object The object to use under that name
+     */
+    public void loadLibrary(String name, MolangObject object)
+    {
+        this.objects.put(name.toLowerCase(Locale.ROOT), object);
+    }
+
     @Override
     public void loadParameter(int index, MolangExpression expression)
     {
@@ -109,7 +120,12 @@ public class MolangRuntime implements MolangEnvironment
         return new Builder();
     }
 
-    // TODO docs
+    /**
+     * <p>Constructs a new {@link MolangRuntime} with preset parameters.</p>
+     *
+     * @author Ocelot
+     * @since 1.0.0
+     */
     public static class Builder
     {
         private final MolangObject query;
@@ -123,51 +139,98 @@ public class MolangRuntime implements MolangEnvironment
             this.variable = new MolangVariableStorage(false);
         }
 
+        /**
+         * Sets a global immutable value.
+         *
+         * @param name  The name of the value
+         * @param value The resulting number
+         */
         public Builder setQuery(String name, float value)
         {
             this.query.set(name, new MolangConstantNode(value));
             return this;
         }
 
+        /**
+         * Sets a global immutable value.
+         *
+         * @param name  The name of the value
+         * @param value The resulting number
+         */
         public Builder setGlobal(String name, float value)
         {
             this.global.set(name, new MolangConstantNode(value));
             return this;
         }
 
+        /**
+         * Sets a global mutable value.
+         *
+         * @param name  The name of the value
+         * @param value The resulting number
+         */
         public Builder setVariable(String name, float value)
         {
             this.variable.set(name, new MolangConstantNode(value));
             return this;
         }
 
+        /**
+         * Sets a global immutable function.
+         *
+         * @param name     The name of the function
+         * @param params   The number of parameters to accept
+         * @param function The function to execute
+         */
         public Builder setQuery(String name, int params, MolangJavaFunction function)
         {
             this.query.set(params < 0 ? name : (name + "$" + params), new MolangFunction(params, function));
             return this;
         }
 
+        /**
+         * Sets a global immutable function.
+         *
+         * @param name     The name of the function
+         * @param params   The number of parameters to accept
+         * @param function The function to execute
+         */
         public Builder setGlobal(String name, int params, MolangJavaFunction function)
         {
             this.global.set(params < 0 ? name : (name + "$" + params), new MolangFunction(params, function));
             return this;
         }
 
+        /**
+         * Creates a new runtime with the provided value as the value for <code>this</code>.
+         *
+         * @param thisValue The value to load for the context
+         * @return A new runtime
+         */
         public MolangRuntime create(float thisValue)
         {
             return new MolangRuntime(thisValue, new ImmutableMolangObject(this.query), new ImmutableMolangObject(this.global), this.variable);
         }
 
+        /**
+         * @return The query variable object
+         */
         public MolangObject getQuery()
         {
             return query;
         }
 
+        /**
+         * @return The global variable object
+         */
         public MolangObject getGlobal()
         {
             return global;
         }
 
+        /**
+         * @return The variable object
+         */
         public MolangObject getVariable()
         {
             return variable;

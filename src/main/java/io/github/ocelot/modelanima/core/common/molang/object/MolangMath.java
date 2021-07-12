@@ -3,52 +3,36 @@ package io.github.ocelot.modelanima.core.common.molang.object;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.api.common.molang.MolangJavaFunction;
-import io.github.ocelot.modelanima.api.common.molang.MolangObject;
+import io.github.ocelot.modelanima.api.common.molang.MolangLibrary;
 import io.github.ocelot.modelanima.core.common.molang.node.MolangConstantNode;
 import net.minecraft.util.math.MathHelper;
 
 import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.Random;
+import java.util.function.BiConsumer;
 
 /**
+ * <p>A reference to all standard MoLang math functions.</p>
+ *
  * @author Ocelot
+ * @since 1.0.0
  */
-public class MolangMath implements MolangObject
+public class MolangMath extends MolangLibrary
 {
     private static final Random RNG = new Random();
 
     @Override
-    public void set(String name, MolangExpression value)
+    protected void populate(BiConsumer<String, MolangExpression> consumer)
     {
-        throw new UnsupportedOperationException("Cannot set values on the math object");
-    }
-
-    @Override
-    public MolangExpression get(String name)
-    {
-        MathFunction function = MathFunction.byName(name);
-        return function != null ? function.expression : MolangExpression.ZERO;
-    }
-
-    @Override
-    public boolean has(String name)
-    {
-        return MathFunction.byName(name) != null;
-    }
-
-    @Override
-    public String toString()
-    {
-        StringBuilder builder = new StringBuilder("MoLang Math\n");
         for (MathFunction function : MathFunction.values())
-        {
-            builder.append('\t').append(function.functionName);
-            if (function.op != null)
-                builder.append("()");
-            builder.append('\n');
-        }
-        return builder.toString();
+            consumer.accept(function.functionName, function.expression);
+    }
+
+    @Override
+    protected String getName()
+    {
+        return "MoLang Math";
     }
 
     public enum MathFunction
@@ -182,7 +166,10 @@ public class MolangMath implements MolangObject
         SQRT(1, parameters ->
                 (float) Math.sqrt(parameters.resolve(0))),
         TRUNC(1, parameters ->
-                (int) parameters.resolve(0));
+                (int) parameters.resolve(0)),
+        // Extended function
+        TRIANGLE_WAVE(2, parameters ->
+                MathHelper.triangleWave(parameters.resolve(0), parameters.resolve(1)));
 
         private final int parameters;
         private final String functionName;
