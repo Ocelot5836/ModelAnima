@@ -250,9 +250,9 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     {
         if (frames.length == 1)
         {
-            float x = frames[0].getTransformPostX().safeResolve(runtime.create(currentPos.x()));
-            float y = frames[0].getTransformPostY().safeResolve(runtime.create(currentPos.y()));
-            float z = frames[0].getTransformPostZ().safeResolve(runtime.create(currentPos.z()));
+            float x = frames[0].getTransformPostX().safeResolve(runtime.create(0));
+            float y = frames[0].getTransformPostY().safeResolve(runtime.create(0));
+            float z = frames[0].getTransformPostZ().safeResolve(runtime.create(0));
             vector.set(x, y, z);
             return;
         }

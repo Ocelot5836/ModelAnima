@@ -550,7 +550,7 @@ public class MolangCompiler
                 MolangExpression expression = MolangCompiler.parseExpression(new StringReader(reader.getRead().substring(start)), flags, true, false);
                 if (!checkFlag(flags, REDUCE_FLAG))
                     return expression;
-                if (this.canReduce && (expression instanceof MolangSetVariableNode || expression instanceof MolangInvokeFunctionNode || expression instanceof MolangGetVariableNode))
+                if (this.canReduce && (expression instanceof MolangSetVariableNode || expression instanceof MolangInvokeFunctionNode || expression instanceof MolangGetVariableNode || expression instanceof MolangThisNode))
                     this.canReduce = false;
                 return expression;
             }
