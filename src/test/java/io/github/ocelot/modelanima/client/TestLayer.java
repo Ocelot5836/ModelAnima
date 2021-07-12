@@ -35,7 +35,7 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
             model.prepareMobModel(player, limbSwing, limbSwingAmount, partialTicks);
             model.setupAnim(player, limbSwing, limbSwingAmount, ageInTicks / 20F, netHeadYaw, headPitch);
             GeometryModelRenderer.copyModelAngles(this.getParentModel(), model.getModel());
-            model.renderToBuffer(matrixStack, new ResourceLocation(TestMod.MOD_ID, "cod"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+            model.render(matrixStack, new ResourceLocation(TestMod.MOD_ID, "cod"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 }
