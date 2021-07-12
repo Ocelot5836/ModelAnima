@@ -27,15 +27,15 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        GeometryModel geometryModel = GeometryModelManager.getModel(new ResourceLocation(TestMod.MOD_ID, "ghast"));
+        GeometryModel geometryModel = GeometryModelManager.getModel(new ResourceLocation(TestMod.MOD_ID, "yeti"));
         geometryModel.resetTransformation();
         GeometryModelRenderer.copyModelAngles(this.getParentModel(), geometryModel);
 
         float ticks = player.tickCount + partialTicks;
         if (geometryModel instanceof AnimatedModel)
         {
-            AnimationData animation = AnimationManager.getAnimation(new ResourceLocation(TestMod.MOD_ID, "animation.ghast.move"));
-            ((AnimatedModel) geometryModel).applyAnimation(ticks / 20F, animation, MolangRuntime.runtime().
+            AnimationData animation = AnimationManager.getAnimation(new ResourceLocation(TestMod.MOD_ID, "yeti.throw_snowball"));
+            ((AnimatedModel) geometryModel).applyAnimation((ticks / 20F) % animation.getAnimationLength(), animation, MolangRuntime.runtime().
                     setQuery("target_x_rotation", player.getViewXRot(partialTicks)).
                     setQuery("target_y_rotation", player.getViewYRot(partialTicks)).
                     setQuery("model_scale", 1.0F).setQuery("modified_distance_moved", player.moveDist).
@@ -45,6 +45,6 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
             );
         }
 
-        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "ghast"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        GeometryModelRenderer.render(geometryModel, new ResourceLocation(TestMod.MOD_ID, "yeti"), matrixStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }
