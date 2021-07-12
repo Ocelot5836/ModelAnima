@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
 
@@ -30,9 +31,9 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
             AnimatedGeometryEntityModel<AbstractClientPlayerEntity> model = new AnimatedGeometryEntityModel<>(new ResourceLocation(TestMod.MOD_ID, "yeti"));
             model.setVariableProvider(context ->
             {
-
+                context.add("walkAmount", 1.5F * MathHelper.triangleWave(limbSwing, 13.0F) * limbSwingAmount * (float) (180F / Math.PI));
             });
-            model.setAnimations(new ResourceLocation(TestMod.MOD_ID, "yeti.throw_snowball"));
+            model.setAnimations(new ResourceLocation(TestMod.MOD_ID, "yeti.setup"), new ResourceLocation(TestMod.MOD_ID, "yeti.throw_snowball"));
             this.getParentModel().copyPropertiesTo(model);
             model.prepareMobModel(player, limbSwing, limbSwingAmount, partialTicks);
             model.setupAnim(player, limbSwing, limbSwingAmount, (ageInTicks / 20F) % (float) Arrays.stream(model.getAnimations()).mapToDouble(AnimationData::getAnimationLength).max().orElse(0), netHeadYaw, headPitch);

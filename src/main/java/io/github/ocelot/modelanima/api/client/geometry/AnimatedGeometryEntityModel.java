@@ -56,7 +56,7 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
         this.variableProvider = null;
     }
 
-    private MolangRuntime.Builder createRuntime(T entity)
+    private MolangRuntime.Builder createRuntime(T entity, float yaw, float pitch)
     {
         float partialTicks = Animation.getPartialTickTime();
         MolangRuntime.Builder builder = MolangRuntime.runtime();
@@ -205,8 +205,8 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
         builder.setQuery("has_rider", () -> entity.getPassengers().isEmpty() ? 0.0F : 1.0F);
         // Skip has_target. This is not accessible on the client
         // Skip head_roll_angle
-        builder.setQuery("head_x_rotation", () -> entity.getViewXRot(partialTicks));
-        builder.setQuery("head_y_rotation", () -> entity.getViewYRot(partialTicks));
+        builder.setQuery("head_x_rotation", () -> pitch);
+        builder.setQuery("head_y_rotation", () -> yaw);
         if (entity instanceof LivingEntity)
             builder.setQuery("health", ((LivingEntity) entity)::getHealth);
         // Skip heightmap
@@ -488,7 +488,7 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
         model.resetTransformation();
         if (model instanceof AnimatedModel && this.animations.length > 0)
         {
-            MolangRuntime.Builder builder = this.createRuntime(entity);
+            MolangRuntime.Builder builder = this.createRuntime(entity, netHeadYaw, headPitch);
             if (entity instanceof MolangVariableProvider)
                 builder.setVariables((MolangVariableProvider) entity);
             if (this.variableProvider != null)
