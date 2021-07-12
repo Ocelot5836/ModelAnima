@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.TestMod;
 import io.github.ocelot.modelanima.api.client.geometry.AnimatedGeometryEntityModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
+import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
@@ -11,6 +12,8 @@ import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.util.ResourceLocation;
+
+import java.util.Arrays;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {
@@ -24,18 +27,17 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     {
         if (!player.isInvisible())
         {
-            AnimatedGeometryEntityModel<AbstractClientPlayerEntity> model = new AnimatedGeometryEntityModel<>(new ResourceLocation(TestMod.MOD_ID, "yeti"));
+            AnimatedGeometryEntityModel<AbstractClientPlayerEntity> model = new AnimatedGeometryEntityModel<>(new ResourceLocation(TestMod.MOD_ID, "guardian"));
             model.setVariableProvider(context ->
             {
-                context.add("animationamountblend", ageInTicks);
-                context.add("zrot", 90F);
+
             });
-            model.setAnimation(new ResourceLocation(TestMod.MOD_ID, "yeti.throw_snowball"));
+            model.setAnimations(new ResourceLocation(TestMod.MOD_ID, "animation.guardian.setup"), new ResourceLocation(TestMod.MOD_ID, "animation.guardian.spikes"), new ResourceLocation(TestMod.MOD_ID, "animation.guardian.swim"));
             this.getParentModel().copyPropertiesTo(model);
             model.prepareMobModel(player, limbSwing, limbSwingAmount, partialTicks);
-            model.setupAnim(player, limbSwing, limbSwingAmount, ageInTicks / 20F, netHeadYaw, headPitch);
+            model.setupAnim(player, limbSwing, limbSwingAmount, (ageInTicks / 20F) % (float) Arrays.stream(model.getAnimations()).mapToDouble(AnimationData::getAnimationLength).max().orElse(0), netHeadYaw, headPitch);
             GeometryModelRenderer.copyModelAngles(this.getParentModel(), model.getModel());
-            model.render(matrixStack, new ResourceLocation(TestMod.MOD_ID, "yeti"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+            model.render(matrixStack, new ResourceLocation(TestMod.MOD_ID, "guardian"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 }

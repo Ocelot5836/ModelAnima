@@ -16,10 +16,10 @@ public interface AnimatedModel
      * Applies the specified animation transformations at the specified time.
      *
      * @param animationTime The time of the animation in seconds
-     * @param animation     The animation
      * @param runtime       The runtime to execute MoLang instructions in. This is generally going to be {@link MolangRuntime.Builder}
+     * @param animations    The animations to play
      */
-    void applyAnimation(float animationTime, AnimationData animation, MolangRuntime.Builder runtime);
+    void applyAnimations(float animationTime, MolangRuntime.Builder runtime, AnimationData... animations);
 
     /**
      * Fetches all locators for the specified part.

@@ -30,9 +30,7 @@ public class BoneModelRenderer extends ModelRenderer
     private final ObjectList<Polygon> polygons;
     private final Matrix4f copyPosition;
     private final Matrix3f copyNormal;
-    private final Vector3f animPos;
-    private final Vector3f animRotation;
-    private final Vector3f animScale;
+    private final AnimationPose animationPose;
     private boolean copyVanilla;
 
     public BoneModelRenderer(BedrockGeometryModel parent, GeometryModelData.Bone bone)
@@ -45,9 +43,7 @@ public class BoneModelRenderer extends ModelRenderer
         this.polygons = new ObjectArrayList<>();
         this.copyPosition = new Matrix4f();
         this.copyNormal = new Matrix3f();
-        this.animPos = new Vector3f();
-        this.animRotation = new Vector3f();
-        this.animScale = new Vector3f();
+        this.animationPose = new AnimationPose();
         this.resetTransform(false);
         Arrays.stream(bone.getCubes()).forEach(this::addCube);
         GeometryModelData.PolyMesh polyMesh = bone.getPolyMesh();
@@ -179,9 +175,7 @@ public class BoneModelRenderer extends ModelRenderer
         this.z = pivot.z();
         this.copyPosition.setIdentity();
         this.copyNormal.setIdentity();
-        this.animPos.set(0, 0, 0);
-        this.animRotation.set(0, 0, 0);
-        this.animScale.set(1, 1, 1);
+        this.animationPose.reset();
         if (resetChildren)
             this.children.forEach(boneModelRenderer -> boneModelRenderer.resetTransform(true));
         this.copyVanilla = false;
@@ -263,7 +257,6 @@ public class BoneModelRenderer extends ModelRenderer
         MatrixStack matrixStack = new MatrixStack();
         modelRenderer.translateAndRotate(matrixStack);
         this.copyPosition.multiply(matrixStack.last().pose());
-        matrixStack.last().normal().invert(); // Invert because the default renderer makes normals upside-down
         this.copyNormal.mul(matrixStack.last().normal());
         this.copyVanilla = !BoneModelRenderer.class.isAssignableFrom(modelRenderer.getClass());
     }
@@ -271,38 +264,18 @@ public class BoneModelRenderer extends ModelRenderer
     @Override
     public void translateAndRotate(MatrixStack matrixStack)
     {
-        matrixStack.translate((this.animPos.x() + this.x) / 16.0F, (-this.animPos.y() + this.y) / 16.0F, (this.animPos.z() + this.z) / 16.0F);
-        if (this.animScale.x() != 1 || this.animScale.y() != 1 || this.animScale.z() != 1)
-            matrixStack.scale(this.animScale.x(), this.animScale.y(), this.animScale.z());
-        if (this.zRot + this.animRotation.z() != 0)
-            matrixStack.mulPose(Vector3f.ZP.rotation(this.zRot + (float) (this.animRotation.z() / 180.0F * Math.PI)));
-        if (this.yRot + this.animRotation.y() != 0)
-            matrixStack.mulPose(Vector3f.YP.rotation(this.yRot + (float) (this.animRotation.y() / 180.0F * Math.PI)));
-        if (this.xRot + this.animRotation.x() != 0)
-            matrixStack.mulPose(Vector3f.XP.rotation(this.xRot + (float) (this.animRotation.x() / 180.0F * Math.PI)));
+        matrixStack.translate((this.animationPose.getPosition().x() + this.x) / 16.0F, (-this.animationPose.getPosition().y() + this.y) / 16.0F, (this.animationPose.getPosition().z() + this.z) / 16.0F);
+        if (this.animationPose.getScale().hashCode() != 1333788672) // 1333788672 is the hash code of a 1, 1, 1 vector;
+            matrixStack.scale(this.animationPose.getScale().x(), this.animationPose.getScale().y(), this.animationPose.getScale().z());
+        if (this.zRot + this.animationPose.getRotation().z() != 0)
+            matrixStack.mulPose(Vector3f.ZP.rotation(this.zRot + (float) (this.animationPose.getRotation().z() / 180.0F * Math.PI)));
+        if (this.yRot + this.animationPose.getRotation().y() != 0)
+            matrixStack.mulPose(Vector3f.YP.rotation(this.yRot + (float) (this.animationPose.getRotation().y() / 180.0F * Math.PI)));
+        if (this.xRot + this.animationPose.getRotation().x() != 0)
+            matrixStack.mulPose(Vector3f.XP.rotation(this.xRot + (float) (this.animationPose.getRotation().x() / 180.0F * Math.PI)));
         matrixStack.translate(-this.x / 16.0F, -this.y / 16.0F, -this.z / 16.0F);
         matrixStack.last().pose().multiply(this.copyPosition);
         matrixStack.last().normal().mul(this.copyNormal);
-    }
-
-    /**
-     * Applies additional transformations that can be dynamically changed.
-     *
-     * @param x         The x offset
-     * @param y         The y offset
-     * @param z         The z offset
-     * @param rotationX The x rotation offset
-     * @param rotationY The y rotation offset
-     * @param rotationZ The z rotation offset
-     * @param scaleX    The x factor
-     * @param scaleY    The y factor
-     * @param scaleZ    The z factor
-     */
-    public void applyAnimationAngles(float x, float y, float z, float rotationX, float rotationY, float rotationZ, float scaleX, float scaleY, float scaleZ)
-    {
-        this.animPos.set(x, y, z);
-        this.animRotation.set(rotationX, rotationY, rotationZ);
-        this.animScale.set(scaleX, scaleY, scaleZ);
     }
 
     /**
@@ -310,31 +283,97 @@ public class BoneModelRenderer extends ModelRenderer
      */
     public GeometryModelData.Bone getBone()
     {
-        return this.bone;
+        return bone;
     }
 
     /**
-     * @return The current offset of this bone for the current animation
+     * @return The pose of this bone for animation
      */
-    public Vector3f getAnimPos()
+    public AnimationPose getAnimationPose()
     {
-        return animPos;
+        return animationPose;
     }
 
     /**
-     * @return The current rotation offset of this bone for the current animation
+     * <p>A position, rotation, and scale transformation applied on top of default positions for animations.</p>
+     *
+     * @author Ocelot
+     * @since 1.0.0
      */
-    public Vector3f getAnimRotation()
+    public static class AnimationPose
     {
-        return animRotation;
-    }
+        private final Vector3f position;
+        private final Vector3f rotation;
+        private final Vector3f scale;
 
-    /**
-     * @return The current scale of this bone for the current animation
-     */
-    public Vector3f getAnimScale()
-    {
-        return animScale;
+        public AnimationPose()
+        {
+            this.position = new Vector3f();
+            this.rotation = new Vector3f();
+            this.scale = new Vector3f(1, 1, 1);
+        }
+
+        /**
+         * Resets the transformation for this pose.
+         */
+        public void reset()
+        {
+            this.position.set(0, 0, 0);
+            this.rotation.set(0, 0, 0);
+            this.scale.set(1, 1, 1);
+        }
+
+        /**
+         * @return Whether or not this pose is set to "identity"
+         */
+        public boolean isIdentity()
+        {
+            return this.position.hashCode() == 0 && this.rotation.hashCode() == 0 && this.scale.hashCode() == 1333788672; // 1333788672 is the hash code of a 1, 1, 1 vector;
+        }
+
+        /**
+         * Applies additional transformations that can be dynamically changed.
+         *
+         * @param x         The x offset
+         * @param y         The y offset
+         * @param z         The z offset
+         * @param rotationX The x rotation offset
+         * @param rotationY The y rotation offset
+         * @param rotationZ The z rotation offset
+         * @param scaleX    The x factor
+         * @param scaleY    The y factor
+         * @param scaleZ    The z factor
+         */
+        public void add(float x, float y, float z, float rotationX, float rotationY, float rotationZ, float scaleX, float scaleY, float scaleZ)
+        {
+            this.position.add(x, y, z);
+            this.rotation.add(rotationX, rotationY, rotationZ);
+            this.scale.add(scaleX, scaleY, scaleZ);
+        }
+
+        /**
+         * @return The current offset of this bone for the current animation
+         */
+        public Vector3f getPosition()
+        {
+            return position;
+        }
+
+        /**
+         * @return The current rotation offset of this bone for the current animation
+         */
+        public Vector3f getRotation()
+        {
+            return rotation;
+        }
+
+        /**
+         * @return The current scale of this bone for the current animation
+         */
+        public Vector3f getScale()
+        {
+            return scale;
+        }
     }
 
     private static class Vertex

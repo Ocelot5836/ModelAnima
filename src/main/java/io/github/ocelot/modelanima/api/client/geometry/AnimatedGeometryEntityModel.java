@@ -33,6 +33,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.model.animation.Animation;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
@@ -45,13 +46,13 @@ import java.util.stream.LongStream;
 public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T>
 {
     private final ResourceLocation model;
-    private ResourceLocation animation;
+    private ResourceLocation[] animations;
     private MolangVariableProvider variableProvider;
 
     public AnimatedGeometryEntityModel(ResourceLocation model)
     {
         this.model = model;
-        this.animation = null;
+        this.animations = new ResourceLocation[0];
         this.variableProvider = null;
     }
 
@@ -485,14 +486,14 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
     {
         GeometryModel model = this.getModel();
         model.resetTransformation();
-        if (model instanceof AnimatedModel && this.animation != null)
+        if (model instanceof AnimatedModel && this.animations.length > 0)
         {
             MolangRuntime.Builder builder = this.createRuntime(entity);
             if (entity instanceof MolangVariableProvider)
                 builder.setVariables((MolangVariableProvider) entity);
             if (this.variableProvider != null)
                 builder.setVariables(this.variableProvider);
-            ((AnimatedModel) model).applyAnimation(animationTime, this.getAnimation(), builder);
+            ((AnimatedModel) model).applyAnimations(animationTime, builder, this.getAnimations());
         }
     }
 
@@ -515,21 +516,21 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
     }
 
     /**
-     * @return The model this model is wrapping
+     * @return The animations
      */
-    public AnimationData getAnimation()
+    public AnimationData[] getAnimations()
     {
-        return this.animation != null ? AnimationManager.getAnimation(this.animation) : AnimationData.EMPTY;
+        return Arrays.stream(this.animations).map(AnimationManager::getAnimation).filter(animation -> animation != AnimationData.EMPTY).toArray(AnimationData[]::new);
     }
 
     /**
      * Sets the new animation to use.
      *
-     * @param animation The new animation or <code>null</code> to stop animating
+     * @param animations The animations to play
      */
-    public void setAnimation(@Nullable ResourceLocation animation)
+    public void setAnimations(ResourceLocation... animations)
     {
-        this.animation = animation;
+        this.animations = animations;
     }
 
     /**

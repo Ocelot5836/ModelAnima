@@ -32,6 +32,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     private static final Vector3f ROTATION = new Vector3f();
     private static final Vector3f SCALE = new Vector3f();
 
+    private final Map<String, BoneModelRenderer.AnimationPose> transformations;
     private final Map<String, BoneModelRenderer> modelParts;
     private final Set<BoneModelRenderer> renderParts;
     private final String[] modelKeys;
@@ -48,6 +49,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         super(RenderType::entityCutoutNoCull);
         this.texWidth = textureWidth;
         this.texHeight = textureHeight;
+        this.transformations = new HashMap<>();
         this.modelParts = new HashMap<>();
         this.renderParts = new HashSet<>();
 
@@ -192,42 +194,58 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     }
 
     @Override
-    public void applyAnimation(float animationTime, AnimationData animation, MolangRuntime.Builder runtime)
+    public void applyAnimations(float animationTime, MolangRuntime.Builder runtime, AnimationData... animations)
     {
+        if (animations.length == 0)
+            return;
+
         runtime.setQuery("delta_time", Animation::getPartialTickTime);
         runtime.setQuery("life_time", animationTime);
 
-        if (animationTime > animation.getAnimationLength())
+        boolean loop = false;
+        float length = 0;
+        for (AnimationData animation : animations)
         {
-            switch (animation.getLoop())
+            if (animation.getLoop() == AnimationData.Loop.LOOP)
+                loop = true;
+            if (animation.getAnimationLength() > length)
+                length = animation.getAnimationLength();
+        }
+
+        if (loop && animationTime > length)
+            animationTime %= length;
+
+        this.transformations.values().forEach(BoneModelRenderer.AnimationPose::reset);
+        for (AnimationData animation : animations)
+        {
+            float localAnimationTime = animationTime;
+            if (localAnimationTime > animation.getAnimationLength())
             {
-                case NONE:
-                    animationTime = 0;
-                    break;
-                case LOOP:
-                    animationTime %= animation.getAnimationLength();
-                    break;
-                case HOLD_ON_LAST_FRAME:
-                    animationTime = animation.getAnimationLength();
-                    break;
+                localAnimationTime = animation.getAnimationLength();
+            }
+
+            float blendWeight = animation.getBlendWeight();
+            for (AnimationData.BoneAnimation boneAnimation : animation.getBoneAnimations())
+            {
+                if (!this.modelParts.containsKey(boneAnimation.getName()) || animation.getBoneAnimations().length == 0)
+                    continue;
+
+                POSITION.set(0, 0, 0);
+                ROTATION.set(0, 0, 0);
+                SCALE.set(1, 1, 1);
+                get(localAnimationTime, runtime, boneAnimation.getPositionFrames(), POSITION);
+                get(localAnimationTime, runtime, boneAnimation.getRotationFrames(), ROTATION);
+                get(localAnimationTime, runtime, boneAnimation.getScaleFrames(), SCALE);
+
+                this.transformations.computeIfAbsent(boneAnimation.getName(), key -> new BoneModelRenderer.AnimationPose()).add(POSITION.x() * blendWeight, POSITION.y() * blendWeight, POSITION.z() * blendWeight, ROTATION.x() * blendWeight, ROTATION.y() * blendWeight, ROTATION.z() * blendWeight, (SCALE.x() - 1) * blendWeight, (SCALE.y() - 1) * blendWeight, (SCALE.z() - 1) * blendWeight);
             }
         }
-
-        for (AnimationData.BoneAnimation boneAnimation : animation.getBoneAnimations())
+        this.transformations.forEach((name, pose) ->
         {
-            if (!this.modelParts.containsKey(boneAnimation.getName()))
-                continue;
-
-            BoneModelRenderer renderer = this.modelParts.get(boneAnimation.getName());
-            POSITION.set(0, 0, 0);
-            ROTATION.set(0, 0, 0);
-            SCALE.set(1, 1, 1);
-            get(animationTime, runtime, boneAnimation.getPositionFrames(), renderer.getAnimPos(), POSITION);
-            get(animationTime, runtime, boneAnimation.getRotationFrames(), renderer.getAnimRotation(), ROTATION);
-            get(animationTime, runtime, boneAnimation.getScaleFrames(), renderer.getAnimScale(), SCALE);
-
-            renderer.applyAnimationAngles(POSITION.x(), POSITION.y(), POSITION.z(), ROTATION.x(), ROTATION.y(), ROTATION.z(), SCALE.x(), SCALE.y(), SCALE.z());
-        }
+            BoneModelRenderer.AnimationPose p = this.modelParts.get(name).getAnimationPose();
+            p.reset();
+            p.add(pose.getPosition().x(), pose.getPosition().y(), pose.getPosition().z(), pose.getRotation().x(), pose.getRotation().y(), pose.getRotation().z(), pose.getScale().x() - 1, pose.getScale().y() - 1, pose.getScale().z() - 1);
+        });
     }
 
     @Override
@@ -246,10 +264,11 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         return activeMaterial;
     }
 
-    private static void get(float animationTime, MolangRuntime.Builder runtime, AnimationData.KeyFrame[] frames, Vector3f currentPos, Vector3f result)
+    private static void get(float animationTime, MolangRuntime.Builder runtime, AnimationData.KeyFrame[] frames, Vector3f result)
     {
         if (frames.length == 1)
         {
+            // TODO figure out what "this" is supposed to be
             float x = frames[0].getTransformPostX().safeResolve(runtime.create(0));
             float y = frames[0].getTransformPostY().safeResolve(runtime.create(0));
             float z = frames[0].getTransformPostZ().safeResolve(runtime.create(0));
@@ -260,7 +279,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         for (int i = 0; i < frames.length; i++)
         {
             AnimationData.KeyFrame to = frames[i];
-            if (to.getTime() == 0 || (animationTime > to.getTime() && i < frames.length - 1))
+            if (to.getTime() == 0 ||( to.getTime() < animationTime && i < frames.length - 1))
                 continue;
 
             AnimationData.KeyFrame from = i == 0 ? null : frames[i - 1];
@@ -271,7 +290,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
                     lerp(progress, runtime, from, to, result);
                     break;
                 case CATMULLROM:
-                    catmullRom(progress, runtime, i > 1 ? frames[i - 2] : null, from, to, i < frames.length - 2 ? frames[i + 1] : null, result);
+                    catmullRom(progress, runtime, i > 1 ? frames[i - 2] : null, from, to, i < frames.length - 1 ? frames[i + 1] : null, result);
                     break;
             }
             break;
@@ -304,9 +323,9 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         float toY = to.getTransformPreY().safeResolve(runtime.create(0));
         float toZ = to.getTransformPreZ().safeResolve(runtime.create(0));
 
-        float afterX = after == null ? 0 : after.getTransformPreX().safeResolve(runtime.create(0));
-        float afterY = after == null ? 0 : after.getTransformPreY().safeResolve(runtime.create(0));
-        float afterZ = after == null ? 0 : after.getTransformPreZ().safeResolve(runtime.create(0));
+        float afterX = after == null ? toX : after.getTransformPreX().safeResolve(runtime.create(0));
+        float afterY = after == null ? toY : after.getTransformPreY().safeResolve(runtime.create(0));
+        float afterZ = after == null ? toZ : after.getTransformPreZ().safeResolve(runtime.create(0));
 
         result.set(catmullRom(beforeX, fromX, toX, afterX, progress), catmullRom(beforeY, fromY, toY, afterY, progress), catmullRom(beforeZ, fromZ, toZ, afterZ, progress));
     }
