@@ -214,12 +214,12 @@ public class BoneModelRenderer extends ModelRenderer
                 matrixStack.translate(-this.x / 16.0F, -this.y / 16.0F, -this.z / 16.0F);
 
             Matrix4f matrix4f = matrixStack.last().pose();
-            Matrix3f matrix3f = matrixStack.last().normal();
+            Matrix3f matrix3f = matrixStack.last().normal().copy();
             for (Quad quad : this.quads)
             {
                 if (!quad.material.equals(this.parent.getActiveMaterial()))
                     continue;
-                NORMAL_VECTOR.set(quad.normal.x(), quad.normal.y(), quad.normal.z());
+                NORMAL_VECTOR.set(-quad.normal.x(), quad.normal.y(), -quad.normal.z());
                 NORMAL_VECTOR.transform(matrix3f);
                 for (Vertex vertex : quad.vertices)
                 {
@@ -263,6 +263,7 @@ public class BoneModelRenderer extends ModelRenderer
         MatrixStack matrixStack = new MatrixStack();
         modelRenderer.translateAndRotate(matrixStack);
         this.copyPosition.multiply(matrixStack.last().pose());
+        matrixStack.last().normal().invert(); // Invert because the default renderer makes normals upside-down
         this.copyNormal.mul(matrixStack.last().normal());
         this.copyVanilla = !BoneModelRenderer.class.isAssignableFrom(modelRenderer.getClass());
     }

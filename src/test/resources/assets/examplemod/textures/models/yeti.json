@@ -1,0 +1,7 @@
+{
+  "texture": {
+    "type": "location",
+    "texture": "examplemod:entity/yeti",
+    "layer": "cutout"
+  }
+}

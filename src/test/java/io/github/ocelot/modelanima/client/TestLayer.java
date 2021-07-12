@@ -24,18 +24,18 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     {
         if (!player.isInvisible())
         {
-            AnimatedGeometryEntityModel<AbstractClientPlayerEntity> model = new AnimatedGeometryEntityModel<>(new ResourceLocation(TestMod.MOD_ID, "cod"));
+            AnimatedGeometryEntityModel<AbstractClientPlayerEntity> model = new AnimatedGeometryEntityModel<>(new ResourceLocation(TestMod.MOD_ID, "yeti"));
             model.setVariableProvider(context ->
             {
                 context.add("animationamountblend", ageInTicks);
                 context.add("zrot", 90F);
             });
-            model.setAnimation(new ResourceLocation(TestMod.MOD_ID, "animation.cod.flop"));
+            model.setAnimation(new ResourceLocation(TestMod.MOD_ID, "yeti.throw_snowball"));
             this.getParentModel().copyPropertiesTo(model);
             model.prepareMobModel(player, limbSwing, limbSwingAmount, partialTicks);
             model.setupAnim(player, limbSwing, limbSwingAmount, ageInTicks / 20F, netHeadYaw, headPitch);
             GeometryModelRenderer.copyModelAngles(this.getParentModel(), model.getModel());
-            model.render(matrixStack, new ResourceLocation(TestMod.MOD_ID, "cod"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+            model.render(matrixStack, new ResourceLocation(TestMod.MOD_ID, "yeti"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 }
