@@ -155,6 +155,25 @@ public class MolangRuntime implements MolangEnvironment
             return this;
         }
 
+        public Builder setVariables(MolangVariableProvider provider)
+        {
+            provider.addMolangVariables(new MolangVariableProvider.Context()
+            {
+                @Override
+                public void add(String name, float value)
+                {
+                    variable.set(name, new MolangConstantNode(value));
+                }
+
+                @Override
+                public void remove(String name)
+                {
+                    variable.set(name, MolangExpression.ZERO);
+                }
+            }); // Variables are assumed to be used later
+            return this;
+        }
+
         public Builder setQuery(String name, int params, MolangJavaFunction function)
         {
             this.query.set(params < 0 ? name : (name + "$" + params), new MolangFunction(params, function));

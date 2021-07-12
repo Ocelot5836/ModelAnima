@@ -20,6 +20,11 @@ public class MolangVariableStorage implements MolangObject
     @Override
     public void set(String name, MolangExpression value)
     {
+        if (value == MolangExpression.ZERO)
+        {
+            this.storage.remove(name);
+            return;
+        }
         if (!this.allowMethods && value instanceof MolangFunction)
             throw new IllegalStateException("Cannot set functions on objects that do not allow functions");
         this.storage.put(name, value);

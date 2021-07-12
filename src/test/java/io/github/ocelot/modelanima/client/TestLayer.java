@@ -14,8 +14,6 @@ import net.minecraft.util.ResourceLocation;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {
-    private static final AnimatedGeometryEntityModel<AbstractClientPlayerEntity> MODEL = new AnimatedGeometryEntityModel<>(new ResourceLocation(TestMod.MOD_ID, "ghast"));
-
     public TestLayer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRenderer)
     {
         super(entityRenderer);
@@ -26,12 +24,18 @@ public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerM
     {
         if (!player.isInvisible())
         {
-            MODEL.setAnimation(new ResourceLocation(TestMod.MOD_ID, "animation.ghast.move"));
-            this.getParentModel().copyPropertiesTo(MODEL);
-            MODEL.prepareMobModel(player, limbSwing, limbSwingAmount, partialTicks);
-            MODEL.setupAnim(player, limbSwing, limbSwingAmount, ageInTicks / 20F, netHeadYaw, headPitch);
-            GeometryModelRenderer.copyModelAngles(this.getParentModel(), MODEL.getModel());
-            MODEL.renderToBuffer(matrixStack, new ResourceLocation(TestMod.MOD_ID, "ghast"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+            AnimatedGeometryEntityModel<AbstractClientPlayerEntity> model = new AnimatedGeometryEntityModel<>(new ResourceLocation(TestMod.MOD_ID, "cod"));
+            model.setVariableProvider(context ->
+            {
+                context.add("animationamountblend", ageInTicks);
+                context.add("zrot", 90F);
+            });
+            model.setAnimation(new ResourceLocation(TestMod.MOD_ID, "animation.cod.flop"));
+            this.getParentModel().copyPropertiesTo(model);
+            model.prepareMobModel(player, limbSwing, limbSwingAmount, partialTicks);
+            model.setupAnim(player, limbSwing, limbSwingAmount, ageInTicks / 20F, netHeadYaw, headPitch);
+            GeometryModelRenderer.copyModelAngles(this.getParentModel(), model.getModel());
+            model.renderToBuffer(matrixStack, new ResourceLocation(TestMod.MOD_ID, "cod"), packedLight, LivingRenderer.getOverlayCoords(player, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 }

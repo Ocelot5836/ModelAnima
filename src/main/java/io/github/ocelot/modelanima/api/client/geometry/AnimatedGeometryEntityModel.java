@@ -6,6 +6,7 @@ import io.github.ocelot.modelanima.api.client.animation.AnimationManager;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
+import io.github.ocelot.modelanima.api.common.molang.MolangVariableProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -31,6 +32,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.model.animation.Animation;
 
+import javax.annotation.Nullable;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
@@ -44,11 +46,13 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
 {
     private final ResourceLocation model;
     private ResourceLocation animation;
+    private MolangVariableProvider variableProvider;
 
     public AnimatedGeometryEntityModel(ResourceLocation model)
     {
         this.model = model;
         this.animation = null;
+        this.variableProvider = null;
     }
 
     private MolangRuntime.Builder createRuntime(T entity)
@@ -482,7 +486,14 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
         GeometryModel model = this.getModel();
         model.resetTransformation();
         if (model instanceof AnimatedModel && this.animation != null)
-            ((AnimatedModel) model).applyAnimation(animationTime, this.getAnimation(), this.createRuntime(entity));
+        {
+            MolangRuntime.Builder builder = this.createRuntime(entity);
+            if (entity instanceof MolangVariableProvider)
+                builder.setVariables((MolangVariableProvider) entity);
+            if (this.variableProvider != null)
+                builder.setVariables(this.variableProvider);
+            ((AnimatedModel) model).applyAnimation(animationTime, this.getAnimation(), builder);
+        }
     }
 
     public void renderToBuffer(MatrixStack poseStack, ResourceLocation texture, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
@@ -514,10 +525,20 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
     /**
      * Sets the new animation to use.
      *
-     * @param animation The new animation
+     * @param animation The new animation or <code>null</code> to stop animating
      */
-    public void setAnimation(ResourceLocation animation)
+    public void setAnimation(@Nullable ResourceLocation animation)
     {
         this.animation = animation;
+    }
+
+    /**
+     * Sets an additional provider for MoLang variables.
+     *
+     * @param variableProvider The provider for variables in addition to the entity's variable provider
+     */
+    public void setVariableProvider(@Nullable MolangVariableProvider variableProvider)
+    {
+        this.variableProvider = variableProvider;
     }
 }
