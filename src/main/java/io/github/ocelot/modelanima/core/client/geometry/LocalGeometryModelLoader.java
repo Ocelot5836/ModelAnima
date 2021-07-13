@@ -1,5 +1,6 @@
-package io.github.ocelot.modelanima.api.client.geometry;
+package io.github.ocelot.modelanima.core.client.geometry;
 
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelParser;
 import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
@@ -17,10 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * <p>Loads {@link GeometryModel} from local locations.</p>
- *
  * @author Ocelot
- * @since 1.0.0
  */
 public final class LocalGeometryModelLoader implements BackgroundLoader<Map<ResourceLocation, GeometryModel>>
 {

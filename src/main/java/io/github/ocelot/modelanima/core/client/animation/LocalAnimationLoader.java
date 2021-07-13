@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.api.client.animation;
+package io.github.ocelot.modelanima.core.client.animation;
 
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.animation.AnimationParser;
@@ -16,10 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * <p>Loads animations from a local file location.</p>
- *
  * @author Ocelot
- * @since 1.0.0
  */
 public class LocalAnimationLoader implements BackgroundLoader<Map<ResourceLocation, AnimationData>>
 {

@@ -2,6 +2,7 @@ package io.github.ocelot.modelanima.api.client.geometry;
 
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
+import io.github.ocelot.modelanima.core.client.geometry.LocalGeometryModelLoader;
 import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
@@ -53,6 +54,7 @@ public final class GeometryModelManager
                 ((IReloadableResourceManager) resourceManager).registerReloadListener(RELOADER);
             }
         });
+        addLoader(new LocalGeometryModelLoader());
     }
 
     /**

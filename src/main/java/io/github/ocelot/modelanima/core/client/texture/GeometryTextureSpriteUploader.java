@@ -5,11 +5,11 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.JsonObject;
 import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.client.texture.GeometryAtlasTexture;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
-import io.github.ocelot.modelanima.api.common.util.FileCache;
-import io.github.ocelot.modelanima.core.common.util.HashedTextureCache;
-import io.github.ocelot.modelanima.core.common.util.TimedTextureCache;
+import io.github.ocelot.modelanima.api.common.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.core.client.util.FileCache;
+import io.github.ocelot.modelanima.core.client.util.HashedTextureCache;
+import io.github.ocelot.modelanima.core.client.util.TimedTextureCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -49,7 +49,7 @@ import java.util.stream.Stream;
  */
 public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.SheetData> implements GeometryAtlasTexture, AutoCloseable
 {
-    public static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(ModelAnima.DOMAIN, "textures/atlas/geometry.png");
+    public static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(ModelAnima.MOD_ID, "textures/atlas/geometry.png");
     private static final Logger LOGGER = LogManager.getLogger();
     private final AtlasTexture textureAtlas;
     private final Set<GeometryModelTexture> textures;
@@ -290,7 +290,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
             @Override
             public String getSourceName()
             {
-                return ModelAnima.DOMAIN + "_online";
+                return ModelAnima.MOD_ID + "_online";
             }
 
             @Override

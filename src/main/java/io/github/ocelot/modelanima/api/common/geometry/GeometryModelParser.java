@@ -2,7 +2,7 @@ package io.github.ocelot.modelanima.api.common.geometry;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.core.common.geometry.Geometry110Parser;
 import io.github.ocelot.modelanima.core.common.geometry.Geometry1120Parser;
 import io.github.ocelot.modelanima.core.common.geometry.Geometry180Parser;
@@ -18,7 +18,6 @@ import java.io.Reader;
  */
 public class GeometryModelParser
 {
-    private static final String VERSION = "1.12.0";
     private static final Gson GSON = new GsonBuilder().registerTypeAdapter(GeometryModelTextureTable.class, new GeometryModelTextureTable.Serializer()).create();
 
     /**

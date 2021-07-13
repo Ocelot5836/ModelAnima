@@ -1,17 +1,17 @@
 package io.github.ocelot.modelanima.core.client.geometry;
 
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.api.common.texture.GeometryModelTexture;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import static org.lwjgl.opengl.GL11.*;
 
-@OnlyIn(Dist.CLIENT)
+/**
+ * @author Ocelot
+ */
 public final class GeometryRenderTypes extends RenderType
 {
     private static final DiffuseLightingState SMOOTH_LIGHTING = new DiffuseLightingState(true)

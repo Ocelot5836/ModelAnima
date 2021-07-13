@@ -1,12 +1,13 @@
-package io.github.ocelot.modelanima.api.client.geometry;
+package io.github.ocelot.modelanima.core.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import io.github.ocelot.modelanima.api.client.animation.AnimatedModel;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTexture;
+import io.github.ocelot.modelanima.api.common.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
-import io.github.ocelot.modelanima.core.client.geometry.BoneModelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -21,10 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * <p>A {@link Model} that uses data from {@link GeometryModelData}.</p>
- *
  * @author Ocelot
- * @since 1.0.0
  */
 public class BedrockGeometryModel extends Model implements GeometryModel, AnimatedModel
 {

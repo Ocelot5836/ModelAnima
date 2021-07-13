@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.api.client.entity;
+package io.github.ocelot.modelanima.api.client.animation;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
@@ -13,6 +13,7 @@ import net.minecraft.util.ResourceLocation;
  *
  * @param <T> The type of entity to render
  * @author Ocelot
+ * @since 1.0.0
  */
 public abstract class AnimatedEntityRenderer<T extends MobEntity & AnimatedEntity> extends MobRenderer<T, AnimatedGeometryEntityModel<T>>
 {

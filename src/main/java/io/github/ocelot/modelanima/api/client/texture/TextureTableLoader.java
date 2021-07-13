@@ -1,6 +1,6 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
 import net.minecraft.resources.IFutureReloadListener;
 import net.minecraft.util.ResourceLocation;
 

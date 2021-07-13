@@ -1,12 +1,6 @@
 package io.github.ocelot.modelanima;
 
 import com.mojang.brigadier.CommandDispatcher;
-import io.github.ocelot.modelanima.api.client.animation.AnimationManager;
-import io.github.ocelot.modelanima.api.client.animation.LocalAnimationLoader;
-import io.github.ocelot.modelanima.api.client.geometry.GeometryModelManager;
-import io.github.ocelot.modelanima.api.client.geometry.LocalGeometryModelLoader;
-import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
-import io.github.ocelot.modelanima.api.client.texture.LocalTextureTableLoader;
 import io.github.ocelot.modelanima.client.ClientInit;
 import io.github.ocelot.sonar.Sonar;
 import io.github.ocelot.sonar.common.item.SpawnEggItemBase;
@@ -48,14 +42,7 @@ public class TestMod
     {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         Sonar.init(modBus);
-        ModelAnima.init(modBus);
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-        {
-            GeometryModelManager.addLoader(new LocalGeometryModelLoader());
-            GeometryTextureManager.addProvider(new LocalTextureTableLoader());
-            AnimationManager.addLoader(new LocalAnimationLoader());
-            modBus.addListener(ClientInit::initClient);
-        });
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> modBus.addListener(ClientInit::initClient));
         BLOCKS.register(modBus);
         TILE_ENTITIES.register(modBus);
         ITEMS.register(modBus);

@@ -7,7 +7,8 @@ import io.github.ocelot.modelanima.core.common.network.ModelAnimaMessages;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
  * <p>Contains static information about Model Anima.</p>
@@ -15,22 +16,14 @@ import net.minecraftforge.fml.ModLoadingContext;
  * @author Ocelot
  * @since 1.0.0
  */
+@Mod(ModelAnima.MOD_ID)
 public class ModelAnima
 {
-    /**
-     * The domain (modid) used for resource locations.
-     */
-    public static final String DOMAIN = "modelanima";
-    private static String parentModId;
+    public static final String MOD_ID = "modelanima";
 
-    /**
-     * <p>Initializes all required loading for ModelAnima.</p>
-     *
-     * @param bus The mod event bus to register events on
-     */
-    public static void init(IEventBus bus)
+    public ModelAnima()
     {
-        ModelAnima.parentModId = ModLoadingContext.get().getActiveNamespace();
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         ModelAnimaMessages.init();
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
         {
@@ -38,13 +31,5 @@ public class ModelAnima
             GeometryTextureManager.init(bus);
             AnimationManager.init(bus);
         });
-    }
-
-    /**
-     * @return The id of the mod hosting ModelAnima
-     */
-    public static String getParentModId()
-    {
-        return parentModId;
     }
 }

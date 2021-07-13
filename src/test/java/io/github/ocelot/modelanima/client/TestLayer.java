@@ -1,21 +1,11 @@
 package io.github.ocelot.modelanima.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import io.github.ocelot.modelanima.TestMod;
-import io.github.ocelot.modelanima.api.client.entity.AnimatedGeometryEntityModel;
-import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
-import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
-import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.client.renderer.entity.model.CowModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
-import net.minecraft.util.ResourceLocation;
-
-import java.util.Arrays;
 
 public class TestLayer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>
 {

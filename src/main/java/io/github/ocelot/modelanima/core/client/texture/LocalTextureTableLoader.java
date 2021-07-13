@@ -1,8 +1,9 @@
-package io.github.ocelot.modelanima.api.client.texture;
+package io.github.ocelot.modelanima.core.client.texture;
 
 import com.google.gson.Gson;
+import io.github.ocelot.modelanima.api.client.texture.TextureTableLoader;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelParser;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
@@ -19,10 +20,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * <p>Loads textures from local files each reload.</p>
- *
  * @author Ocelot
- * @since 1.0.0
  */
 public class LocalTextureTableLoader implements TextureTableLoader
 {

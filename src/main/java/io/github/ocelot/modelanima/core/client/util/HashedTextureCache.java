@@ -1,9 +1,8 @@
-package io.github.ocelot.modelanima.core.common.util;
+package io.github.ocelot.modelanima.core.client.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.ocelot.modelanima.api.client.util.GeometryCache;
-import io.github.ocelot.modelanima.api.common.util.FileCache;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

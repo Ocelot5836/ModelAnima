@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.api.client.util;
+package io.github.ocelot.modelanima.api.client.geometry;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -37,7 +37,7 @@ public class GeometryCache
 {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
-    private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDirectory.toURI()).resolve(ModelAnima.DOMAIN + "-cache");
+    private static final Path CACHE_FOLDER = Paths.get(Minecraft.getInstance().gameDirectory.toURI()).resolve(ModelAnima.MOD_ID + "-cache");
     private static final Object METADATA_LOCK = new Object();
     private static final Object IO_LOCK = new Object();
 

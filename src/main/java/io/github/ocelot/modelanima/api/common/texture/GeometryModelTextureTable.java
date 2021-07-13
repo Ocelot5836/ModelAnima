@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.api.common.geometry.texture;
+package io.github.ocelot.modelanima.api.common.texture;
 
 import com.google.gson.*;
 import com.mojang.serialization.JsonOps;

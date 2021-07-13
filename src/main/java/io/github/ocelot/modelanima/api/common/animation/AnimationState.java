@@ -4,6 +4,7 @@ import net.minecraft.util.ResourceLocation;
 
 /**
  * <p>An animation state is an array of animations that can play for a specific amount of time. This is to allow the server to know what animation should be playing for state checking.</p>
+ *
  * @author Ocelot
  * @since 1.0.0
  */

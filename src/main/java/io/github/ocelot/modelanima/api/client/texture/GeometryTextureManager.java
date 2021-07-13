@@ -1,8 +1,9 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
-import io.github.ocelot.modelanima.api.common.geometry.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.core.client.texture.GeometryTextureSpriteUploader;
+import io.github.ocelot.modelanima.core.client.texture.LocalTextureTableLoader;
 import io.github.ocelot.modelanima.core.client.texture.StaticTextureTableLoader;
 import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
 import net.minecraft.client.Minecraft;
@@ -55,6 +56,7 @@ public class GeometryTextureManager
                 ((IReloadableResourceManager) resourceManager).registerReloadListener(RELOADER);
             }
         });
+        addProvider(new LocalTextureTableLoader());
     }
 
     /**

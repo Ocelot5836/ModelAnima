@@ -2,7 +2,6 @@ package io.github.ocelot.modelanima.core.client.geometry;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import io.github.ocelot.modelanima.api.client.geometry.BedrockGeometryModel;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;

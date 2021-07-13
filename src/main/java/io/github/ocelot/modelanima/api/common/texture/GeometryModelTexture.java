@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.api.common.geometry.texture;
+package io.github.ocelot.modelanima.api.common.texture;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -210,7 +210,7 @@ public class GeometryModelTexture
         UNKNOWN(location -> new ResourceLocation("missingno")),
         INVISIBLE(location -> new ResourceLocation("missingno")),
         LOCATION(ResourceLocation::new),
-        ONLINE(location -> new ResourceLocation(ModelAnima.DOMAIN, "base32" + ONLINE_PATTERN.matcher(new Base32().encodeAsString(location.getBytes()).toLowerCase(Locale.ROOT)).replaceAll("_")));
+        ONLINE(location -> new ResourceLocation(ModelAnima.MOD_ID, "base32" + ONLINE_PATTERN.matcher(new Base32().encodeAsString(location.getBytes()).toLowerCase(Locale.ROOT)).replaceAll("_")));
 
         private final Function<String, ResourceLocation> locationGenerator;
 

@@ -2,6 +2,7 @@ package io.github.ocelot.modelanima.api.client.animation;
 
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
+import io.github.ocelot.modelanima.core.client.animation.LocalAnimationLoader;
 import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
@@ -53,6 +54,7 @@ public final class AnimationManager
                 ((IReloadableResourceManager) resourceManager).registerReloadListener(RELOADER);
             }
         });
+        addLoader(new LocalAnimationLoader());
     }
 
     /**

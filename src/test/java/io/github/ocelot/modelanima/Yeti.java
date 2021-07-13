@@ -23,6 +23,9 @@ import net.minecraft.world.World;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+/**
+ * @author Ocelot
+ */
 public class Yeti extends MonsterEntity implements AnimatedEntity
 {
     public static final AnimationState THROW_SNOWBALL = new AnimationState(53, new ResourceLocation(TestMod.MOD_ID, "yeti.setup"), new ResourceLocation(TestMod.MOD_ID, "yeti.throw_snowball"));

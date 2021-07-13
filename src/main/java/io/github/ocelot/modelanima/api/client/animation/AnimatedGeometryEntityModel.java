@@ -1,9 +1,7 @@
-package io.github.ocelot.modelanima.api.client.entity;
+package io.github.ocelot.modelanima.api.client.animation;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import io.github.ocelot.modelanima.api.client.animation.AnimationManager;
-import io.github.ocelot.modelanima.api.client.geometry.AnimatedModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelManager;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
@@ -14,7 +12,6 @@ import io.github.ocelot.modelanima.api.common.molang.MolangVariableProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.entity.model.CowModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.settings.PointOfView;
 import net.minecraft.entity.*;
@@ -47,6 +44,7 @@ import java.util.stream.LongStream;
  *
  * @param <T> The type of entity this model is rendering
  * @author Ocelot
+ * @since 1.0.0
  */
 public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T>
 {

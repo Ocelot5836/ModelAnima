@@ -1,6 +1,6 @@
 package io.github.ocelot.modelanima.api.common.animation;
 
-import io.github.ocelot.modelanima.api.client.geometry.AnimatedModel;
+import io.github.ocelot.modelanima.api.client.animation.AnimatedModel;
 import io.github.ocelot.modelanima.core.common.network.ModelAnimaMessages;
 import io.github.ocelot.modelanima.core.common.network.SyncAnimationMessage;
 import net.minecraft.entity.Entity;

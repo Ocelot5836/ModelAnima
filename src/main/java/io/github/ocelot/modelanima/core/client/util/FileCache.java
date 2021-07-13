@@ -1,4 +1,4 @@
-package io.github.ocelot.modelanima.api.common.util;
+package io.github.ocelot.modelanima.core.client.util;
 
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -14,10 +14,7 @@ import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * <p>Manages caching of files to disk from online.</p>
- *
  * @author Ocelot
- * @since 1.0.0
  */
 public interface FileCache
 {

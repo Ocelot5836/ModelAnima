@@ -3,11 +3,14 @@ package io.github.ocelot.modelanima.client;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import io.github.ocelot.modelanima.TestMod;
 import io.github.ocelot.modelanima.Yeti;
-import io.github.ocelot.modelanima.api.client.entity.AnimatedEntityRenderer;
+import io.github.ocelot.modelanima.api.client.animation.AnimatedEntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
+/**
+ * @author Ocelot
+ */
 public class YetiRenderer extends AnimatedEntityRenderer<Yeti>
 {
     private static final ResourceLocation[] DEFAULT_ANIMATIONS = new ResourceLocation[]{new ResourceLocation(TestMod.MOD_ID, "yeti.setup"), new ResourceLocation(TestMod.MOD_ID, "yeti.swing_arms")};

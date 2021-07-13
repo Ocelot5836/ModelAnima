@@ -1,6 +1,6 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-package io.github.ocelot.modelanima.core.common.util;
+package io.github.ocelot.modelanima.core.common.molang.object;
 
 import mcp.MethodsReturnNonnullByDefault;
 
