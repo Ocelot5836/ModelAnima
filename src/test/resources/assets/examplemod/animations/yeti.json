@@ -517,10 +517,10 @@
           "rotation": ["q.head_x_rotation", "q.head_y_rotation", 0]
         },
         "leg0": {
-          "rotation": ["-1.5 * math.triangle_wave(v.limb_swing, 13.0) * v.limb_swing_amount * 180 / math.pi", 0, 0]
+          "rotation": ["-1.5 * math.triangle_wave(q.limb_swing, 13.0) * q.limb_swing_amount * 180 / math.pi", 0, 0]
         },
         "leg1": {
-          "rotation": ["1.5 * math.triangle_wave(v.limb_swing, 13.0) * v.limb_swing_amount * 180 / math.pi", 0, 0]
+          "rotation": ["1.5 * math.triangle_wave(q.limb_swing, 13.0) * q.limb_swing_amount * 180 / math.pi", 0, 0]
         }
       }
     },
@@ -528,10 +528,10 @@
       "loop": true,
       "bones": {
         "arm0": {
-          "rotation": ["(-0.2 + 1.5 * math.triangle_wave(v.limb_swing, 13.0)) * v.limb_swing_amount * 180 / math.pi", 0, 0]
+          "rotation": ["(-0.2 + 1.5 * math.triangle_wave(q.limb_swing, 13.0)) * q.limb_swing_amount * 180 / math.pi", 0, 0]
         },
         "arm1": {
-          "rotation": ["(-0.2 - 1.5 * math.triangle_wave(v.limb_swing, 13.0)) * v.limb_swing_amount * 180 / math.pi", 0, 0]
+          "rotation": ["(-0.2 - 1.5 * math.triangle_wave(q.limb_swing, 13.0)) * q.limb_swing_amount * 180 / math.pi", 0, 0]
         }
       }
     },

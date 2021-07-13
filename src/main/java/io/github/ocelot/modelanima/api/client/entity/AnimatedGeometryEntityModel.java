@@ -14,6 +14,7 @@ import io.github.ocelot.modelanima.api.common.molang.MolangVariableProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.renderer.entity.model.CowModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.settings.PointOfView;
 import net.minecraft.entity.*;
@@ -62,7 +63,7 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
         this.variableProvider = null;
     }
 
-    private MolangRuntime.Builder createRuntime(T entity, float yaw, float pitch)
+    private MolangRuntime.Builder createRuntime(T entity, float limbSwing, float limbSwingAmount, float yaw, float pitch)
     {
         float partialTicks = Animation.getPartialTickTime();
         MolangRuntime.Builder builder = MolangRuntime.runtime();
@@ -483,22 +484,27 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
         // Skip wing_flap_position
         // Skip wing_flap_speed
         // Skip yaw_speed
+
+        // Custom Queries
+        builder.setQuery("limb_swing", limbSwing);
+        builder.setQuery("limb_swing_amount", limbSwingAmount);
+
         return builder;
     }
 
     @Override
-    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float animationTime, float netHeadYaw, float headPitch)
+    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float animationTicks, float netHeadYaw, float headPitch)
     {
         GeometryModel model = this.getModel();
         model.resetTransformation();
         if (model instanceof AnimatedModel && this.animations.length > 0)
         {
-            MolangRuntime.Builder builder = this.createRuntime(entity, netHeadYaw, headPitch);
+            MolangRuntime.Builder builder = this.createRuntime(entity, limbSwing, limbSwingAmount, netHeadYaw, headPitch);
             if (entity instanceof MolangVariableProvider)
                 builder.setVariables((MolangVariableProvider) entity);
             if (this.variableProvider != null)
                 builder.setVariables(this.variableProvider);
-            ((AnimatedModel) model).applyAnimations(animationTime, builder, this.getAnimations());
+            ((AnimatedModel) model).applyAnimations(animationTicks / 20F, builder, this.getAnimations());
         }
     }
 

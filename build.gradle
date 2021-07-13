@@ -67,8 +67,17 @@ if (project.hasProperty('UPDATE_MAPPINGS')) {
     sourceSets.test.java.srcDirs.each { extractMappedNew.addTarget it }
 }
 
+repositories{
+    maven {
+        name = "JitPack"
+        url = "https://jitpack.io"
+    }
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${project.minecraft}-${project.forge}"
+
+    testImplementation fg.deobf("com.github.Ocelot5836:Sonar:${project.sonar}")
 }
 
 processResources {

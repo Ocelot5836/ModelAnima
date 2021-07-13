@@ -1,6 +1,11 @@
 package io.github.ocelot.modelanima.api.common.animation;
 
 import io.github.ocelot.modelanima.api.client.geometry.AnimatedModel;
+import io.github.ocelot.modelanima.core.common.network.ModelAnimaMessages;
+import io.github.ocelot.modelanima.core.common.network.SyncAnimationMessage;
+import net.minecraft.entity.Entity;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 /**
  * <p>Defines an entity as having animations states for animating {@link AnimatedModel}.</p>
@@ -105,4 +110,22 @@ public interface AnimatedEntity
      * @param state The new animation state
      */
     void setAnimationState(AnimationState state);
+
+    /**
+     * Sets the animation for the specified entity on the server side, and syncs with clients.
+     *
+     * @param entity         The entity to sync the animation of
+     * @param animationState The new animation state
+     * @param <T>            The type of entity to set the animation state for
+     */
+    static <T extends Entity & AnimatedEntity> void setAnimation(T entity, AnimationState animationState)
+    {
+        World level = entity.level;
+        if (level.isClientSide())
+            return;
+        AnimationState before = entity.getAnimationState();
+        entity.setAnimationState(animationState);
+        if (before != animationState)
+            ModelAnimaMessages.PLAY.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new SyncAnimationMessage(entity));
+    }
 }
