@@ -31,7 +31,6 @@ public abstract class AnimatedEntityRenderer<T extends MobEntity & AnimatedEntit
     protected void setupRotations(T entity, MatrixStack matrixStack, float ticksExisted, float rotY, float partialTicks)
     {
         super.setupRotations(entity, matrixStack, ticksExisted, rotY, partialTicks);
-        matrixStack.translate(0, -1.5F, 0); // what?
         this.model.setTexture(this.getTextureTableLocation(entity));
         this.model.setAnimations(this.getAnimations(entity));
     }
