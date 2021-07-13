@@ -1,10 +1,10 @@
 package io.github.ocelot.modelanima.api.common.util;
 
 import com.google.gson.*;
-import io.github.ocelot.modelanima.api.common.molang.MolangCompiler;
-import io.github.ocelot.modelanima.api.common.molang.MolangException;
-import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
-import io.github.ocelot.modelanima.core.common.molang.node.MolangConstantNode;
+import io.github.ocelot.molangcompiler.api.MolangCompiler;
+import io.github.ocelot.molangcompiler.api.MolangExpression;
+import io.github.ocelot.molangcompiler.api.exception.MolangException;
+import io.github.ocelot.molangcompiler.core.node.MolangConstantNode;
 import net.minecraft.util.GsonHelper;
 
 import javax.annotation.Nullable;

@@ -2,7 +2,7 @@ package io.github.ocelot.modelanima.api.client.animation;
 
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
-import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
+import io.github.ocelot.molangcompiler.api.MolangRuntime;
 
 /**
  * <p>Transforms model parts according to {@link AnimationData} over time.</p>

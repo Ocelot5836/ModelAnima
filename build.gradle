@@ -53,10 +53,15 @@ dependencies {
 
     forge "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
 
+    // MoLang support
+    implementation "com.github.Ocelot5836:molang-compiler:${project.molang_compiler_version}"
+    shade "com.github.Ocelot5836:molang-compiler:${project.molang_compiler_version}"
+
     // These mods make life easier during runtime. They aren't strictly necessary
     modRuntime "curse.maven:configured-457570:3340535"
     modRuntime "curse.maven:catalogue-459701:3335979"
 
+    // Testing
     modImplementation "com.github.Ocelot5836:Sonar:${project.sonar_version}"
 }
 

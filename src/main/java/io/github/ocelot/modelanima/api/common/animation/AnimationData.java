@@ -1,9 +1,9 @@
 package io.github.ocelot.modelanima.api.common.animation;
 
 import com.google.gson.*;
-import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.api.common.util.JSONTupleParser;
-import io.github.ocelot.modelanima.core.common.molang.node.MolangConstantNode;
+import io.github.ocelot.molangcompiler.api.MolangExpression;
+import io.github.ocelot.molangcompiler.core.node.MolangConstantNode;
 import net.minecraft.util.GsonHelper;
 
 import java.lang.reflect.Type;
