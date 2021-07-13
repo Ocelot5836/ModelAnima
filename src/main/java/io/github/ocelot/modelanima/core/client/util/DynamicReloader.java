@@ -1,12 +1,12 @@
 package io.github.ocelot.modelanima.core.client.util;
 
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ResourceLoadProgressGui;
-import net.minecraft.resources.AsyncReloader;
-import net.minecraft.resources.IAsyncReloader;
-import net.minecraft.resources.IFutureReloadListener;
+import net.minecraft.client.gui.screens.LoadingOverlay;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ReloadInstance;
+import net.minecraft.server.packs.resources.SimpleReloadInstance;
 import net.minecraft.util.Unit;
-import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,15 +20,15 @@ import java.util.concurrent.CompletableFuture;
 public class DynamicReloader
 {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final List<IFutureReloadListener> reloadListeners;
-    private IAsyncReloader asyncReloader;
+    private final List<PreparableReloadListener> reloadListeners;
+    private ReloadInstance asyncReloader;
 
     public DynamicReloader()
     {
         this.reloadListeners = new ArrayList<>();
     }
 
-    public void addListener(IFutureReloadListener listener)
+    public void addListener(PreparableReloadListener listener)
     {
         this.reloadListeners.add(listener);
     }
@@ -37,9 +37,9 @@ public class DynamicReloader
     {
         if (asyncReloader != null)
             return asyncReloader.done();
-        asyncReloader = AsyncReloader.of(Minecraft.getInstance().getResourceManager(), this.reloadListeners, Util.backgroundExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE));
+        asyncReloader = SimpleReloadInstance.of(Minecraft.getInstance().getResourceManager(), this.reloadListeners, Util.backgroundExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE));
         if (showLoadingScreen)
-            Minecraft.getInstance().setOverlay(new ResourceLoadProgressGui(Minecraft.getInstance(), asyncReloader, error ->
+            Minecraft.getInstance().setOverlay(new LoadingOverlay(Minecraft.getInstance(), asyncReloader, error ->
             {
                 asyncReloader = null;
                 error.ifPresent(LOGGER::error);

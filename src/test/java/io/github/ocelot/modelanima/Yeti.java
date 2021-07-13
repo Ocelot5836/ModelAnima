@@ -2,23 +2,31 @@ package io.github.ocelot.modelanima;
 
 import io.github.ocelot.modelanima.api.common.animation.AnimatedEntity;
 import io.github.ocelot.modelanima.api.common.animation.AnimationState;
-import io.github.ocelot.modelanima.api.common.molang.MolangVariableProvider;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.monster.MonsterEntity;
-import net.minecraft.entity.monster.PillagerEntity;
-import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particles.BlockParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.*;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Pillager;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -26,7 +34,7 @@ import java.util.stream.Stream;
 /**
  * @author Ocelot
  */
-public class Yeti extends MonsterEntity implements AnimatedEntity
+public class Yeti extends Monster implements AnimatedEntity
 {
     public static final AnimationState THROW_SNOWBALL = new AnimationState(53, new ResourceLocation(TestMod.MOD_ID, "yeti.setup"), new ResourceLocation(TestMod.MOD_ID, "yeti.throw_snowball"));
     public static final AnimationState ATTACK = new AnimationState(10, new ResourceLocation(TestMod.MOD_ID, "yeti.setup"), new ResourceLocation(TestMod.MOD_ID, "yeti.attack"));
@@ -41,31 +49,31 @@ public class Yeti extends MonsterEntity implements AnimatedEntity
     private AnimationState animationState;
     private int animationTick;
 
-    public Yeti(EntityType<? extends MonsterEntity> type, World world)
+    public Yeti(EntityType<? extends Monster> type, Level level)
     {
-        super(type, world);
+        super(type, level);
         this.xpReward = 50;
         this.animationState = AnimationState.EMPTY;
     }
 
-    public static AttributeModifierMap.MutableAttribute createAttributes()
+    public static AttributeSupplier.Builder createAttributes()
     {
-        return PillagerEntity.createAttributes().add(Attributes.MAX_HEALTH, 150).add(Attributes.MOVEMENT_SPEED, 0.25).add(Attributes.KNOCKBACK_RESISTANCE, 1.0).add(Attributes.ATTACK_DAMAGE, 6.0);
+        return Pillager.createAttributes().add(Attributes.MAX_HEALTH, 150).add(Attributes.MOVEMENT_SPEED, 0.25).add(Attributes.KNOCKBACK_RESISTANCE, 1.0).add(Attributes.ATTACK_DAMAGE, 6.0);
     }
 
     @Override
     protected void registerGoals()
     {
         super.registerGoals();
-        this.goalSelector.addGoal(0, new SwimGoal(this));
+        this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(3, new YetiAttackTargetGoal(this, 1.0D, true));
-        this.goalSelector.addGoal(8, new WaterAvoidingRandomWalkingGoal(this, 0.6D));
-        this.goalSelector.addGoal(9, new LookAtGoal(this, PlayerEntity.class, 15.0F, 1.0F));
-        this.goalSelector.addGoal(10, new LookAtGoal(this, MobEntity.class, 15.0F));
+        this.goalSelector.addGoal(8, new RandomStrollGoal(this, 0.6D));
+        this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 15.0F, 1.0F));
+        this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 15.0F));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this, Yeti.class));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, true));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillagerEntity.class, false));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolemEntity.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, false));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
 
     private void createSnowball()
@@ -103,7 +111,7 @@ public class Yeti extends MonsterEntity implements AnimatedEntity
                 {
                     if (this.getAnimationTick() >= 13)
                         for (int i = 0; i < 4; i++)
-                            this.level.addParticle(new BlockParticleData(ParticleTypes.FALLING_DUST, Blocks.PACKED_ICE.defaultBlockState()), this.getRandomX(0.5), this.getY(1.0) + this.random.nextFloat() * 2.0, this.getRandomZ(0.5), 0, 0, 0);
+                            this.level.addParticle(new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.PACKED_ICE.defaultBlockState()), this.getRandomX(0.5), this.getY(1.0) + this.random.nextFloat() * 2.0, this.getRandomZ(0.5), 0, 0, 0);
                     break;
                 }
             }
@@ -162,7 +170,7 @@ public class Yeti extends MonsterEntity implements AnimatedEntity
     }
 
     @Override
-    public boolean addEffect(EffectInstance p_195064_1_)
+    public boolean addEffect(MobEffectInstance effect)
     {
         return false;
     }
@@ -198,9 +206,9 @@ public class Yeti extends MonsterEntity implements AnimatedEntity
     }
 
     @Override
-    public CreatureAttribute getMobType()
+    public MobType getMobType()
     {
-        return CreatureAttribute.ILLAGER;
+        return MobType.ILLAGER;
     }
 
     @Override
@@ -254,7 +262,7 @@ public class Yeti extends MonsterEntity implements AnimatedEntity
                     return;
 
                 this.attackTimer = 20;
-                this.mob.swing(Hand.MAIN_HAND);
+                this.mob.swing(InteractionHand.MAIN_HAND);
                 this.mob.doHurtTarget(enemy);
             }
             else if (this.snowballTimer <= 0 && distToEnemySqr > 36.0 && this.mob.getRandom().nextInt(10) == 0)

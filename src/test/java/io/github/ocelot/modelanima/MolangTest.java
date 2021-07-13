@@ -5,14 +5,14 @@ import io.github.ocelot.modelanima.api.common.molang.MolangCompiler;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 public class MolangTest
 {
     public static void main(String[] args) throws MolangException
     {
         // Hack to load class
-        MathHelper.sin(0);
+        Mth.sin(0);
 
         Stopwatch compileTime = Stopwatch.createStarted();
         MolangExpression expression =

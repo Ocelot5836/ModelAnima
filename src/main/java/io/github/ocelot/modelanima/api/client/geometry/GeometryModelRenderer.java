@@ -1,14 +1,14 @@
 package io.github.ocelot.modelanima.api.client.geometry;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import cpw.mods.modlauncher.api.INameMappingService;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.common.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.model.Model;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class GeometryModelRenderer
 {
-    private static final Map<Model, Map<String, ModelRenderer>> MODEL_PARTS = new HashMap<>();
+    private static final Map<Model, Map<String, ModelPart>> MODEL_PARTS = new HashMap<>();
 
     /**
      * Copies angles from the parent model to the geometry model.
@@ -40,7 +40,7 @@ public class GeometryModelRenderer
             model.resetTransformation();
             return;
         }
-        Map<String, ModelRenderer> parentParts = MODEL_PARTS.computeIfAbsent(parent, GeometryModelRenderer::mapRenderers);
+        Map<String, ModelPart> parentParts = MODEL_PARTS.computeIfAbsent(parent, GeometryModelRenderer::mapRenderers);
         for (String modelKey : model.getParentModelKeys())
         {
             String deobfName = ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, modelKey);
@@ -63,7 +63,7 @@ public class GeometryModelRenderer
      * @param blue            The blue factor for color
      * @param alpha           The alpha factor for color
      */
-    public static void render(GeometryModel model, @Nullable ResourceLocation textureLocation, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public static void render(GeometryModel model, @Nullable ResourceLocation textureLocation, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
         if (GeometryTextureManager.isReloading())
             return;
@@ -83,31 +83,9 @@ public class GeometryModelRenderer
         });
     }
 
-    /**
-     * Renders the specified model on the specified parent model.
-     *
-     * @param parent          The parent model to attach parts to or <code>null</code> to skip
-     * @param model           The model to render
-     * @param textureLocation The textures to apply to the model or <code>null</code> to use a missing texture
-     * @param matrixStack     The current stack of transformations
-     * @param buffer          The buffer to get the builder from
-     * @param packedLight     The packed uv into the light texture the parts should be rendered at
-     * @param packedOverlay   The packed uv into the overlay texture the parts should be rendered at
-     * @param red             The red factor for color
-     * @param green           The green factor for color
-     * @param blue            The blue factor for color
-     * @param alpha           The alpha factor for color
-     * @deprecated Use {@link #copyModelAngles(Model, GeometryModel)} to clone angles, and {@link #render(GeometryModel, ResourceLocation, MatrixStack, IRenderTypeBuffer, int, int, float, float, float, float)} to render the model
-     */
-    public static void render(@Nullable Model parent, GeometryModel model, @Nullable ResourceLocation textureLocation, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    private static Map<String, ModelPart> mapRenderers(Model model)
     {
-        copyModelAngles(parent, model);
-        render(model, textureLocation, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-    }
-
-    private static Map<String, ModelRenderer> mapRenderers(Model model)
-    {
-        Map<String, ModelRenderer> renderers = new HashMap<>();
+        Map<String, ModelPart> renderers = new HashMap<>();
         Class<?> i = model.getClass();
         while (i != null && i != Object.class)
         {
@@ -115,12 +93,12 @@ public class GeometryModelRenderer
             {
                 if (!field.isSynthetic())
                 {
-                    if (ModelRenderer.class.isAssignableFrom(field.getType()))
+                    if (ModelPart.class.isAssignableFrom(field.getType()))
                     {
                         try
                         {
                             field.setAccessible(true);
-                            renderers.put(field.getName(), (ModelRenderer) field.get(model));
+                            renderers.put(field.getName(), (ModelPart) field.get(model));
                         }
                         catch (Exception ignored)
                         {

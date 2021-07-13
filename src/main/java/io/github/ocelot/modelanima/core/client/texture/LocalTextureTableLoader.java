@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import io.github.ocelot.modelanima.api.client.texture.TextureTableLoader;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelParser;
 import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,7 +56,7 @@ public class LocalTextureTableLoader implements TextureTableLoader
     }
 
     @Override
-    public CompletableFuture<Void> reload(IStage stage, IResourceManager resourceManager, IProfiler preparationsProfiler, IProfiler reloadProfiler, Executor backgroundExecutor, Executor gameExecutor)
+    public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor)
     {
         return CompletableFuture.supplyAsync(() ->
         {
@@ -67,7 +67,7 @@ public class LocalTextureTableLoader implements TextureTableLoader
                 if (textureTableName.getPath().equals("hash_tables"))
                     continue;
 
-                try (IResource resource = resourceManager.getResource(textureTableLocation))
+                try (Resource resource = resourceManager.getResource(textureTableLocation))
                 {
                     textureLocations.put(textureTableName, GeometryModelParser.parseTextures(new InputStreamReader(resource.getInputStream())));
                 }
@@ -87,7 +87,7 @@ public class LocalTextureTableLoader implements TextureTableLoader
                 if (!resourceManager.hasResource(hashTableLocation))
                     continue;
 
-                try (IResource resource = resourceManager.getResource(hashTableLocation))
+                try (Resource resource = resourceManager.getResource(hashTableLocation))
                 {
                     hashTables.addAll(Arrays.asList(GSON.fromJson(new InputStreamReader(resource.getInputStream()), String[].class)));
                 }

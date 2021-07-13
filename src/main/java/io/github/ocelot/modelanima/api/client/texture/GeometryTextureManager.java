@@ -7,18 +7,19 @@ import io.github.ocelot.modelanima.core.client.texture.LocalTextureTableLoader;
 import io.github.ocelot.modelanima.core.client.texture.StaticTextureTableLoader;
 import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IFutureReloadListener;
-import net.minecraft.resources.IReloadableResourceManager;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Unit;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.util.perf.Profiler;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -50,10 +51,10 @@ public class GeometryTextureManager
         bus.addListener(EventPriority.NORMAL, true, ColorHandlerEvent.Block.class, event ->
         {
             spriteUploader = new GeometryTextureSpriteUploader(Minecraft.getInstance().getTextureManager());
-            IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-            if (resourceManager instanceof IReloadableResourceManager)
+            ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+            if (resourceManager instanceof ReloadableResourceManager)
             {
-                ((IReloadableResourceManager) resourceManager).registerReloadListener(RELOADER);
+                ((ReloadableResourceManager) resourceManager).registerReloadListener(RELOADER);
             }
         });
         addProvider(new LocalTextureTableLoader());
@@ -131,10 +132,10 @@ public class GeometryTextureManager
         return DYNAMIC_RELOADER.isReloading();
     }
 
-    private static class Reloader implements IFutureReloadListener
+    private static class Reloader implements PreparableReloadListener
     {
         @Override
-        public CompletableFuture<Void> reload(IStage stage, IResourceManager resourceManager, IProfiler preparationsProfiler, IProfiler reloadProfiler, Executor backgroundExecutor, Executor gameExecutor)
+        public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor)
         {
             return CompletableFuture.allOf(PROVIDERS.stream().map(provider -> provider.reload(stage, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor)).toArray(CompletableFuture[]::new)).thenApplyAsync(a ->
             {

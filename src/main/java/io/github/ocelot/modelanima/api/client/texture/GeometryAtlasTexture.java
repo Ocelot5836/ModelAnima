@@ -1,7 +1,7 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * <p>Fetches a geometry texture by the specified name.</p>

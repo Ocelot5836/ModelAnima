@@ -10,22 +10,24 @@ import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.core.client.util.FileCache;
 import io.github.ocelot.modelanima.core.client.util.HashedTextureCache;
 import io.github.ocelot.modelanima.core.client.util.TimedTextureCache;
+import net.minecraft.ReportedException;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.ReloadListener;
-import net.minecraft.crash.ReportedException;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.resources.IResourcePack;
-import net.minecraft.resources.data.IMetadataSectionSerializer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Bootstrap;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.Bootstrap;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraftforge.common.extensions.IForgeResourcePack;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -47,17 +49,17 @@ import java.util.stream.Stream;
 /**
  * @author Ocelot
  */
-public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.SheetData> implements GeometryAtlasTexture, AutoCloseable
+public class GeometryTextureSpriteUploader extends SimplePreparableReloadListener<TextureAtlas.Preparations> implements GeometryAtlasTexture, AutoCloseable
 {
     public static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(ModelAnima.MOD_ID, "textures/atlas/geometry.png");
     private static final Logger LOGGER = LogManager.getLogger();
-    private final AtlasTexture textureAtlas;
+    private final TextureAtlas textureAtlas;
     private final Set<GeometryModelTexture> textures;
     private String[] hashTables;
 
     public GeometryTextureSpriteUploader(TextureManager textureManager)
     {
-        this.textureAtlas = new AtlasTexture(ATLAS_LOCATION);
+        this.textureAtlas = new TextureAtlas(ATLAS_LOCATION);
         this.textures = new HashSet<>();
         this.hashTables = new String[0];
         textureManager.register(this.textureAtlas.location(), this.textureAtlas);
@@ -88,7 +90,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     }
 
     @Override
-    protected AtlasTexture.SheetData prepare(IResourceManager resourceManager, IProfiler profiler)
+    protected TextureAtlas.Preparations prepare(ResourceManager resourceManager, ProfilerFiller profiler)
     {
         try (OnlineRepository onlineRepository = new OnlineRepository(this.hashTables))
         {
@@ -96,7 +98,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
             profiler.push("stitching");
             Stopwatch stopwatch = Stopwatch.createUnstarted();
             this.beginStitch(System.currentTimeMillis(), stopwatch);
-            AtlasTexture.SheetData sheetData = this.textureAtlas.prepareToStitch(new OnlineResourceManager(resourceManager, onlineRepository, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.LOCATION || texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().options.mipmapLevels);
+            TextureAtlas.Preparations sheetData = this.textureAtlas.prepareToStitch(new OnlineResourceManager(resourceManager, onlineRepository, this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.ONLINE).collect(Collectors.toSet())), this.textures.stream().filter(texture -> texture.getType() == GeometryModelTexture.Type.LOCATION || texture.getType() == GeometryModelTexture.Type.ONLINE).map(GeometryModelTexture::getLocation).distinct(), profiler, Minecraft.getInstance().options.mipmapLevels);
             this.endStitch(stopwatch);
             profiler.pop();
             profiler.endTick();
@@ -105,7 +107,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
     }
 
     @Override
-    protected void apply(AtlasTexture.SheetData sheetData, IResourceManager resourceManager, IProfiler profiler)
+    protected void apply(TextureAtlas.Preparations sheetData, ResourceManager resourceManager, ProfilerFiller profiler)
     {
         profiler.startTick();
         profiler.push("upload");
@@ -128,14 +130,14 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         return this;
     }
 
-    private static class OnlineResourceManager implements IResourceManager
+    private static class OnlineResourceManager implements ResourceManager
     {
-        private final IResourceManager parent;
+        private final ResourceManager parent;
         private final OnlineRepository repository;
         private final Set<String> uncached;
         private final Map<String, Pair<CompletableFuture<Path>, CompletableFuture<JsonObject>>> onlineLocations;
 
-        private OnlineResourceManager(IResourceManager parent, OnlineRepository repository, Set<GeometryModelTexture> onlineTextures)
+        private OnlineResourceManager(ResourceManager parent, OnlineRepository repository, Set<GeometryModelTexture> onlineTextures)
         {
             this.parent = parent;
             this.repository = repository;
@@ -166,7 +168,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
                 try (BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8)))
                 {
-                    return JSONUtils.parse(bufferedreader);
+                    return GsonHelper.parse(bufferedreader);
                 }
                 catch (Exception ignored)
                 {
@@ -184,7 +186,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         }
 
         @Override
-        public IResource getResource(ResourceLocation resourceLocation) throws IOException
+        public Resource getResource(ResourceLocation resourceLocation) throws IOException
         {
             String url = parseUrl(new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().substring(9, resourceLocation.getPath().length() - 4)));
             if (url != null)
@@ -209,7 +211,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         }
 
         @Override
-        public List<IResource> getResources(ResourceLocation resourceLocation) throws IOException
+        public List<Resource> getResources(ResourceLocation resourceLocation) throws IOException
         {
             return this.parent.getResources(resourceLocation);
         }
@@ -221,7 +223,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
         }
 
         @Override
-        public Stream<IResourcePack> listPacks()
+        public Stream<PackResources> listPacks()
         {
             return this.parent.listPacks();
         }
@@ -250,7 +252,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
             }
         }
 
-        private static class OnlineResource implements IResource
+        private static class OnlineResource implements Resource
         {
             private final String url;
             private final ResourceLocation textureLocation;
@@ -279,12 +281,12 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
             @Nullable
             @Override
-            public <T> T getMetadata(IMetadataSectionSerializer<T> serializer)
+            public <T> T getMetadata(MetadataSectionSerializer<T> serializer)
             {
                 if (this.metadataJson == null)
                     return null;
                 String s = serializer.getMetadataSectionName();
-                return this.metadataJson.has(s) ? serializer.fromJson(JSONUtils.getAsJsonObject(this.metadataJson, s)) : null;
+                return this.metadataJson.has(s) ? serializer.fromJson(GsonHelper.getAsJsonObject(this.metadataJson, s)) : null;
             }
 
             @Override
@@ -333,7 +335,7 @@ public class GeometryTextureSpriteUploader extends ReloadListener<AtlasTexture.S
 
         private static ExecutorService createOnlineWorker(Supplier<Integer> idGenerator)
         {
-            int i = MathHelper.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 7);
+            int i = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 7);
             ExecutorService executorservice;
             if (i <= 0)
             {

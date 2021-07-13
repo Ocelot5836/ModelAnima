@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.api.client.texture;
 
 import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
-import net.minecraft.resources.IFutureReloadListener;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * @author Ocelot
  * @since 1.0.0
  */
-public interface TextureTableLoader extends IFutureReloadListener
+public interface TextureTableLoader extends PreparableReloadListener
 {
     /**
      * Adds all textures to the provided consumer.

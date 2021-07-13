@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.core.common.network;
 
 import io.github.ocelot.modelanima.api.common.animation.AnimatedEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.ArrayUtils;
@@ -21,13 +21,13 @@ public class SyncAnimationMessage
         this.animationId = ArrayUtils.indexOf(entity.getAnimationStates(), entity.getAnimationState());
     }
 
-    public SyncAnimationMessage(PacketBuffer buf)
+    public SyncAnimationMessage(FriendlyByteBuf buf)
     {
         this.entityId = buf.readVarInt();
         this.animationId = buf.readVarInt();
     }
 
-    public void write(PacketBuffer buf)
+    public void write(FriendlyByteBuf buf)
     {
         buf.writeVarInt(this.entityId);
         buf.writeVarInt(this.animationId);

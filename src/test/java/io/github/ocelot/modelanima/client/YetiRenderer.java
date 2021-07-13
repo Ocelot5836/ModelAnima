@@ -1,12 +1,12 @@
 package io.github.ocelot.modelanima.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import io.github.ocelot.modelanima.TestMod;
 import io.github.ocelot.modelanima.Yeti;
 import io.github.ocelot.modelanima.api.client.animation.AnimatedEntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * @author Ocelot
@@ -16,13 +16,13 @@ public class YetiRenderer extends AnimatedEntityRenderer<Yeti>
     private static final ResourceLocation[] DEFAULT_ANIMATIONS = new ResourceLocation[]{new ResourceLocation(TestMod.MOD_ID, "yeti.setup"), new ResourceLocation(TestMod.MOD_ID, "yeti.swing_arms")};
     private static final ResourceLocation YETI_LOCATION = new ResourceLocation(TestMod.MOD_ID, "yeti");
 
-    public YetiRenderer(EntityRendererManager rendererManager)
+    public YetiRenderer(EntityRenderDispatcher rendererManager)
     {
         super(rendererManager, new ResourceLocation(TestMod.MOD_ID, "yeti"), 0.5F);
     }
 
     @Override
-    protected void setupRotations(Yeti entity, MatrixStack matrixStack, float ticksExisted, float rotY, float partialTicks)
+    protected void setupRotations(Yeti entity, PoseStack matrixStack, float ticksExisted, float rotY, float partialTicks)
     {
         super.setupRotations(entity, matrixStack, ticksExisted, rotY, partialTicks);
         if (!((double) entity.animationSpeed < 0.01))

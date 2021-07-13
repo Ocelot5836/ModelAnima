@@ -6,8 +6,8 @@ import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.core.client.geometry.GeometryRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.codec.binary.Base32;
@@ -60,27 +60,6 @@ public class GeometryModelTexture
         this.glowing = glowing;
         this.smoothShading = smoothShading;
         this.location = type.createLocation(data);
-    }
-
-    public GeometryModelTexture(PacketBuffer buf)
-    {
-        this(buf.readEnum(Type.class), buf.readEnum(TextureLayer.class), buf.readUtf(), buf.readBoolean(), buf.readInt(), buf.readBoolean(), buf.readBoolean());
-    }
-
-    /**
-     * Writes the data of this texture into the provided buffer.
-     *
-     * @param buf The buffer to write into
-     */
-    public void write(PacketBuffer buf)
-    {
-        buf.writeEnum(this.type);
-        buf.writeEnum(this.layer);
-        buf.writeUtf(this.data);
-        buf.writeBoolean(this.cache);
-        buf.writeInt(this.color);
-        buf.writeBoolean(this.glowing);
-        buf.writeBoolean(this.smoothShading);
     }
 
     /**

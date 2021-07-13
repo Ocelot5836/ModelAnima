@@ -3,8 +3,8 @@ package io.github.ocelot.modelanima.api.common.animation;
 import io.github.ocelot.modelanima.api.client.animation.AnimatedModel;
 import io.github.ocelot.modelanima.core.common.network.ModelAnimaMessages;
 import io.github.ocelot.modelanima.core.common.network.SyncAnimationMessage;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 /**
@@ -120,7 +120,7 @@ public interface AnimatedEntity
      */
     static <T extends Entity & AnimatedEntity> void setAnimation(T entity, AnimationState animationState)
     {
-        World level = entity.level;
+        Level level = entity.level;
         if (level.isClientSide())
             return;
         AnimationState before = entity.getAnimationState();

@@ -1,19 +1,19 @@
 package io.github.ocelot.modelanima.core.client.geometry;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import io.github.ocelot.modelanima.api.client.animation.AnimatedModel;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
-import io.github.ocelot.modelanima.api.common.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.api.common.molang.MolangRuntime;
+import io.github.ocelot.modelanima.api.common.texture.GeometryModelTexture;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.Model;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraftforge.client.model.animation.Animation;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -30,9 +30,9 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     private static final Vector3f ROTATION = new Vector3f();
     private static final Vector3f SCALE = new Vector3f();
 
-    private final Map<String, BoneModelRenderer.AnimationPose> transformations;
-    private final Map<String, BoneModelRenderer> modelParts;
-    private final Set<BoneModelRenderer> renderParts;
+    private final Map<String, BoneModelPart.AnimationPose> transformations;
+    private final Map<String, BoneModelPart> modelParts;
+    private final Set<BoneModelPart> renderParts;
     private final String[] modelKeys;
     private final String[] textureKeys;
     private String activeMaterial;
@@ -75,13 +75,13 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
             return;
         }
 
-        Map<String, Pair<GeometryModelData.Bone, BoneModelRenderer>> boneLookup = Arrays.stream(bones).map(bone -> Pair.of(bone, new BoneModelRenderer(this, bone))).collect(Collectors.toMap(pair -> pair.getKey().getName(), pair -> pair));
+        Map<String, Pair<GeometryModelData.Bone, BoneModelPart>> boneLookup = Arrays.stream(bones).map(bone -> Pair.of(bone, new BoneModelPart(this, bone))).collect(Collectors.toMap(pair -> pair.getKey().getName(), pair -> pair));
         Map<GeometryModelData.Bone, String> parts = new HashMap<>();
         List<String> unprocessedBones = Arrays.stream(bones).map(GeometryModelData.Bone::getName).collect(Collectors.toList());
 
         while (!unprocessedBones.isEmpty())
         {
-            Pair<GeometryModelData.Bone, BoneModelRenderer> pair = boneLookup.get(unprocessedBones.remove(0));
+            Pair<GeometryModelData.Bone, BoneModelPart> pair = boneLookup.get(unprocessedBones.remove(0));
             GeometryModelData.Bone currentBone = pair.getLeft();
             String parent = currentBone.getParent();
 
@@ -96,7 +96,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
                     if (!boneLookup.containsKey(parent))
                         throw new IllegalStateException("Unknown bone '" + parent + "'");
 
-                    ModelRenderer parentRenderer = boneLookup.get(parent).getRight();
+                    ModelPart parentRenderer = boneLookup.get(parent).getRight();
                     parentRenderer.addChild(pair.getRight());
                 }
             }
@@ -104,7 +104,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
             unprocessedBones.remove(currentBone.getName());
         }
 
-        for (Pair<GeometryModelData.Bone, BoneModelRenderer> pair : boneLookup.values())
+        for (Pair<GeometryModelData.Bone, BoneModelPart> pair : boneLookup.values())
         {
             GeometryModelData.Bone currentBone = pair.getLeft();
 
@@ -119,12 +119,12 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     }
 
     @Override
-    public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public void renderToBuffer(PoseStack matrixStack, VertexConsumer builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
     }
 
     @Override
-    public void render(String material, GeometryModelTexture texture, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public void render(String material, GeometryModelTexture texture, PoseStack matrixStack, VertexConsumer builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
         this.activeMaterial = material;
         this.renderParts.forEach(renderer ->
@@ -144,27 +144,27 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     }
 
     @Override
-    public void copyAngles(@Nullable String parent, ModelRenderer limbRenderer)
+    public void copyAngles(@Nullable String parent, ModelPart limbRenderer)
     {
         this.modelParts.values().stream().filter(part -> Objects.equals(part.getBone().getParent(), parent)).forEach(renderer -> renderer.copyFrom(limbRenderer));
     }
 
     @Override
-    public Optional<ModelRenderer> getModelRenderer(String part)
+    public Optional<ModelPart> getModelPart(String part)
     {
         return Optional.ofNullable(this.modelParts.get(part));
     }
 
     @Override
-    public ModelRenderer[] getChildRenderers(String part)
+    public ModelPart[] getChildRenderers(String part)
     {
-        return this.modelParts.values().stream().filter(boneModelRenderer -> part.equals(boneModelRenderer.getBone().getParent())).toArray(ModelRenderer[]::new);
+        return this.modelParts.values().stream().filter(boneModelPart -> part.equals(boneModelPart.getBone().getParent())).toArray(ModelPart[]::new);
     }
 
     @Override
-    public ModelRenderer[] getModelRenderers()
+    public ModelPart[] getModelParts()
     {
-        return this.modelParts.values().toArray(new BoneModelRenderer[0]);
+        return this.modelParts.values().toArray(new BoneModelPart[0]);
     }
 
     @Override
@@ -213,7 +213,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         if (loop && animationTime > length)
             animationTime %= length;
 
-        this.transformations.values().forEach(BoneModelRenderer.AnimationPose::reset);
+        this.transformations.values().forEach(BoneModelPart.AnimationPose::reset);
         for (AnimationData animation : animations)
         {
             float localAnimationTime = animationTime;
@@ -235,12 +235,12 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
                 get(localAnimationTime, runtime, boneAnimation.getRotationFrames(), ROTATION);
                 get(localAnimationTime, runtime, boneAnimation.getScaleFrames(), SCALE);
 
-                this.transformations.computeIfAbsent(boneAnimation.getName(), key -> new BoneModelRenderer.AnimationPose()).add(POSITION.x() * blendWeight, POSITION.y() * blendWeight, POSITION.z() * blendWeight, ROTATION.x() * blendWeight, ROTATION.y() * blendWeight, ROTATION.z() * blendWeight, (SCALE.x() - 1) * blendWeight, (SCALE.y() - 1) * blendWeight, (SCALE.z() - 1) * blendWeight);
+                this.transformations.computeIfAbsent(boneAnimation.getName(), key -> new BoneModelPart.AnimationPose()).add(POSITION.x() * blendWeight, POSITION.y() * blendWeight, POSITION.z() * blendWeight, ROTATION.x() * blendWeight, ROTATION.y() * blendWeight, ROTATION.z() * blendWeight, (SCALE.x() - 1) * blendWeight, (SCALE.y() - 1) * blendWeight, (SCALE.z() - 1) * blendWeight);
             }
         }
         this.transformations.forEach((name, pose) ->
         {
-            BoneModelRenderer.AnimationPose p = this.modelParts.get(name).getAnimationPose();
+            BoneModelPart.AnimationPose p = this.modelParts.get(name).getAnimationPose();
             p.reset();
             p.add(pose.getPosition().x(), pose.getPosition().y(), pose.getPosition().z(), pose.getRotation().x(), pose.getRotation().y(), pose.getRotation().z(), pose.getScale().x() - 1, pose.getScale().y() - 1, pose.getScale().z() - 1);
         });
@@ -249,11 +249,11 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     @Override
     public GeometryModelData.Locator[] getLocators(String part)
     {
-        return this.getModelRenderer(part).map(modelRenderer ->
+        return this.getModelPart(part).map(modelPart ->
         {
-            if (!(modelRenderer instanceof BoneModelRenderer))
+            if (!(modelPart instanceof BoneModelPart))
                 return new GeometryModelData.Locator[0];
-            return ((BoneModelRenderer) modelRenderer).getBone().getLocators();
+            return ((BoneModelPart) modelPart).getBone().getLocators();
         }).orElseGet(() -> new GeometryModelData.Locator[0]);
     }
 
@@ -277,7 +277,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         for (int i = 0; i < frames.length; i++)
         {
             AnimationData.KeyFrame to = frames[i];
-            if (to.getTime() == 0 ||( to.getTime() < animationTime && i < frames.length - 1))
+            if (to.getTime() == 0 || (to.getTime() < animationTime && i < frames.length - 1))
                 continue;
 
             AnimationData.KeyFrame from = i == 0 ? null : frames[i - 1];
@@ -301,9 +301,9 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         float fromY = from == null ? 0 : from.getTransformPostY().safeResolve(runtime.create(0));
         float fromZ = from == null ? 0 : from.getTransformPostZ().safeResolve(runtime.create(0));
 
-        float x = MathHelper.lerp(progress, fromX, to.getTransformPreX().safeResolve(runtime.create(0)));
-        float y = MathHelper.lerp(progress, fromY, to.getTransformPreY().safeResolve(runtime.create(0)));
-        float z = MathHelper.lerp(progress, fromZ, to.getTransformPreZ().safeResolve(runtime.create(0)));
+        float x = Mth.lerp(progress, fromX, to.getTransformPreX().safeResolve(runtime.create(0)));
+        float y = Mth.lerp(progress, fromY, to.getTransformPreY().safeResolve(runtime.create(0)));
+        float z = Mth.lerp(progress, fromZ, to.getTransformPreZ().safeResolve(runtime.create(0)));
         result.set(x, y, z);
     }
 

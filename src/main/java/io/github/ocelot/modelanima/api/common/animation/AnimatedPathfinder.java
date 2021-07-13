@@ -1,8 +1,8 @@
 package io.github.ocelot.modelanima.api.common.animation;
 
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.level.Level;
 
 /**
  * <p>An implementation of {@link AnimatedEntity} for basic entities.</p>
@@ -10,12 +10,12 @@ import net.minecraft.world.World;
  * @author Ocelot
  * @since 1.0.0
  */
-public abstract class AnimatedPathfinder extends CreatureEntity implements AnimatedEntity
+public abstract class AnimatedPathfinder extends PathfinderMob implements AnimatedEntity
 {
     private AnimationState animationState;
     private int animationTick;
 
-    protected AnimatedPathfinder(EntityType<? extends CreatureEntity> entityType, World level)
+    protected AnimatedPathfinder(EntityType<? extends PathfinderMob> entityType, Level level)
     {
         super(entityType, level);
         this.animationState = AnimationState.EMPTY;

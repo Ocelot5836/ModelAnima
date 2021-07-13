@@ -2,9 +2,10 @@ package io.github.ocelot.modelanima.core.client.texture;
 
 import io.github.ocelot.modelanima.api.client.texture.TextureTableLoader;
 import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
@@ -42,7 +43,7 @@ public class StaticTextureTableLoader implements TextureTableLoader
     }
 
     @Override
-    public CompletableFuture<Void> reload(IStage stage, IResourceManager resourceManager, IProfiler preparationsProfiler, IProfiler reloadProfiler, Executor backgroundExecutor, Executor gameExecutor)
+    public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor)
     {
         return CompletableFuture.completedFuture(null);
     }

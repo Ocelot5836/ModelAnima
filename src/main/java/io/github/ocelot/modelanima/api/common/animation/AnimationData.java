@@ -4,7 +4,7 @@ import com.google.gson.*;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.api.common.util.JSONTupleParser;
 import io.github.ocelot.modelanima.core.common.molang.node.MolangConstantNode;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.util.GsonHelper;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -427,9 +427,9 @@ public class AnimationData
                 /* Parse global animation properties */
                 String animationName = animationEntry.getKey();
                 Loop loop = animationObject.has("loop") ? parseLoop(animationObject.get("loop")) : Loop.NONE; // bool
-                float blendWeight = JSONUtils.getAsFloat(animationObject, "blend_weight", 1.0f); // expression TODO Molang
-                float animationLength = JSONUtils.getAsFloat(animationObject, "animation_length", -1); // float
-                boolean overridePreviousAnimation = JSONUtils.getAsBoolean(animationObject, "override_previous_animation", false); // bool
+                float blendWeight = GsonHelper.getAsFloat(animationObject, "blend_weight", 1.0f); // expression TODO Molang
+                float animationLength = GsonHelper.getAsFloat(animationObject, "animation_length", -1); // float
+                boolean overridePreviousAnimation = GsonHelper.getAsBoolean(animationObject, "override_previous_animation", false); // bool
                 Set<BoneAnimation> bones = new HashSet<>();
                 List<SoundEffect> soundEffects = new ArrayList<>();
                 List<ParticleEffect> particleEffects = new ArrayList<>();
@@ -438,7 +438,7 @@ public class AnimationData
                 List<KeyFrame> positions = new ArrayList<>();
                 List<KeyFrame> rotations = new ArrayList<>();
                 List<KeyFrame> scales = new ArrayList<>();
-                for (Map.Entry<String, JsonElement> boneAnimationEntry : JSONUtils.getAsJsonObject(animationObject, "bones").entrySet())
+                for (Map.Entry<String, JsonElement> boneAnimationEntry : GsonHelper.getAsJsonObject(animationObject, "bones").entrySet())
                 {
                     JsonObject boneAnimationObject = boneAnimationEntry.getValue().getAsJsonObject();
 
@@ -457,8 +457,8 @@ public class AnimationData
                 }
 
                 /* Parse Effects */
-                parseEffect((time, soundEffectObject) -> soundEffects.add(new SoundEffect(time, JSONUtils.getAsString(soundEffectObject, "effect"))), animationObject, "sound_effects");
-                parseEffect((time, particleEffectObject) -> particleEffects.add(new ParticleEffect(time, JSONUtils.getAsString(particleEffectObject, "effect"), JSONUtils.getAsString(particleEffectObject, "locator"))), animationObject, "particle_effects");
+                parseEffect((time, soundEffectObject) -> soundEffects.add(new SoundEffect(time, GsonHelper.getAsString(soundEffectObject, "effect"))), animationObject, "sound_effects");
+                parseEffect((time, particleEffectObject) -> particleEffects.add(new ParticleEffect(time, GsonHelper.getAsString(particleEffectObject, "effect"), GsonHelper.getAsString(particleEffectObject, "locator"))), animationObject, "particle_effects");
                 soundEffects.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
                 particleEffects.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
 
@@ -471,7 +471,7 @@ public class AnimationData
         private static Loop parseLoop(JsonElement json)
         {
             if (!json.isJsonPrimitive())
-                throw new JsonSyntaxException("Expected Boolean or String, was " + JSONUtils.getType(json));
+                throw new JsonSyntaxException("Expected Boolean or String, was " + GsonHelper.getType(json));
             if (json.getAsJsonPrimitive().isBoolean())
                 return json.getAsBoolean() ? Loop.LOOP : Loop.NONE;
             if (json.getAsJsonPrimitive().isString())
@@ -481,7 +481,7 @@ public class AnimationData
                         return loop;
                 throw new JsonSyntaxException("Unsupported loop: " + json.getAsString());
             }
-            throw new JsonSyntaxException("Expected Boolean or String, was " + JSONUtils.getType(json));
+            throw new JsonSyntaxException("Expected Boolean or String, was " + GsonHelper.getType(json));
         }
 
         private static void parseEffect(BiConsumer<Float, JsonObject> effectConsumer, JsonObject json, String name)
@@ -550,7 +550,7 @@ public class AnimationData
                 {
                     lerpMode = null;
 
-                    String mode = JSONUtils.getAsString(transformationObject, "lerp_mode");
+                    String mode = GsonHelper.getAsString(transformationObject, "lerp_mode");
                     for (LerpMode m : LerpMode.values())
                     {
                         if (m.name().toLowerCase(Locale.ROOT).equals(mode))

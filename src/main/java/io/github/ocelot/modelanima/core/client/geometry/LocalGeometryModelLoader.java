@@ -4,9 +4,9 @@ import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelParser;
 import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
-import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,28 +23,17 @@ import java.util.concurrent.Executor;
 public final class LocalGeometryModelLoader implements BackgroundLoader<Map<ResourceLocation, GeometryModel>>
 {
     private static final Logger LOGGER = LogManager.getLogger();
-
-    private final String folder;
-
-    public LocalGeometryModelLoader()
-    {
-        this("models/geometry");
-    }
-
-    public LocalGeometryModelLoader(String folder)
-    {
-        this.folder = folder.isEmpty() ? "" : folder + "/";
-    }
+    private static final String FOLDER = "models/geometry/";
 
     @Override
-    public CompletableFuture<Map<ResourceLocation, GeometryModel>> reload(IResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor)
+    public CompletableFuture<Map<ResourceLocation, GeometryModel>> reload(ResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor)
     {
         return CompletableFuture.supplyAsync(() ->
         {
             Map<ResourceLocation, GeometryModelData> modelLocations = new HashMap<>();
-            for (ResourceLocation modelLocation : resourceManager.listResources(this.folder, name -> name.endsWith(".json")))
+            for (ResourceLocation modelLocation : resourceManager.listResources(FOLDER, name -> name.endsWith(".json")))
             {
-                try (IResource resource = resourceManager.getResource(modelLocation))
+                try (Resource resource = resourceManager.getResource(modelLocation))
                 {
                     GeometryModelData[] models = GeometryModelParser.parseModel(IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8));
                     for (GeometryModelData model : models)
@@ -56,7 +45,7 @@ public final class LocalGeometryModelLoader implements BackgroundLoader<Map<Reso
                 }
                 catch (Exception e)
                 {
-                    LOGGER.error("Failed to load geometry file '" + modelLocation.getNamespace() + ":" + modelLocation.getPath().substring(this.folder.length(), modelLocation.getPath().length() - 5) + "'", e);
+                    LOGGER.error("Failed to load geometry file '" + modelLocation.getNamespace() + ":" + modelLocation.getPath().substring(FOLDER.length(), modelLocation.getPath().length() - 5) + "'", e);
                 }
             }
             LOGGER.info("Loaded " + modelLocations.size() + " geometry models.");

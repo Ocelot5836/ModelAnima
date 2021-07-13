@@ -1,14 +1,18 @@
 package io.github.ocelot.modelanima.core.client.geometry;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.*;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec2;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,14 +21,14 @@ import java.util.Set;
 /**
  * @author Ocelot
  */
-public class BoneModelRenderer extends ModelRenderer
+public class BoneModelPart extends ModelPart
 {
     private static final Vector4f TRANSFORM_VECTOR = new Vector4f();
     private static final Vector3f NORMAL_VECTOR = new Vector3f();
 
     private final BedrockGeometryModel parent;
     private final GeometryModelData.Bone bone;
-    private final Set<BoneModelRenderer> children;
+    private final Set<BoneModelPart> children;
     private final ObjectList<Quad> quads;
     private final ObjectList<Polygon> polygons;
     private final Matrix4f copyPosition;
@@ -32,7 +36,7 @@ public class BoneModelRenderer extends ModelRenderer
     private final AnimationPose animationPose;
     private boolean copyVanilla;
 
-    public BoneModelRenderer(BedrockGeometryModel parent, GeometryModelData.Bone bone)
+    public BoneModelPart(BedrockGeometryModel parent, GeometryModelData.Bone bone)
     {
         super(parent, 0, 0);
         this.parent = parent;
@@ -100,13 +104,13 @@ public class BoneModelRenderer extends ModelRenderer
             x = f3;
         }
 
-        MatrixStack matrixStack = new MatrixStack();
+        PoseStack matrixStack = new PoseStack();
         matrixStack.translate(pivotX, pivotY, pivotZ);
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees(rotationZ));
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(rotationY));
         matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotationX));
         matrixStack.translate(-pivotX, -pivotY, -pivotZ);
-        MatrixStack.Entry entry = matrixStack.last();
+        PoseStack.Pose entry = matrixStack.last();
         Matrix4f matrix4f = entry.pose();
         Matrix3f matrix3f = entry.normal();
 
@@ -139,7 +143,7 @@ public class BoneModelRenderer extends ModelRenderer
     private Vertex getVertex(GeometryModelData.PolyMesh polyMesh, GeometryModelData.Poly poly, Matrix4f matrix4f, int index)
     {
         Vector3f position = polyMesh.getPositions()[poly.getPositions()[index]];
-        Vector2f uv = polyMesh.getUvs()[poly.getUVs()[index]];
+        Vec2 uv = polyMesh.getUvs()[poly.getUVs()[index]];
         return new Vertex(matrix4f, position.x(), -position.y(), position.z(), polyMesh.isNormalizedUvs() ? uv.x : uv.x / this.parent.getTextureWidth(), 1 - (polyMesh.isNormalizedUvs() ? uv.y : uv.y / this.parent.getTextureHeight()));
     }
 
@@ -176,25 +180,25 @@ public class BoneModelRenderer extends ModelRenderer
         this.copyNormal.setIdentity();
         this.animationPose.reset();
         if (resetChildren)
-            this.children.forEach(boneModelRenderer -> boneModelRenderer.resetTransform(true));
+            this.children.forEach(boneModelPart -> boneModelPart.resetTransform(true));
         this.copyVanilla = false;
     }
 
     @Override
-    public void addChild(ModelRenderer renderer)
+    public void addChild(ModelPart part)
     {
-        if (renderer instanceof BoneModelRenderer)
+        if (part instanceof BoneModelPart)
         {
-            this.children.add((BoneModelRenderer) renderer);
+            this.children.add((BoneModelPart) part);
         }
         else
         {
-            super.addChild(renderer);
+            super.addChild(part);
         }
     }
 
     @Override
-    public void render(MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public void render(PoseStack matrixStack, VertexConsumer builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
         super.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
 
@@ -225,7 +229,7 @@ public class BoneModelRenderer extends ModelRenderer
                 {
                     for (int i = 0; i < 4; i++)
                     {
-                        int index = MathHelper.clamp(i, 0, polygon.vertices.length - 1);
+                        int index = Mth.clamp(i, 0, polygon.vertices.length - 1);
                         Vertex vertex = polygon.vertices[index];
                         Vector3f normal = polygon.normals[index];
                         NORMAL_VECTOR.set(normal.x(), normal.y(), normal.z());
@@ -241,7 +245,7 @@ public class BoneModelRenderer extends ModelRenderer
         }
     }
 
-    private static void addVertex(IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, Matrix4f matrix4f, Vertex vertex)
+    private static void addVertex(VertexConsumer builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, Matrix4f matrix4f, Vertex vertex)
     {
         TRANSFORM_VECTOR.set(vertex.x, vertex.y, vertex.z, 1);
         TRANSFORM_VECTOR.transform(matrix4f);
@@ -249,19 +253,19 @@ public class BoneModelRenderer extends ModelRenderer
     }
 
     @Override
-    public void copyFrom(ModelRenderer modelRenderer)
+    public void copyFrom(ModelPart part)
     {
         this.copyPosition.setIdentity();
         this.copyNormal.setIdentity();
-        MatrixStack matrixStack = new MatrixStack();
-        modelRenderer.translateAndRotate(matrixStack);
+        PoseStack matrixStack = new PoseStack();
+        part.translateAndRotate(matrixStack);
         this.copyPosition.multiply(matrixStack.last().pose());
         this.copyNormal.mul(matrixStack.last().normal());
-        this.copyVanilla = !BoneModelRenderer.class.isAssignableFrom(modelRenderer.getClass());
+        this.copyVanilla = !BoneModelPart.class.isAssignableFrom(part.getClass());
     }
 
     @Override
-    public void translateAndRotate(MatrixStack matrixStack)
+    public void translateAndRotate(PoseStack matrixStack)
     {
         matrixStack.translate((this.animationPose.getPosition().x() + this.x) / 16.0F, (-this.animationPose.getPosition().y() + this.y) / 16.0F, (this.animationPose.getPosition().z() + this.z) / 16.0F);
         if (this.animationPose.getScale().hashCode() != 1333788672) // 1333788672 is the hash code of a 1, 1, 1 vector;

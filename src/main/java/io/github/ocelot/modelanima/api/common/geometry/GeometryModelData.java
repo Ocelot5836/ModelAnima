@@ -1,11 +1,10 @@
 package io.github.ocelot.modelanima.api.common.geometry;
 
 import com.google.gson.*;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3f;
+import com.mojang.math.Vector3f;
+import net.minecraft.core.Direction;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.phys.Vec2;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nullable;
@@ -177,7 +176,7 @@ public class GeometryModelData
     }
 
     /**
-     * <p>A single bone equivalent to {@link ModelRenderer}.</p>
+     * <p>A single bone equivalent to {@link net.minecraft.client.model.geom.ModelPart}.</p>
      *
      * @author Ocelot
      * @since 1.0.0
@@ -656,11 +655,11 @@ public class GeometryModelData
         private final boolean normalizedUvs;
         private final Vector3f[] positions;
         private final Vector3f[] normals;
-        private final Vector2f[] uvs;
+        private final Vec2[] uvs;
         private final Poly[] polys;
         private final PolyType polyType;
 
-        public PolyMesh(boolean normalizedUvs, Vector3f[] positions, Vector3f[] normals, Vector2f[] uvs, Poly[] polys, PolyType polyType)
+        public PolyMesh(boolean normalizedUvs, Vector3f[] positions, Vector3f[] normals, Vec2[] uvs, Poly[] polys, PolyType polyType)
         {
             this.normalizedUvs = normalizedUvs;
             this.positions = positions;
@@ -697,7 +696,7 @@ public class GeometryModelData
         /**
          * @return The UV values
          */
-        public Vector2f[] getUvs()
+        public Vec2[] getUvs()
         {
             return uvs;
         }
@@ -737,17 +736,17 @@ public class GeometryModelData
             public PolyMesh deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
             {
                 JsonObject jsonObject = json.getAsJsonObject();
-                boolean normalizedUvs = JSONUtils.getAsBoolean(jsonObject, "normalized_uvs", false);
+                boolean normalizedUvs = GsonHelper.getAsBoolean(jsonObject, "normalized_uvs", false);
                 Vector3f[] positions = parsePositions(jsonObject, "positions", 3, Vector3f[]::new, j -> new Vector3f(j.get(0).getAsFloat(), j.get(1).getAsFloat(), j.get(2).getAsFloat()));
                 Vector3f[] normals = parsePositions(jsonObject, "normals", 3, Vector3f[]::new, j -> new Vector3f(j.get(0).getAsFloat(), j.get(1).getAsFloat(), j.get(2).getAsFloat()));
-                Vector2f[] uvs = parsePositions(jsonObject, "uvs", 2, Vector2f[]::new, j -> new Vector2f(j.get(0).getAsFloat(), j.get(1).getAsFloat()));
+                Vec2[] uvs = parsePositions(jsonObject, "uvs", 2, Vec2[]::new, j -> new Vec2(j.get(0).getAsFloat(), j.get(1).getAsFloat()));
 
                 if (!jsonObject.has("polys"))
                     throw new JsonSyntaxException("Missing polys, expected to find a JsonArray or String");
 
                 JsonElement polysJson = jsonObject.get("polys");
                 if (!polysJson.isJsonArray() && !(polysJson.isJsonPrimitive() && polysJson.getAsJsonPrimitive().isString()))
-                    throw new JsonSyntaxException("Expected polys to be a JsonArray or String, was " + JSONUtils.getType(polysJson));
+                    throw new JsonSyntaxException("Expected polys to be a JsonArray or String, was " + GsonHelper.getType(polysJson));
 
                 Poly[] polys = polysJson.isJsonArray() ? context.deserialize(polysJson, Poly[].class) : new Poly[0];
                 PolyType polyType = polysJson.isJsonPrimitive() ? parseType(polysJson) : parseType(polys);
@@ -768,7 +767,7 @@ public class GeometryModelData
             private static PolyType parseType(JsonElement json) throws JsonParseException
             {
                 if (!json.isJsonPrimitive())
-                    throw new JsonSyntaxException("Expected String, was " + JSONUtils.getType(json));
+                    throw new JsonSyntaxException("Expected String, was " + GsonHelper.getType(json));
                 for (PolyType polyType : PolyType.values())
                     if (polyType.name.equalsIgnoreCase(json.getAsString()))
                         return polyType;
@@ -785,7 +784,7 @@ public class GeometryModelData
 
             private static <T> T[] parsePositions(JsonObject json, String name, int size, Function<Integer, T[]> arrayGenerator, Function<JsonArray, T> generator) throws JsonParseException
             {
-                JsonArray positionsJson = JSONUtils.getAsJsonArray(json, name, null);
+                JsonArray positionsJson = GsonHelper.getAsJsonArray(json, name, null);
                 if (positionsJson == null)
                     return arrayGenerator.apply(0);
 
@@ -794,7 +793,7 @@ public class GeometryModelData
                 {
                     JsonElement element = positionsJson.get(i);
                     if (!element.isJsonArray())
-                        throw new JsonSyntaxException("Expected " + name + " to be a JsonArray, was " + JSONUtils.getType(element));
+                        throw new JsonSyntaxException("Expected " + name + " to be a JsonArray, was " + GsonHelper.getType(element));
 
                     JsonArray array = element.getAsJsonArray();
                     if (array.size() != size)
@@ -884,7 +883,7 @@ public class GeometryModelData
             private static int[] parseVertex(JsonElement element) throws JsonParseException
             {
                 if (!element.isJsonArray())
-                    throw new JsonSyntaxException("Expected vertex to be a JsonArray, was " + JSONUtils.getType(element));
+                    throw new JsonSyntaxException("Expected vertex to be a JsonArray, was " + GsonHelper.getType(element));
                 JsonArray array = element.getAsJsonArray();
                 if (array.size() != 3)
                     throw new JsonParseException("Expected 3 vertex values, was " + array.size());

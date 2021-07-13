@@ -1,23 +1,18 @@
 package io.github.ocelot.modelanima;
 
-import com.mojang.brigadier.CommandDispatcher;
 import io.github.ocelot.modelanima.client.ClientInit;
 import io.github.ocelot.sonar.Sonar;
 import io.github.ocelot.sonar.common.item.SpawnEggItemBase;
-import net.minecraft.block.Block;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
@@ -32,11 +27,11 @@ public class TestMod
     public static final String MOD_ID = "examplemod";
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MOD_ID);
-    public static final DeferredRegister<TileEntityType<?>> TILE_ENTITIES = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> TILE_ENTITIES = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, MOD_ID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MOD_ID);
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, MOD_ID);
 
-    public static final RegistryObject<EntityType<Yeti>> YETI = register("yeti", EntityType.Builder.of(Yeti::new, EntityClassification.MONSTER).sized(1.4F, 2.7F).clientTrackingRange(10), 0x577B8A, 0xFAFAFA);
+    public static final RegistryObject<EntityType<Yeti>> YETI = register("yeti", EntityType.Builder.of(Yeti::new, MobCategory.MONSTER).sized(1.4F, 2.7F).clientTrackingRange(10), 0x577B8A, 0xFAFAFA);
 
     public TestMod()
     {
@@ -49,7 +44,6 @@ public class TestMod
         ENTITIES.register(modBus);
         modBus.addListener(this::init);
         modBus.addListener(this::attributeSetup);
-        MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void attributeSetup(EntityAttributeCreationEvent event)
@@ -59,13 +53,6 @@ public class TestMod
 
     private void init(FMLCommonSetupEvent event)
     {
-    }
-
-    @SubscribeEvent
-    public void registerCommands(RegisterCommandsEvent event)
-    {
-        CommandDispatcher<CommandSource> dispatcher = event.getDispatcher();
-        TestCommand.register(dispatcher);
     }
 
     /**
@@ -80,7 +67,7 @@ public class TestMod
     private static <T extends Entity> RegistryObject<EntityType<T>> register(String id, EntityType.Builder<T> builder, int primaryColor, int secondaryColor)
     {
         RegistryObject<EntityType<T>> object = register(id, builder);
-        ITEMS.register(id + "_spawn_egg", () -> new SpawnEggItemBase<>(object, primaryColor, secondaryColor, true, new Item.Properties().tab(ItemGroup.TAB_MISC)));
+        ITEMS.register(id + "_spawn_egg", () -> new SpawnEggItemBase<>(object, primaryColor, secondaryColor, true, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
         return object;
     }
 

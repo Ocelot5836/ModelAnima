@@ -5,7 +5,7 @@ import io.github.ocelot.modelanima.api.common.molang.MolangCompiler;
 import io.github.ocelot.modelanima.api.common.molang.MolangException;
 import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.core.common.molang.node.MolangConstantNode;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.util.GsonHelper;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -19,8 +19,6 @@ import java.util.function.Supplier;
  */
 public class JSONTupleParser
 {
-    // TODO implement MoLang expressions
-
     /**
      * Parses an array of floats from the specified JSON.
      *
@@ -36,7 +34,7 @@ public class JSONTupleParser
         if (!json.has(name) && defaultValue != null)
             return defaultValue.get();
         if (!json.has(name))
-            throw new JsonSyntaxException("Expected " + name + " to be a JsonArray or JsonPrimitive, was " + JSONUtils.getType(json));
+            throw new JsonSyntaxException("Expected " + name + " to be a JsonArray or JsonPrimitive, was " + GsonHelper.getType(json));
         if (json.get(name).isJsonPrimitive() && json.getAsJsonPrimitive(name).isString())
             throw new JsonSyntaxException("Molang expressions are not supported");
         if (json.get(name).isJsonArray())
@@ -48,13 +46,13 @@ public class JSONTupleParser
             float[] values = new float[length];
             if (vectorJson.size() == 1)
             {
-                Arrays.fill(values, JSONUtils.convertToFloat(vectorJson.get(0), name));
+                Arrays.fill(values, GsonHelper.convertToFloat(vectorJson.get(0), name));
             }
             else
             {
                 for (int i = 0; i < values.length; i++)
                 {
-                    values[i] = JSONUtils.convertToFloat(vectorJson.get(i), name + "[" + i + "]");
+                    values[i] = GsonHelper.convertToFloat(vectorJson.get(i), name + "[" + i + "]");
                 }
             }
 
@@ -70,7 +68,7 @@ public class JSONTupleParser
                 return values;
             }
         }
-        throw new JsonSyntaxException("Expected " + name + " to be a JsonArray or JsonPrimitive, was " + JSONUtils.getType(json));
+        throw new JsonSyntaxException("Expected " + name + " to be a JsonArray or JsonPrimitive, was " + GsonHelper.getType(json));
     }
 
     /**
@@ -90,7 +88,7 @@ public class JSONTupleParser
             if (!json.has(name) && defaultValue != null)
                 return defaultValue.get();
             if (!json.has(name))
-                throw new JsonSyntaxException("Expected " + name + " to be a JsonArray or JsonPrimitive, was " + JSONUtils.getType(json));
+                throw new JsonSyntaxException("Expected " + name + " to be a JsonArray or JsonPrimitive, was " + GsonHelper.getType(json));
             if (json.get(name).isJsonArray())
             {
                 JsonArray vectorJson = json.getAsJsonArray(name);
@@ -102,7 +100,7 @@ public class JSONTupleParser
                 {
                     JsonElement vectorElement = vectorJson.get(0);
                     if (!vectorElement.isJsonPrimitive())
-                        throw new JsonSyntaxException("Expected " + name + " to be a Float or String, was " + JSONUtils.getType(vectorElement));
+                        throw new JsonSyntaxException("Expected " + name + " to be a Float or String, was " + GsonHelper.getType(vectorElement));
 
                     JsonPrimitive vectorPrimitive = vectorElement.getAsJsonPrimitive();
                     if (vectorPrimitive.isString())
@@ -115,7 +113,7 @@ public class JSONTupleParser
                     }
                     else
                     {
-                        throw new JsonSyntaxException("Expected " + name + " to be a Float or String, was " + JSONUtils.getType(vectorElement));
+                        throw new JsonSyntaxException("Expected " + name + " to be a Float or String, was " + GsonHelper.getType(vectorElement));
                     }
                 }
                 else
@@ -124,7 +122,7 @@ public class JSONTupleParser
                     {
                         JsonElement vectorElement = vectorJson.get(i);
                         if (!vectorElement.isJsonPrimitive())
-                            throw new JsonSyntaxException("Expected " + name + "[" + i + "] to be a Float or String, was " + JSONUtils.getType(vectorElement));
+                            throw new JsonSyntaxException("Expected " + name + "[" + i + "] to be a Float or String, was " + GsonHelper.getType(vectorElement));
 
                         JsonPrimitive vectorPrimitive = vectorElement.getAsJsonPrimitive();
                         if (vectorPrimitive.isString())
@@ -137,7 +135,7 @@ public class JSONTupleParser
                         }
                         else
                         {
-                            throw new JsonSyntaxException("Expected " + name + "[" + i + "] to be a Float or String, was " + JSONUtils.getType(vectorElement));
+                            throw new JsonSyntaxException("Expected " + name + "[" + i + "] to be a Float or String, was " + GsonHelper.getType(vectorElement));
                         }
                     }
                 }
@@ -165,6 +163,6 @@ public class JSONTupleParser
         {
             throw new JsonParseException("Failed to compile MoLang expression", e);
         }
-        throw new JsonSyntaxException("Expected " + name + " to be a JsonArray or JsonPrimitive, was " + JSONUtils.getType(json));
+        throw new JsonSyntaxException("Expected " + name + " to be a JsonArray or JsonPrimitive, was " + GsonHelper.getType(json));
     }
 }

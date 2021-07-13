@@ -6,7 +6,7 @@ import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.core.common.geometry.Geometry110Parser;
 import io.github.ocelot.modelanima.core.common.geometry.Geometry1120Parser;
 import io.github.ocelot.modelanima.core.common.geometry.Geometry180Parser;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.util.GsonHelper;
 
 import java.io.Reader;
 
@@ -61,7 +61,7 @@ public class GeometryModelParser
      */
     public static GeometryModelData[] parseModel(JsonElement json) throws JsonParseException
     {
-        String formatVersion = JSONUtils.getAsString(json.getAsJsonObject(), "format_version");
+        String formatVersion = GsonHelper.getAsString(json.getAsJsonObject(), "format_version");
         if (formatVersion.equals("1.12.0"))
             return Geometry1120Parser.parseModel(json);
         if (formatVersion.equals("1.8.0"))

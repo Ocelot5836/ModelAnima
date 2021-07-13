@@ -1,6 +1,6 @@
 package io.github.ocelot.modelanima.api.common.util;
 
-import net.minecraft.resources.IResourceManager;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -22,5 +22,5 @@ public interface BackgroundLoader<T>
      * @param gameExecutor       The game executor for tasks that are thread-sensitive
      * @return A future of data that will be present in the future
      */
-    CompletableFuture<T> reload(IResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor);
+    CompletableFuture<T> reload(ResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor);
 }

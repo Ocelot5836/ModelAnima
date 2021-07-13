@@ -1,18 +1,18 @@
 package io.github.ocelot.modelanima.api.client.geometry;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.ocelot.modelanima.api.client.texture.GeometryAtlasTexture;
 import io.github.ocelot.modelanima.api.common.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.core.client.geometry.LocalGeometryModelLoader;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**
- * <p>An abstract renderer for geometry models that can be queried by {@link LocalGeometryModelLoader}.</p>
+ * <p>An abstract part for geometry models that can be queried by {@link LocalGeometryModelLoader}.</p>
  *
  * @author Ocelot
  * @since 1.0.0
@@ -25,7 +25,7 @@ public interface GeometryModel
     GeometryModel EMPTY = new GeometryModel()
     {
         @Override
-        public void render(String material, GeometryModelTexture texture, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+        public void render(String material, GeometryModelTexture texture, PoseStack matrixStack, VertexConsumer builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
         {
         }
 
@@ -35,26 +35,26 @@ public interface GeometryModel
         }
 
         @Override
-        public void copyAngles(@Nullable String parent, ModelRenderer modelRenderer)
+        public void copyAngles(@Nullable String parent, ModelPart modelPart)
         {
         }
 
         @Override
-        public Optional<ModelRenderer> getModelRenderer(String part)
+        public Optional<ModelPart> getModelPart(String part)
         {
             return Optional.empty();
         }
 
         @Override
-        public ModelRenderer[] getChildRenderers(String part)
+        public ModelPart[] getChildRenderers(String part)
         {
-            return new ModelRenderer[0];
+            return new ModelPart[0];
         }
 
         @Override
-        public ModelRenderer[] getModelRenderers()
+        public ModelPart[] getModelParts()
         {
-            return new ModelRenderer[0];
+            return new ModelPart[0];
         }
 
         @Override
@@ -96,7 +96,7 @@ public interface GeometryModel
      * @param blue          The blue factor for color
      * @param alpha         The alpha factor for color
      */
-    void render(String material, GeometryModelTexture texture, MatrixStack matrixStack, IVertexBuilder builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
+    void render(String material, GeometryModelTexture texture, PoseStack matrixStack, VertexConsumer builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
 
     /**
      * Resets all model angles to the default transformation.
@@ -106,31 +106,31 @@ public interface GeometryModel
     /**
      * Copies the model angles to the currently selected part.
      *
-     * @param parent        The parent model part being copied
-     * @param modelRenderer The renderer to copy angles of
+     * @param parent    The parent model part being copied
+     * @param modelPart The part to copy angles of
      */
-    void copyAngles(@Nullable String parent, ModelRenderer modelRenderer);
+    void copyAngles(@Nullable String parent, ModelPart modelPart);
 
     /**
-     * Fetches a model renderer from the model.
+     * Fetches a model part from the model.
      *
-     * @param part The name of the renderer to get
-     * @return An optional of the model renderer by that name
+     * @param part The name of the part to get
+     * @return An optional of the model part by that name
      */
-    Optional<ModelRenderer> getModelRenderer(String part);
+    Optional<ModelPart> getModelPart(String part);
 
     /**
      * Fetches all model parts that are a child to the provided parent part.
      *
      * @param part The name of the part to get children from
-     * @return All model renderers copying angles from that part
+     * @return All model parts copying angles from that part
      */
-    ModelRenderer[] getChildRenderers(String part);
+    ModelPart[] getChildRenderers(String part);
 
     /**
-     * @return An array of all model renderers
+     * @return An array of all model parts
      */
-    ModelRenderer[] getModelRenderers();
+    ModelPart[] getModelParts();
 
     /**
      * @return An array of all used part keys
@@ -153,14 +153,14 @@ public interface GeometryModel
     float getTextureHeight();
 
     /**
-     * Fetches an {@link IVertexBuilder} for the specified texture.
+     * Fetches an {@link com.mojang.blaze3d.vertex.VertexConsumer} for the specified texture.
      *
      * @param buffer  The render type buffers
      * @param atlas   The atlas to get the textures from
      * @param texture The texture to use
      * @return The buffer that should be used for the provided texture
      */
-    default IVertexBuilder getBuffer(IRenderTypeBuffer buffer, GeometryAtlasTexture atlas, GeometryModelTexture texture)
+    default VertexConsumer getBuffer(MultiBufferSource buffer, GeometryAtlasTexture atlas, GeometryModelTexture texture)
     {
         return atlas.getSprite(texture.getLocation()).wrap(buffer.getBuffer(texture.getLayer().getRenderType(texture, atlas.getAtlasLocation())));
     }

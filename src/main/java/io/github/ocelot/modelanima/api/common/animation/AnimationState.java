@@ -1,6 +1,6 @@
 package io.github.ocelot.modelanima.api.common.animation;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * <p>An animation state is an array of animations that can play for a specific amount of time. This is to allow the server to know what animation should be playing for state checking.</p>

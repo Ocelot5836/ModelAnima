@@ -3,8 +3,8 @@ package io.github.ocelot.modelanima;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 
 import java.util.Optional;
 
@@ -12,15 +12,15 @@ public class CodecTest
 {
     public static void test()
     {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundTag nbt = new CompoundTag();
         nbt.putBoolean("foo", true);
         nbt.putIntArray("bar", new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-        CompoundNBT blockStateNBT = new CompoundNBT();
+        CompoundTag blockStateNBT = new CompoundTag();
         blockStateNBT.putString("Name", "diamond_block");
         nbt.put("blockstate_example", blockStateNBT);
 
-        Optional<Foobar> nbtOptional = Foobar.CODEC.parse(NBTDynamicOps.INSTANCE, nbt).get().left();
+        Optional<Foobar> nbtOptional = Foobar.CODEC.parse(NbtOps.INSTANCE, nbt).get().left();
 
         JsonObject json = new JsonObject();
         json.addProperty("foo", true);

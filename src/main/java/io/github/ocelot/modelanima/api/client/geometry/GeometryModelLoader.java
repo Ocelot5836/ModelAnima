@@ -1,7 +1,7 @@
 package io.github.ocelot.modelanima.api.client.geometry;
 
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -23,5 +23,5 @@ public interface GeometryModelLoader
      * @param gameExecutor       The game executor for tasks that are thread-sensitive
      * @return A future of animations that will be present in the future
      */
-    CompletableFuture<Map<ResourceLocation, GeometryModel>> reload(IResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor);
+    CompletableFuture<Map<ResourceLocation, GeometryModel>> reload(ResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor);
 }

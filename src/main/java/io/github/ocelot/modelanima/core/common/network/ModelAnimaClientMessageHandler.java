@@ -3,8 +3,8 @@ package io.github.ocelot.modelanima.core.common.network;
 import io.github.ocelot.modelanima.api.common.animation.AnimatedEntity;
 import io.github.ocelot.modelanima.api.common.animation.AnimationState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.fml.network.NetworkEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +18,7 @@ public class ModelAnimaClientMessageHandler
 
     public static void handleSyncAnimationMessage(SyncAnimationMessage msg, NetworkEvent.Context ctx)
     {
-        ClientWorld level = Minecraft.getInstance().level;
+        ClientLevel level = Minecraft.getInstance().level;
         if (level == null)
             return;
 

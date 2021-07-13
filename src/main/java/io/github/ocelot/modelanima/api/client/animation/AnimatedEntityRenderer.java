@@ -1,12 +1,12 @@
 package io.github.ocelot.modelanima.api.client.animation;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.common.animation.AnimatedEntity;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.PathfinderMob;
 
 /**
  * <p>Renders an {@link AnimatedEntity} using {@link AnimatedGeometryEntityModel}.</p>
@@ -15,9 +15,9 @@ import net.minecraft.util.ResourceLocation;
  * @author Ocelot
  * @since 1.0.0
  */
-public abstract class AnimatedEntityRenderer<T extends MobEntity & AnimatedEntity> extends MobRenderer<T, AnimatedGeometryEntityModel<T>>
+public abstract class AnimatedEntityRenderer<T extends PathfinderMob & AnimatedEntity> extends MobRenderer<T, AnimatedGeometryEntityModel<T>>
 {
-    public AnimatedEntityRenderer(EntityRendererManager rendererManager, ResourceLocation model, float shadowSize)
+    public AnimatedEntityRenderer(EntityRenderDispatcher rendererManager, ResourceLocation model, float shadowSize)
     {
         super(rendererManager, new AnimatedGeometryEntityModel<>(model), shadowSize);
     }
@@ -29,7 +29,7 @@ public abstract class AnimatedEntityRenderer<T extends MobEntity & AnimatedEntit
     }
 
     @Override
-    protected void setupRotations(T entity, MatrixStack matrixStack, float ticksExisted, float rotY, float partialTicks)
+    protected void setupRotations(T entity, PoseStack matrixStack, float ticksExisted, float rotY, float partialTicks)
     {
         super.setupRotations(entity, matrixStack, ticksExisted, rotY, partialTicks);
         this.model.setTexture(this.getTextureTableLocation(entity));

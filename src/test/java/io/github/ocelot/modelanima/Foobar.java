@@ -2,9 +2,8 @@ package io.github.ocelot.modelanima;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,7 +23,7 @@ public class Foobar
     private final int[] bar;
     private final BlockState blockState;
 
-    public Foobar(boolean foo, int[] bar, @Nullable BlockState blockState)
+    public Foobar(boolean foo, int[] bar, BlockState blockState)
     {
         this.foo = foo;
         this.bar = bar;

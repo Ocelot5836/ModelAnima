@@ -2,7 +2,7 @@ package io.github.ocelot.modelanima.api.common.animation;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.util.GsonHelper;
 
 import java.io.Reader;
 
@@ -59,9 +59,9 @@ public class AnimationParser
      */
     public static AnimationData[] parse(JsonElement json) throws JsonSyntaxException
     {
-        String formatVersion = JSONUtils.getAsString(json.getAsJsonObject(), "format_version");
+        String formatVersion = GsonHelper.getAsString(json.getAsJsonObject(), "format_version");
         if (!formatVersion.equals(VERSION))
             throw new JsonSyntaxException("Unsupported animation version: " + formatVersion);
-        return GSON.fromJson(JSONUtils.getAsJsonObject(json.getAsJsonObject(), "animations"), AnimationData[].class);
+        return GSON.fromJson(GsonHelper.getAsJsonObject(json.getAsJsonObject(), "animations"), AnimationData[].class);
     }
 }

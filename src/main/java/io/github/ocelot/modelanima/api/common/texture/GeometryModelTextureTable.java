@@ -4,16 +4,12 @@ import com.google.gson.*;
 import com.mojang.serialization.JsonOps;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTDynamicOps;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.network.FriendlyByteBuf;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -36,7 +32,7 @@ public class GeometryModelTextureTable
         this.textures.values().removeIf(layers -> layers.length == 0);
     }
 
-    public GeometryModelTextureTable(PacketBuffer buf)
+    public GeometryModelTextureTable(FriendlyByteBuf buf)
     {
         this.textures = new HashMap<>();
         List<GeometryModelTexture> textureSet = new ArrayList<>();
@@ -47,31 +43,16 @@ public class GeometryModelTextureTable
             String key = buf.readUtf();
             int layers = buf.readVarInt();
             for (int j = 0; j < layers; j++)
-                textureSet.add(new GeometryModelTexture(buf));
-            if (!textureSet.isEmpty())
             {
-                this.textures.put(key, textureSet.toArray(new GeometryModelTexture[0]));
-                textureSet.clear();
+                try
+                {
+                    textureSet.add(buf.readWithCodec(GeometryModelTexture.CODEC));
+                }
+                catch (IOException e)
+                {
+                    throw new IllegalStateException("Failed to deserialize geometry model texture", e);
+                }
             }
-        }
-    }
-
-    public GeometryModelTextureTable(CompoundNBT nbt)
-    {
-        this.textures = new HashMap<>();
-        List<GeometryModelTexture> textureSet = new ArrayList<>();
-
-        ListNBT texturesNbt = nbt.getList("Textures", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < texturesNbt.size(); i++)
-        {
-            CompoundNBT textureNbt = texturesNbt.getCompound(i);
-            String key = textureNbt.getString("Key");
-            INBT value = textureNbt.get("Value");
-            if (value == null || value.getType() != ListNBT.TYPE)
-                continue;
-
-            ListNBT layersNbt = (ListNBT) value;
-            layersNbt.forEach(layerNbt -> GeometryModelTexture.CODEC.parse(NBTDynamicOps.INSTANCE, layerNbt).get().ifLeft(textureSet::add));
             if (!textureSet.isEmpty())
             {
                 this.textures.put(key, textureSet.toArray(new GeometryModelTexture[0]));
@@ -85,7 +66,7 @@ public class GeometryModelTextureTable
      *
      * @param buf The buffer to write into
      */
-    public void write(PacketBuffer buf)
+    public void write(FriendlyByteBuf buf)
     {
         buf.writeVarInt(this.textures.size());
         this.textures.forEach((key, layers) ->
@@ -93,33 +74,17 @@ public class GeometryModelTextureTable
             buf.writeUtf(key);
             buf.writeVarInt(layers.length);
             for (GeometryModelTexture texture : layers)
-                texture.write(buf);
-        });
-    }
-
-    public CompoundNBT serializeNBT()
-    {
-        CompoundNBT nbt = new CompoundNBT();
-
-        ListNBT texturesNbt = new ListNBT();
-        this.textures.forEach((key, layers) ->
-        {
-            ListNBT layersNbt = new ListNBT();
-            for (int i = 0; i < layers.length; i++)
             {
-                GeometryModelTexture.CODEC.encodeStart(NBTDynamicOps.INSTANCE, layers[0]).get().ifLeft(textureValueNbt ->
+                try
                 {
-                    CompoundNBT textureNbt = new CompoundNBT();
-                    textureNbt.putString("Key", key);
-                    textureNbt.put("Value", textureValueNbt);
-                    layersNbt.add(textureNbt);
-                });
+                    buf.writeWithCodec(GeometryModelTexture.CODEC, texture);
+                }
+                catch (IOException e)
+                {
+                    throw new IllegalStateException("Failed to serialize geometry model texture: " + texture, e);
+                }
             }
-            texturesNbt.add(layersNbt);
         });
-        nbt.put("Textures", texturesNbt);
-
-        return nbt;
     }
 
     /**

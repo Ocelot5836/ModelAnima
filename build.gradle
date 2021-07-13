@@ -1,77 +1,33 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
-    }
+plugins {
+    id 'forgified-fabric-loom' version '0.6-SNAPSHOT'
+    id 'maven-publish'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 version = "${project.minecraft_version}-${project.mod_version}"
-group = 'io.github.ocelot' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = 'io.github.ocelot'
 archivesBaseName = project.mod_id
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
-
-minecraft {
-    mappings channel: "official", version: project.minecraft_version
+loom {
+    silentMojangMappingsLicense()
 
     runs {
         client {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                modelanima {
-                    source sourceSets.main
-                }
-                examplemod {
-                    source sourceSets.test
-                }
-            }
+            runDir "run/client"
         }
-
         server {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                modelanima {
-                    source sourceSets.main
-                }
-                examplemod {
-                    source sourceSets.test
-                }
-            }
+            runDir "run/server"
         }
     }
+
+    localMods {
+        it.add(sourceSets.test)
+    }
 }
 
-if (project.hasProperty('UPDATE_MAPPINGS')) {
-    extractRangeMap {
-        sources sourceSets.test.java.srcDirs
-    }
-    applyRangeMap {
-        sources sourceSets.test.java.srcDirs
-    }
-    sourceSets.test.java.srcDirs.each { extractMappedNew.addTarget it }
-}
-
-repositories{
+repositories {
     maven {
         url "https://www.cursemaven.com"
         content {
@@ -85,13 +41,17 @@ repositories{
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+
+    mappings minecraft.officialMojangMappings()
+
+    forge "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
 
     // These mods make life easier during runtime. They aren't strictly necessary
-    runtimeOnly fg.deobf("curse.maven:configured-457570:3340535")
-    runtimeOnly fg.deobf("curse.maven:catalogue-459701:3335979")
+    modRuntime "curse.maven:configured-457570:3340535"
+    modRuntime "curse.maven:catalogue-459701:3335979"
 
-    testImplementation fg.deobf("com.github.Ocelot5836:Sonar:${project.sonar_version}")
+    modImplementation "com.github.Ocelot5836:Sonar:${project.sonar_version}"
 }
 
 processResources {
@@ -114,31 +74,18 @@ jar {
                 "Specification-Vendor"    : "Ocelot",
                 "Specification-Version"   : "1",
                 "Implementation-Title"    : project.name,
-                "Implementation-Version"  : version,
+                "Implementation-Version"  : archiveVersion,
                 "Implementation-Vendor"   : "Ocelot",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'FMLModType': 'LIBRARY'
+                'FMLModType'              : 'LIBRARY'
         ])
     }
 }
-
-task apiJar(type: Jar) {
-    classifier = "api"
-    from sourceSets.main.output
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives apiJar
-}
-
-jar.finalizedBy('reobfJar')
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact jar
-            artifact apiJar
         }
     }
     repositories {

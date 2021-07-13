@@ -5,7 +5,7 @@ import io.github.ocelot.modelanima.api.common.molang.MolangExpression;
 import io.github.ocelot.modelanima.api.common.molang.MolangJavaFunction;
 import io.github.ocelot.modelanima.api.common.molang.MolangLibrary;
 import io.github.ocelot.modelanima.core.common.molang.node.MolangConstantNode;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import javax.annotation.Nullable;
 import java.util.Locale;
@@ -58,7 +58,7 @@ public class MolangMath extends MolangLibrary
             return Math.min(value, parameters.resolve(0));
         }),
         COS(1, parameters ->
-                MathHelper.cos((float) (parameters.resolve(0) * Math.PI / 180.0F))),
+                Mth.cos((float) (parameters.resolve(0) * Math.PI / 180.0F))),
         DIE_ROLL(3, parameters ->
         {
             int count = (int) parameters.resolve(0);
@@ -162,14 +162,14 @@ public class MolangMath extends MolangLibrary
         ROUND(1, parameters ->
                 (float) Math.round(parameters.resolve(0))),
         SIN(1, parameters ->
-                MathHelper.sin((float) (parameters.resolve(0) * Math.PI / 180.0F))),
+                Mth.sin((float) (parameters.resolve(0) * Math.PI / 180.0F))),
         SQRT(1, parameters ->
                 (float) Math.sqrt(parameters.resolve(0))),
         TRUNC(1, parameters ->
                 (int) parameters.resolve(0)),
         // Extended function
         TRIANGLE_WAVE(2, parameters ->
-                MathHelper.triangleWave(parameters.resolve(0), parameters.resolve(1)));
+                Mth.triangleWave(parameters.resolve(0), parameters.resolve(1)));
 
         private final int parameters;
         private final String functionName;

@@ -2,7 +2,7 @@ package io.github.ocelot.modelanima.client;
 
 import io.github.ocelot.modelanima.TestMod;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 

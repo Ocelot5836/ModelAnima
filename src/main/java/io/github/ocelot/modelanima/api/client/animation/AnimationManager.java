@@ -5,12 +5,12 @@ import io.github.ocelot.modelanima.api.common.util.BackgroundLoader;
 import io.github.ocelot.modelanima.core.client.animation.LocalAnimationLoader;
 import io.github.ocelot.modelanima.core.client.util.DynamicReloader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IFutureReloadListener;
-import net.minecraft.resources.IReloadableResourceManager;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Unit;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -48,10 +48,10 @@ public final class AnimationManager
     {
         bus.addListener(EventPriority.NORMAL, false, ColorHandlerEvent.Block.class, event ->
         {
-            IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-            if (resourceManager instanceof IReloadableResourceManager)
+            ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+            if (resourceManager instanceof ReloadableResourceManager)
             {
-                ((IReloadableResourceManager) resourceManager).registerReloadListener(RELOADER);
+                ((ReloadableResourceManager) resourceManager).registerReloadListener(RELOADER);
             }
         });
         addLoader(new LocalAnimationLoader());
@@ -101,10 +101,10 @@ public final class AnimationManager
         return DYNAMIC_RELOADER.isReloading();
     }
 
-    private static class Reloader implements IFutureReloadListener
+    private static class Reloader implements PreparableReloadListener
     {
         @Override
-        public CompletableFuture<Void> reload(IStage stage, IResourceManager resourceManager, IProfiler preparationsProfiler, IProfiler reloadProfiler, Executor backgroundExecutor, Executor gameExecutor)
+        public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor)
         {
             Map<ResourceLocation, AnimationData> animationData = new HashMap<>();
             return CompletableFuture.allOf(LOADERS.stream().map(animationLoader -> animationLoader.reload(resourceManager, backgroundExecutor, gameExecutor).thenAcceptAsync(pairs ->

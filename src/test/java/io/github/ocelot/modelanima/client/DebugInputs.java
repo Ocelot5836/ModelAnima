@@ -2,8 +2,8 @@ package io.github.ocelot.modelanima.client;
 
 import io.github.ocelot.modelanima.TestMod;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Util;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
