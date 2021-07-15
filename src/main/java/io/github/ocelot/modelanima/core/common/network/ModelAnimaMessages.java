@@ -5,12 +5,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class ModelAnimaMessages
 {
     public static final SimpleChannel PLAY = NetworkRegistry.newSimpleChannel(new ResourceLocation(ModelAnima.MOD_ID, "play"), () -> "1", "1"::equals, "1"::equals);

@@ -9,6 +9,7 @@ import net.minecraft.server.packs.resources.SimpleReloadInstance;
 import net.minecraft.util.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class DynamicReloader
 {
     private static final Logger LOGGER = LogManager.getLogger();

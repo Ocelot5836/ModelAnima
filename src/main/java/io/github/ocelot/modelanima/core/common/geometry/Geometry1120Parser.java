@@ -5,6 +5,7 @@ import com.mojang.math.Vector3f;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import io.github.ocelot.modelanima.api.common.util.JSONTupleParser;
 import net.minecraft.util.GsonHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,6 +13,7 @@ import java.util.Set;
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class Geometry1120Parser
 {
     public static GeometryModelData[] parseModel(JsonElement json) throws JsonParseException

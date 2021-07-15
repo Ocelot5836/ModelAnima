@@ -10,6 +10,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.io.InputStreamReader;
@@ -22,6 +23,7 @@ import java.util.function.Consumer;
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class LocalTextureTableLoader implements TextureTableLoader
 {
     private static final Logger LOGGER = LogManager.getLogger();

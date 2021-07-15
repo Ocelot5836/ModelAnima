@@ -16,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraftforge.client.model.animation.Animation;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class BedrockGeometryModel extends Model implements GeometryModel, AnimatedModel
 {
     private static final Vector3f POSITION = new Vector3f();

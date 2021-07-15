@@ -6,10 +6,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class SyncAnimationMessage
 {
     private final int entityId;

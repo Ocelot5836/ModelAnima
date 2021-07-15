@@ -16,6 +16,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ public final class AnimationManager
         DYNAMIC_RELOADER.addListener(RELOADER);
     }
 
+    @ApiStatus.Internal
     public static void init(IEventBus bus)
     {
         bus.addListener(EventPriority.NORMAL, false, ColorHandlerEvent.Block.class, event ->

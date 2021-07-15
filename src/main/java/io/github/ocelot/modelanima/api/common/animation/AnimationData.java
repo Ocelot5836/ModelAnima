@@ -444,7 +444,7 @@ public class AnimationData
 
                     parseTransform(positions, boneAnimationObject, "position", () -> new MolangExpression[]{MolangExpression.ZERO, MolangExpression.ZERO, MolangExpression.ZERO});
                     parseTransform(rotations, boneAnimationObject, "rotation", () -> new MolangExpression[]{MolangExpression.ZERO, MolangExpression.ZERO, MolangExpression.ZERO});
-                    parseTransform(scales, boneAnimationObject, "scale", () -> new MolangExpression[]{new MolangConstantNode(1), new MolangConstantNode(1), new MolangConstantNode(1)});
+                    parseTransform(scales, boneAnimationObject, "scale", () -> new MolangExpression[]{MolangExpression.of(1), MolangExpression.of(1), MolangExpression.of(1)});
 
                     positions.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
                     rotations.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));

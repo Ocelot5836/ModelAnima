@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,6 +20,7 @@ import java.util.concurrent.Executor;
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class HashedTextureCache implements FileCache
 {
     private static final Logger LOGGER = LogManager.getLogger();

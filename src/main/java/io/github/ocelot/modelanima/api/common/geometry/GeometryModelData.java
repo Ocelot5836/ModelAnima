@@ -2,6 +2,8 @@ package io.github.ocelot.modelanima.api.common.geometry;
 
 import com.google.gson.*;
 import com.mojang.math.Vector3f;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
+import io.github.ocelot.modelanima.core.client.geometry.BedrockGeometryModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.phys.Vec2;
@@ -32,6 +34,14 @@ public class GeometryModelData
     {
         this.description = description;
         this.bones = bones;
+    }
+
+    /**
+     * @return A new {@link GeometryModel} using the bones provided by this object
+     */
+    public GeometryModel create()
+    {
+        return new BedrockGeometryModel(this);
     }
 
     /**
@@ -510,64 +520,6 @@ public class GeometryModelData
                     ", downUV=" + getUV(Direction.DOWN) +
                     '}';
         }
-
-//        public static class Deserializer implements JsonDeserializer<Cube>
-//        {
-//            @Override
-//            public Cube deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
-//            {
-//                JsonObject cubeJson = json.getAsJsonObject();
-//                float[] origin = JSONTupleParser.getFloat(cubeJson, "origin", 3, () -> new float[3]);
-//                float[] size = JSONTupleParser.getFloat(cubeJson, "size", 3, () -> new float[3]);
-//                float[] rotation = JSONTupleParser.getFloat(cubeJson, "rotation", 3, () -> new float[3]);
-//                float[] pivot = JSONTupleParser.getFloat(cubeJson, "pivot", 3, () -> new float[]{origin[0] + size[0], origin[1] + size[1], origin[2] + size[2]});
-//                boolean overrideInflate = cubeJson.has("inflate");
-//                float inflate = JSONUtils.getAsFloat(cubeJson, "inflate", 0);
-//                boolean overrideMirror = cubeJson.has("mirror");
-//                boolean mirror = JSONUtils.getAsBoolean(cubeJson, "mirror", false);
-//                CubeUV[] uv = parseUV(cubeJson, size);
-//                if (uv.length != Direction.values().length)
-//                    throw new JsonParseException("Expected uv to be of size " + Direction.values().length + ", was " + uv.length);
-//                return new Cube(new Vector3f(origin), new Vector3f(size), new Vector3f(rotation), new Vector3f(pivot), overrideInflate, inflate, overrideMirror, mirror, uv);
-//            }
-//
-//            private static CubeUV[] parseUV(JsonObject cubeJson, float[] size)
-//            {
-//                if (!cubeJson.has("uv"))
-//                    return new CubeUV[6];
-//
-//                if (cubeJson.get("uv").isJsonArray())
-//                {
-//                    CubeUV[] uvs = new CubeUV[6];
-//                    float[] uv = JSONTupleParser.getFloat(cubeJson, "uv", 2, () -> new float[2]);
-//                    uvs[Direction.NORTH.get3DDataValue()] = new CubeUV(uv[0] + size[2], uv[1] + size[2], size[0], size[1], "texture");
-//                    uvs[Direction.EAST.get3DDataValue()] = new CubeUV(uv[0], uv[1] + size[2], size[2], size[1], "texture");
-//                    uvs[Direction.SOUTH.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2] * 2, uv[1] + size[2], size[0], size[1], "texture");
-//                    uvs[Direction.WEST.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2], uv[1] + size[2], size[2], size[1], "texture");
-//                    uvs[Direction.UP.get3DDataValue()] = new CubeUV(uv[0] + size[2], uv[1], size[0], size[2], "texture");
-//                    uvs[Direction.DOWN.get3DDataValue()] = new CubeUV(uv[0] + size[0] + size[2], uv[1], size[0], size[2], "texture");
-//                    return uvs;
-//                }
-//                if (cubeJson.get("uv").isJsonObject())
-//                {
-//                    JsonObject uvJson = cubeJson.getAsJsonObject("uv");
-//                    CubeUV[] uvs = new CubeUV[6];
-//                    for (Direction direction : Direction.values())
-//                    {
-//                        if (!uvJson.has(direction.getName()))
-//                            continue;
-//
-//                        JsonObject faceJson = JSONUtils.getAsJsonObject(uvJson, direction.getName());
-//                        float[] uv = JSONTupleParser.getFloat(faceJson, "uv", 2, null);
-//                        float[] uvSize = JSONTupleParser.getFloat(faceJson, "uv_size", 2, () -> new float[2]);
-//                        String material = JSONUtils.getAsString(faceJson, "material_instance", "texture");
-//                        uvs[direction.get3DDataValue()] = new CubeUV(uv[0], uv[1], uvSize[0], uvSize[1], material);
-//                    }
-//                    return uvs;
-//                }
-//                throw new JsonSyntaxException("Expected uv to be a JsonArray or JsonObject, was " + JSONUtils.getType(cubeJson.get("uv")));
-//            }
-//        }
     }
 
     /**

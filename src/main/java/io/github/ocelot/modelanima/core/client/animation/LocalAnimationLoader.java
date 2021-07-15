@@ -8,6 +8,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import java.util.concurrent.Executor;
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class LocalAnimationLoader implements BackgroundLoader<Map<ResourceLocation, AnimationData>>
 {
     private static final Logger LOGGER = LogManager.getLogger();

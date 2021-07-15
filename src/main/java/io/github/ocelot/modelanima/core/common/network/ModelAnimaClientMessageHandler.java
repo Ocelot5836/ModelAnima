@@ -8,10 +8,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraftforge.fml.network.NetworkEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class ModelAnimaClientMessageHandler
 {
     private static final Logger LOGGER = LogManager.getLogger();

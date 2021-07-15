@@ -10,6 +10,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.concurrent.Executor;
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public final class LocalGeometryModelLoader implements BackgroundLoader<Map<ResourceLocation, GeometryModel>>
 {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -57,7 +59,7 @@ public final class LocalGeometryModelLoader implements BackgroundLoader<Map<Reso
             {
                 try
                 {
-                    models.put(name, new BedrockGeometryModel(model));
+                    models.put(name, model.create());
                 }
                 catch (Exception e)
                 {

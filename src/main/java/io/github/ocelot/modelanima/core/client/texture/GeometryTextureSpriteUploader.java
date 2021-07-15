@@ -33,6 +33,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -49,6 +50,7 @@ import java.util.stream.Stream;
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class GeometryTextureSpriteUploader extends SimplePreparableReloadListener<TextureAtlas.Preparations> implements GeometryAtlasTexture, AutoCloseable
 {
     public static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(ModelAnima.MOD_ID, "textures/atlas/geometry.png");

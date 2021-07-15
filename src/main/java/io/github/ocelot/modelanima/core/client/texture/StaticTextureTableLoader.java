@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +17,7 @@ import java.util.function.Consumer;
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class StaticTextureTableLoader implements TextureTableLoader
 {
     private final ResourceLocation location;

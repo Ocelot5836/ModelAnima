@@ -6,12 +6,14 @@ import io.github.ocelot.modelanima.api.common.texture.GeometryModelTexture;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
 import static org.lwjgl.opengl.GL11.*;
 
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public final class GeometryRenderTypes extends RenderType
 {
     private static final DiffuseLightingStateShard SMOOTH_LIGHTING = new DiffuseLightingStateShard(true)

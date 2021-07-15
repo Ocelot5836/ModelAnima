@@ -13,6 +13,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import java.util.Set;
 /**
  * @author Ocelot
  */
+@ApiStatus.Internal
 public class BoneModelPart extends ModelPart
 {
     private static final Vector4f TRANSFORM_VECTOR = new Vector4f();

@@ -19,6 +19,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 import org.spongepowered.asm.util.perf.Profiler;
 
 import javax.annotation.Nullable;
@@ -46,6 +47,7 @@ public class GeometryTextureManager
         DYNAMIC_RELOADER.addListener(RELOADER);
     }
 
+    @ApiStatus.Internal
     public static void init(IEventBus bus)
     {
         bus.addListener(EventPriority.NORMAL, true, ColorHandlerEvent.Block.class, event ->

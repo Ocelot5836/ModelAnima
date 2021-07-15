@@ -109,7 +109,7 @@ public class JSONTupleParser
                     }
                     else if (vectorPrimitive.isNumber())
                     {
-                        Arrays.fill(values, new MolangConstantNode(vectorPrimitive.getAsFloat()));
+                        Arrays.fill(values, MolangExpression.of(vectorPrimitive.getAsFloat()));
                     }
                     else
                     {
@@ -131,7 +131,7 @@ public class JSONTupleParser
                         }
                         else if (vectorPrimitive.isNumber())
                         {
-                            values[i] = new MolangConstantNode(vectorPrimitive.getAsFloat());
+                            values[i] = MolangExpression.of(vectorPrimitive.getAsFloat());
                         }
                         else
                         {
@@ -148,7 +148,7 @@ public class JSONTupleParser
                 if (valuePrimitive.isNumber())
                 {
                     MolangExpression[] values = new MolangExpression[length];
-                    Arrays.fill(values, new MolangConstantNode(valuePrimitive.getAsFloat()));
+                    Arrays.fill(values, MolangExpression.of(valuePrimitive.getAsFloat()));
                     return values;
                 }
                 if (valuePrimitive.isString())
