@@ -14,7 +14,7 @@ displayURL="https://github.com/Ocelot5836/ModelAnima"
 authors = "Ocelot5836"
 description = "A simple library that allows usage of Minecraft Bedrock Geometry models to animate entities easier."
 
-[modproperties.beyond]
+[modproperties.${mod_id}]
 #catalogueItemIcon="beyond:rocket_thruster"
 
 [[dependencies.${mod_id}]]

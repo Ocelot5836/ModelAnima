@@ -73,6 +73,15 @@ processResources {
     }
 }
 
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+
+    def targetVersion = 8
+    if (JavaVersion.current().isJava9Compatible()) {
+        it.options.release = targetVersion
+    }
+}
+
 shadowJar {
     configurations = [project.configurations.shade]
     archiveClassifier.set("shadow")
