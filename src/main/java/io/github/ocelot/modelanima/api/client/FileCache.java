@@ -1,5 +1,7 @@
-package io.github.ocelot.modelanima.core.client.util;
+package io.github.ocelot.modelanima.api.client;
 
+import io.github.ocelot.modelanima.core.client.util.HashedTextureCache;
+import io.github.ocelot.modelanima.core.client.util.TimedTextureCache;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -7,17 +9,17 @@ import org.apache.http.conn.EofSensorInputStream;
 import org.apache.http.conn.EofSensorWatcher;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Ocelot
  */
-@ApiStatus.Internal
 public interface FileCache
 {
     String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11";
@@ -26,7 +28,7 @@ public interface FileCache
      * Requests an online resource from the specified URL.
      *
      * @param url           The url to download the resource from
-     * @param ignoreMissing Whether or not to print an error when an exception is thrown
+     * @param ignoreMissing Whether to print an error when an exception is thrown
      * @return A future for the location of the resource locally
      */
     CompletableFuture<Path> requestResource(String url, boolean ignoreMissing);
@@ -72,5 +74,41 @@ public interface FileCache
                 return true;
             }
         });
+    }
+
+    /**
+     * Creates a new {@link FileCache} that does not cache at all.
+     *
+     * @param executor The executor to download files with
+     * @return A new cache
+     */
+    static FileCache direct(Executor executor)
+    {
+        return new TimedTextureCache(executor, 0, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Creates a new {@link FileCache} that updates based on the md5 hash of the file.
+     *
+     * @param executor      The executor to download files with
+     * @param hashTableUrls The URLs to get hash tables from
+     * @return A new cache
+     */
+    static FileCache hashed(Executor executor, String... hashTableUrls)
+    {
+        return new HashedTextureCache(executor, hashTableUrls);
+    }
+
+    /**
+     * Creates a new {@link FileCache} that updates based on the amount of time that has passed.
+     *
+     * @param executor      The executor to download files with
+     * @param cacheTime     The amount of time to wait before re-downloading files
+     * @param cacheTimeUnit The unit of time for cacheTime
+     * @return A new cache
+     */
+    static FileCache timed(Executor executor, long cacheTime, TimeUnit cacheTimeUnit)
+    {
+        return new TimedTextureCache(executor, cacheTime, cacheTimeUnit);
     }
 }

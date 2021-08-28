@@ -2,6 +2,7 @@ package io.github.ocelot.modelanima.core.client.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.github.ocelot.modelanima.api.client.FileCache;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +30,7 @@ public class HashedTextureCache implements FileCache
     private final Executor executor;
     private final CompletableFuture<Map<String, String>> hashes;
 
-    public HashedTextureCache(Executor executor, String[] hashTableUrls)
+    public HashedTextureCache(Executor executor, String... hashTableUrls)
     {
         this.executor = executor;
 

@@ -1,5 +1,6 @@
 package io.github.ocelot.modelanima.core.client.util;
 
+import io.github.ocelot.modelanima.api.client.FileCache;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
