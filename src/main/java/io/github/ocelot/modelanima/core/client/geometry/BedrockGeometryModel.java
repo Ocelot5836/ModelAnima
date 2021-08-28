@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import io.github.ocelot.modelanima.api.client.animation.AnimatedModel;
+import io.github.ocelot.modelanima.api.client.animation.AnimatedModelPart;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.common.animation.AnimationData;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
@@ -32,7 +33,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     private static final Vector3f ROTATION = new Vector3f();
     private static final Vector3f SCALE = new Vector3f();
 
-    private final Map<String, BoneModelPart.AnimationPose> transformations;
+    private final Map<String, AnimatedModelPart.AnimationPose> transformations;
     private final Map<String, BoneModelPart> modelParts;
     private final Set<BoneModelPart> renderParts;
     private final String[] modelKeys;
@@ -166,7 +167,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     @Override
     public ModelPart[] getModelParts()
     {
-        return this.modelParts.values().toArray(new BoneModelPart[0]);
+        return this.modelParts.values().toArray(new ModelPart[0]);
     }
 
     @Override
@@ -215,7 +216,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         if (loop && animationTime > length)
             animationTime %= length;
 
-        this.transformations.values().forEach(BoneModelPart.AnimationPose::reset);
+        this.transformations.values().forEach(AnimatedModelPart.AnimationPose::reset);
         for (AnimationData animation : animations)
         {
             float localAnimationTime = animationTime;
@@ -237,12 +238,12 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
                 get(localAnimationTime, runtime, boneAnimation.getRotationFrames(), ROTATION);
                 get(localAnimationTime, runtime, boneAnimation.getScaleFrames(), SCALE);
 
-                this.transformations.computeIfAbsent(boneAnimation.getName(), key -> new BoneModelPart.AnimationPose()).add(POSITION.x() * blendWeight, POSITION.y() * blendWeight, POSITION.z() * blendWeight, ROTATION.x() * blendWeight, ROTATION.y() * blendWeight, ROTATION.z() * blendWeight, (SCALE.x() - 1) * blendWeight, (SCALE.y() - 1) * blendWeight, (SCALE.z() - 1) * blendWeight);
+                this.transformations.computeIfAbsent(boneAnimation.getName(), key -> new AnimatedModelPart.AnimationPose()).add(POSITION.x() * blendWeight, POSITION.y() * blendWeight, POSITION.z() * blendWeight, ROTATION.x() * blendWeight, ROTATION.y() * blendWeight, ROTATION.z() * blendWeight, (SCALE.x() - 1) * blendWeight, (SCALE.y() - 1) * blendWeight, (SCALE.z() - 1) * blendWeight);
             }
         }
         this.transformations.forEach((name, pose) ->
         {
-            BoneModelPart.AnimationPose p = this.modelParts.get(name).getAnimationPose();
+            AnimatedModelPart.AnimationPose p = this.modelParts.get(name).getAnimationPose();
             p.reset();
             p.add(pose.getPosition().x(), pose.getPosition().y(), pose.getPosition().z(), pose.getRotation().x(), pose.getRotation().y(), pose.getRotation().z(), pose.getScale().x() - 1, pose.getScale().y() - 1, pose.getScale().z() - 1);
         });
@@ -253,9 +254,9 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     {
         return this.getModelPart(part).map(modelPart ->
         {
-            if (!(modelPart instanceof BoneModelPart))
+            if (!(modelPart instanceof AnimatedModelPart))
                 return new GeometryModelData.Locator[0];
-            return ((BoneModelPart) modelPart).getBone().getLocators();
+            return ((AnimatedModelPart) modelPart).getLocators();
         }).orElseGet(() -> new GeometryModelData.Locator[0]);
     }
 

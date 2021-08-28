@@ -6,6 +6,7 @@ import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
+import io.github.ocelot.modelanima.api.client.animation.AnimatedModelPart;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -23,7 +24,7 @@ import java.util.Set;
  * @author Ocelot
  */
 @ApiStatus.Internal
-public class BoneModelPart extends ModelPart
+public class BoneModelPart extends ModelPart implements AnimatedModelPart
 {
     private static final Vector4f TRANSFORM_VECTOR = new Vector4f();
     private static final Vector3f NORMAL_VECTOR = new Vector3f();
@@ -35,7 +36,7 @@ public class BoneModelPart extends ModelPart
     private final ObjectList<Polygon> polygons;
     private final Matrix4f copyPosition;
     private final Matrix3f copyNormal;
-    private final AnimationPose animationPose;
+    private final AnimatedModelPart.AnimationPose animationPose;
     private boolean copyVanilla;
 
     public BoneModelPart(BedrockGeometryModel parent, GeometryModelData.Bone bone)
@@ -291,94 +292,16 @@ public class BoneModelPart extends ModelPart
         return bone;
     }
 
-    /**
-     * @return The pose of this bone for animation
-     */
+    @Override
     public AnimationPose getAnimationPose()
     {
         return animationPose;
     }
 
-    /**
-     * <p>A position, rotation, and scale transformation applied on top of default positions for animations.</p>
-     *
-     * @author Ocelot
-     * @since 1.0.0
-     */
-    public static class AnimationPose
+    @Override
+    public GeometryModelData.Locator[] getLocators()
     {
-        private final Vector3f position;
-        private final Vector3f rotation;
-        private final Vector3f scale;
-
-        public AnimationPose()
-        {
-            this.position = new Vector3f();
-            this.rotation = new Vector3f();
-            this.scale = new Vector3f(1, 1, 1);
-        }
-
-        /**
-         * Resets the transformation for this pose.
-         */
-        public void reset()
-        {
-            this.position.set(0, 0, 0);
-            this.rotation.set(0, 0, 0);
-            this.scale.set(1, 1, 1);
-        }
-
-        /**
-         * @return Whether or not this pose is set to "identity"
-         */
-        public boolean isIdentity()
-        {
-            return this.position.hashCode() == 0 && this.rotation.hashCode() == 0 && this.scale.hashCode() == 1333788672; // 1333788672 is the hash code of a 1, 1, 1 vector;
-        }
-
-        /**
-         * Applies additional transformations that can be dynamically changed.
-         *
-         * @param x         The x offset
-         * @param y         The y offset
-         * @param z         The z offset
-         * @param rotationX The x rotation offset
-         * @param rotationY The y rotation offset
-         * @param rotationZ The z rotation offset
-         * @param scaleX    The x factor
-         * @param scaleY    The y factor
-         * @param scaleZ    The z factor
-         */
-        public void add(float x, float y, float z, float rotationX, float rotationY, float rotationZ, float scaleX, float scaleY, float scaleZ)
-        {
-            this.position.add(x, y, z);
-            this.rotation.add(rotationX, rotationY, rotationZ);
-            this.scale.add(scaleX, scaleY, scaleZ);
-        }
-
-        /**
-         * @return The current offset of this bone for the current animation
-         */
-        public Vector3f getPosition()
-        {
-            return position;
-        }
-
-        /**
-         * @return The current rotation offset of this bone for the current animation
-         */
-        public Vector3f getRotation()
-        {
-            return rotation;
-        }
-
-        /**
-         * @return The current scale of this bone for the current animation
-         */
-        public Vector3f getScale()
-        {
-            return scale;
-        }
+        return this.bone.getLocators();
     }
 
     private static class Vertex
