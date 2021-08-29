@@ -3,7 +3,6 @@ package io.github.ocelot.modelanima.api.common.animation;
 import com.google.gson.*;
 import io.github.ocelot.modelanima.api.common.util.JSONTupleParser;
 import io.github.ocelot.molangcompiler.api.MolangExpression;
-import io.github.ocelot.molangcompiler.core.node.MolangConstantNode;
 import net.minecraft.util.GsonHelper;
 
 import java.lang.reflect.Type;
@@ -22,7 +21,7 @@ public class AnimationData
     /**
      * A completely empty animation definition.
      */
-    public static final AnimationData EMPTY = new AnimationData("empty", Loop.NONE, 0.0F, 0.0F, false, new BoneAnimation[0], new SoundEffect[0], new ParticleEffect[0]);
+    public static final AnimationData EMPTY = new AnimationData("empty", Loop.NONE, 0.0F, 0.0F, false, new BoneAnimation[0], new SoundEffect[0], new ParticleEffect[0], new TimelineEffect[0]);
 
     private final String name;
     private final Loop loop;
@@ -32,8 +31,9 @@ public class AnimationData
     private final BoneAnimation[] boneAnimations;
     private final SoundEffect[] soundEffects;
     private final ParticleEffect[] particleEffects;
+    private final TimelineEffect[] timelineEffects;
 
-    public AnimationData(String name, Loop loop, float blendWeight, float animationLength, boolean overridePreviousAnimation, BoneAnimation[] boneAnimations, SoundEffect[] soundEffects, ParticleEffect[] particleEffects)
+    public AnimationData(String name, Loop loop, float blendWeight, float animationLength, boolean overridePreviousAnimation, BoneAnimation[] boneAnimations, SoundEffect[] soundEffects, ParticleEffect[] particleEffects, TimelineEffect[] timelineEffects)
     {
         this.name = name;
         this.loop = loop;
@@ -43,6 +43,7 @@ public class AnimationData
         this.boneAnimations = boneAnimations;
         this.soundEffects = soundEffects;
         this.particleEffects = particleEffects;
+        this.timelineEffects = timelineEffects;
     }
 
     /**
@@ -78,7 +79,7 @@ public class AnimationData
     }
 
     /**
-     * @return Whether or not all animations leading up to this point should be overridden
+     * @return Whether all animations leading up to this point should be overridden
      */
     public boolean isOverridePreviousAnimation()
     {
@@ -109,6 +110,14 @@ public class AnimationData
         return particleEffects;
     }
 
+    /**
+     * @return All effects that should be applied at their respective times
+     */
+    public TimelineEffect[] getTimelineEffects()
+    {
+        return timelineEffects;
+    }
+
     @Override
     public String toString()
     {
@@ -121,6 +130,7 @@ public class AnimationData
                 ", boneAnimations=" + Arrays.toString(boneAnimations) +
                 ", soundEffects=" + Arrays.toString(soundEffects) +
                 ", particleEffects=" + Arrays.toString(particleEffects) +
+                ", timelineEffects=" + Arrays.toString(timelineEffects) +
                 '}';
     }
 
@@ -402,6 +412,49 @@ public class AnimationData
     }
 
     /**
+     * <p>Arbitrary instructions that happen during a key frame.</p>
+     *
+     * @author Ocelot
+     * @since 1.0.0
+     */
+    public static class TimelineEffect
+    {
+        private final float time;
+        private final String data;
+
+        public TimelineEffect(float time, String data)
+        {
+            this.time = time;
+            this.data = data;
+        }
+
+        /**
+         * @return The time in seconds this effect plays at
+         */
+        public float getTime()
+        {
+            return time;
+        }
+
+        /**
+         * @return The data at this time
+         */
+        public String getData()
+        {
+            return data;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "TimelineEffect{" +
+                    "time=" + time +
+                    ", data='" + data + '\'' +
+                    '}';
+        }
+    }
+
+    /**
      * <p>The different types of animations looping that can occur.</p>
      *
      * @author Ocelot
@@ -433,6 +486,7 @@ public class AnimationData
                 Set<BoneAnimation> bones = new HashSet<>();
                 List<SoundEffect> soundEffects = new ArrayList<>();
                 List<ParticleEffect> particleEffects = new ArrayList<>();
+                List<TimelineEffect> timlineEffects = new ArrayList<>();
 
                 /* Parse Bone Animations */
                 List<KeyFrame> positions = new ArrayList<>();
@@ -457,12 +511,14 @@ public class AnimationData
                 }
 
                 /* Parse Effects */
-                parseEffect((time, soundEffectObject) -> soundEffects.add(new SoundEffect(time, GsonHelper.getAsString(soundEffectObject, "effect"))), animationObject, "sound_effects");
-                parseEffect((time, particleEffectObject) -> particleEffects.add(new ParticleEffect(time, GsonHelper.getAsString(particleEffectObject, "effect"), GsonHelper.getAsString(particleEffectObject, "locator"))), animationObject, "particle_effects");
+                parseEffect((time, effectJson) -> soundEffects.add(new SoundEffect(time, GsonHelper.getAsString(GsonHelper.convertToJsonObject(effectJson, "sound_effects"), "effect"))), animationObject, "sound_effects");
+                parseEffect((time, effectJson) -> particleEffects.add(new ParticleEffect(time, GsonHelper.getAsString(GsonHelper.convertToJsonObject(effectJson, "particle_effects"), "effect"), GsonHelper.getAsString(GsonHelper.convertToJsonObject(effectJson, "effect"), "locator"))), animationObject, "particle_effects");
+                parseEffect((time, effectJson) -> timlineEffects.add(new TimelineEffect(time, GsonHelper.convertToString(effectJson, Float.toString(time)))), animationObject, "timeline");
                 soundEffects.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
                 particleEffects.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
+                timlineEffects.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
 
-                animations.add(new AnimationData(animationName, loop, blendWeight, animationLength, overridePreviousAnimation, bones.toArray(new BoneAnimation[0]), soundEffects.toArray(new SoundEffect[0]), particleEffects.toArray(new ParticleEffect[0])));
+                animations.add(new AnimationData(animationName, loop, blendWeight, animationLength, overridePreviousAnimation, bones.toArray(new BoneAnimation[0]), soundEffects.toArray(new SoundEffect[0]), particleEffects.toArray(new ParticleEffect[0]), timlineEffects.toArray(new TimelineEffect[0])));
             }
 
             return animations.toArray(new AnimationData[0]);
@@ -484,7 +540,7 @@ public class AnimationData
             throw new JsonSyntaxException("Expected Boolean or String, was " + GsonHelper.getType(json));
         }
 
-        private static void parseEffect(BiConsumer<Float, JsonObject> effectConsumer, JsonObject json, String name)
+        private static void parseEffect(BiConsumer<Float, JsonElement> effectConsumer, JsonObject json, String name)
         {
             if (!json.has(name))
                 return;
@@ -493,7 +549,7 @@ public class AnimationData
             {
                 try
                 {
-                    effectConsumer.accept(Float.parseFloat(entry.getKey()), entry.getValue().getAsJsonObject());
+                    effectConsumer.accept(Float.parseFloat(entry.getKey()), entry.getValue());
                 }
                 catch (NumberFormatException e)
                 {
