@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 public class GeometryModelTexture
 {
     public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", false, -1, false, false);
-//    public static final GeometryModelTexture INVISIBLE = new GeometryModelTexture(Type.INVISIBLE, TextureLayer.SOLID, "missingno", false, -1, false, false);
     public static final Codec<GeometryModelTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Type::byName, type -> type.name().toLowerCase(Locale.ROOT)).fieldOf("type").forGetter(GeometryModelTexture::getType),
             Codec.STRING.xmap(TextureLayer::byName, type -> type.name().toLowerCase(Locale.ROOT)).optionalFieldOf("layer", TextureLayer.SOLID).forGetter(GeometryModelTexture::getLayer),
@@ -218,17 +217,6 @@ public class GeometryModelTexture
             this.smoothShading = false;
         }
 
-//        /**
-//         * Marks the texture as invisible, where it will be completely ignored during rendering.
-//         */
-//        public Builder setTextureInvisible()
-//        {
-//            this.type = Type.INVISIBLE;
-//            this.data = "";
-//            this.cache = false;
-//            return this;
-//        }
-
         /**
          * Sets the texture to a local location to a file.
          *
@@ -317,7 +305,6 @@ public class GeometryModelTexture
     public enum Type
     {
         UNKNOWN(location -> new ResourceLocation("missingno")),
-//        INVISIBLE(location -> new ResourceLocation("missingno")),
         LOCATION(ResourceLocation::tryParse),
         ONLINE(location -> new ResourceLocation(ModelAnima.MOD_ID, "base32" + ONLINE_PATTERN.matcher(new Base32().encodeAsString(location.getBytes()).toLowerCase(Locale.ROOT)).replaceAll("_")));
 
