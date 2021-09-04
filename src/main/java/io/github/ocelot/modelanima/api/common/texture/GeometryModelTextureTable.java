@@ -1,15 +1,14 @@
 package io.github.ocelot.modelanima.api.common.texture;
 
 import com.google.gson.*;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
-import net.minecraft.network.FriendlyByteBuf;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -21,7 +20,7 @@ import java.util.*;
  */
 public class GeometryModelTextureTable
 {
-    private static final Logger LOGGER = LogManager.getLogger();
+    public static final Codec<GeometryModelTextureTable> CODEC = Codec.unboundedMap(Codec.STRING, GeometryModelTexture.CODEC.listOf().xmap(list -> list.toArray(new GeometryModelTexture[0]), Arrays::asList)).xmap(GeometryModelTextureTable::new, table -> table.textures);
     public static GeometryModelTextureTable EMPTY = new GeometryModelTextureTable(new HashMap<>());
 
     private final Map<String, GeometryModelTexture[]> textures;
@@ -30,61 +29,6 @@ public class GeometryModelTextureTable
     {
         this.textures = new HashMap<>(textures);
         this.textures.values().removeIf(layers -> layers.length == 0);
-    }
-
-    public GeometryModelTextureTable(FriendlyByteBuf buf)
-    {
-        this.textures = new HashMap<>();
-        List<GeometryModelTexture> textureSet = new ArrayList<>();
-
-        int count = buf.readVarInt();
-        for (int i = 0; i < count; i++)
-        {
-            String key = buf.readUtf();
-            int layers = buf.readVarInt();
-            for (int j = 0; j < layers; j++)
-            {
-                try
-                {
-                    textureSet.add(buf.readWithCodec(GeometryModelTexture.CODEC));
-                }
-                catch (IOException e)
-                {
-                    throw new IllegalStateException("Failed to deserialize geometry model texture", e);
-                }
-            }
-            if (!textureSet.isEmpty())
-            {
-                this.textures.put(key, textureSet.toArray(new GeometryModelTexture[0]));
-                textureSet.clear();
-            }
-        }
-    }
-
-    /**
-     * Writes the data of this texture table into the provided buffer.
-     *
-     * @param buf The buffer to write into
-     */
-    public void write(FriendlyByteBuf buf)
-    {
-        buf.writeVarInt(this.textures.size());
-        this.textures.forEach((key, layers) ->
-        {
-            buf.writeUtf(key);
-            buf.writeVarInt(layers.length);
-            for (GeometryModelTexture texture : layers)
-            {
-                try
-                {
-                    buf.writeWithCodec(GeometryModelTexture.CODEC, texture);
-                }
-                catch (IOException e)
-                {
-                    throw new IllegalStateException("Failed to serialize geometry model texture: " + texture, e);
-                }
-            }
-        });
     }
 
     /**
@@ -136,6 +80,8 @@ public class GeometryModelTextureTable
      */
     public static class Serializer implements JsonSerializer<GeometryModelTextureTable>, JsonDeserializer<GeometryModelTextureTable>
     {
+        private static final Logger LOGGER = LogManager.getLogger();
+
         @Override
         public JsonElement serialize(GeometryModelTextureTable src, Type typeOfSrc, JsonSerializationContext context)
         {
