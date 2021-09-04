@@ -6,12 +6,14 @@ import io.github.ocelot.modelanima.ModelAnima;
 import io.github.ocelot.modelanima.api.client.geometry.GeometryModel;
 import io.github.ocelot.modelanima.core.client.geometry.GeometryRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -29,7 +31,7 @@ import java.util.regex.Pattern;
 public class GeometryModelTexture
 {
     public static final GeometryModelTexture MISSING = new GeometryModelTexture(Type.UNKNOWN, TextureLayer.SOLID, "missingno", false, -1, false, false);
-    public static final GeometryModelTexture INVISIBLE = new GeometryModelTexture(Type.INVISIBLE, TextureLayer.SOLID, "missingno", false, -1, false, false);
+//    public static final GeometryModelTexture INVISIBLE = new GeometryModelTexture(Type.INVISIBLE, TextureLayer.SOLID, "missingno", false, -1, false, false);
     public static final Codec<GeometryModelTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(Type::byName, type -> type.name().toLowerCase(Locale.ROOT)).fieldOf("type").forGetter(GeometryModelTexture::getType),
             Codec.STRING.xmap(TextureLayer::byName, type -> type.name().toLowerCase(Locale.ROOT)).optionalFieldOf("layer", TextureLayer.SOLID).forGetter(GeometryModelTexture::getLayer),
@@ -50,6 +52,7 @@ public class GeometryModelTexture
     private final boolean smoothShading;
     private final ResourceLocation location;
 
+    @ApiStatus.Internal
     public GeometryModelTexture(Type type, TextureLayer layer, String data, boolean cache, int color, boolean glowing, boolean smoothShading)
     {
         this.type = type;
@@ -60,6 +63,7 @@ public class GeometryModelTexture
         this.glowing = glowing;
         this.smoothShading = smoothShading;
         this.location = type.createLocation(data);
+        Validate.notNull(this.location, "Invalid texture data: " + data);
     }
 
     /**
@@ -79,7 +83,7 @@ public class GeometryModelTexture
     }
 
     /**
-     * @return The additional data of this texture. May be a URL depending on {@link #getType()}
+     * @return The additional data of this texture. Can be a URL string depending on {@link #getType()}
      */
     public String getData()
     {
@@ -87,7 +91,7 @@ public class GeometryModelTexture
     }
 
     /**
-     * @return Whether or not caching this texture value is allowed
+     * @return Whether caching this texture value is allowed
      */
     public boolean canCache()
     {
@@ -127,7 +131,7 @@ public class GeometryModelTexture
     }
 
     /**
-     * @return Whether or not this texture should be "fullbright"
+     * @return Whether this texture should be "fullbright"
      */
     public boolean isGlowing()
     {
@@ -135,7 +139,7 @@ public class GeometryModelTexture
     }
 
     /**
-     * @return Whether or not smooth shading should be used
+     * @return Whether smooth shading should be used
      */
     public boolean isSmoothShading()
     {
@@ -156,13 +160,13 @@ public class GeometryModelTexture
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GeometryModelTexture that = (GeometryModelTexture) o;
-        return cache == that.cache && color == that.color && glowing == that.glowing && type == that.type && layer == that.layer && data.equals(that.data);
+        return cache == that.cache && color == that.color && glowing == that.glowing && smoothShading == that.smoothShading && type == that.type && layer == that.layer && data.equals(that.data);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(type, layer, data, cache, color, glowing);
+        return Objects.hash(type, layer, data, cache, color, glowing, smoothShading);
     }
 
     @Override
@@ -175,8 +179,134 @@ public class GeometryModelTexture
                 ", cache=" + cache +
                 ", color=" + color +
                 ", glowing=" + glowing +
-                ", location=" + location +
+                ", smoothShading=" + smoothShading +
                 '}';
+    }
+
+    /**
+     * @return A new builder for constructing a texture
+     */
+    public static GeometryModelTexture.Builder texture()
+    {
+        return new GeometryModelTexture.Builder();
+    }
+
+    /**
+     * <p>Constructs new geometry model textures.</p>
+     *
+     * @author Ocelot
+     * @since 1.0.0
+     */
+    public static class Builder
+    {
+        private Type type;
+        private TextureLayer layer;
+        private String data;
+        private boolean cache;
+        private int color;
+        private boolean glowing;
+        private boolean smoothShading;
+
+        private Builder()
+        {
+            this.type = Type.UNKNOWN;
+            this.layer = TextureLayer.SOLID;
+            this.data = "";
+            this.cache = false;
+            this.color = -1;
+            this.glowing = false;
+            this.smoothShading = false;
+        }
+
+//        /**
+//         * Marks the texture as invisible, where it will be completely ignored during rendering.
+//         */
+//        public Builder setTextureInvisible()
+//        {
+//            this.type = Type.INVISIBLE;
+//            this.data = "";
+//            this.cache = false;
+//            return this;
+//        }
+
+        /**
+         * Sets the texture to a local location to a file.
+         *
+         * @param texture The location of the texture
+         */
+        public Builder setTextureLocation(ResourceLocation texture)
+        {
+            this.type = Type.LOCATION;
+            this.data = texture.toString();
+            this.cache = false;
+            return this;
+        }
+
+        /**
+         * Sets the texture to be an online URL resource.
+         *
+         * @param url   The URL to the texture
+         * @param cache Whether to cache the resource or download it each time
+         */
+        public Builder setTextureOnline(String url, boolean cache)
+        {
+            this.type = Type.ONLINE;
+            this.data = url;
+            this.cache = cache;
+            return this;
+        }
+
+        /**
+         * Sets the layer for the texture to render in
+         *
+         * @param layer The layer to draw in
+         */
+        public Builder setTextureLayer(TextureLayer layer)
+        {
+            this.layer = layer;
+            return this;
+        }
+
+        /**
+         * Sets the color to tint this texture to.
+         *
+         * @param color The new color
+         */
+        public Builder setColor(int color)
+        {
+            this.color = color;
+            return this;
+        }
+
+        /**
+         * Sets whether this texture should render "fullbright".
+         *
+         * @param glowing Whether this should ignore lighting
+         */
+        public Builder setGlowing(boolean glowing)
+        {
+            this.glowing = glowing;
+            return this;
+        }
+
+        /**
+         * Sets whether this texture should have a smooth polygon shading instead of the usual flat.
+         *
+         * @param smoothShading Whether this should use smooth polygon shading
+         */
+        public Builder setSmoothShading(boolean smoothShading)
+        {
+            this.smoothShading = smoothShading;
+            return this;
+        }
+
+        /**
+         * @return A new texture with all the properties defined
+         */
+        public GeometryModelTexture build()
+        {
+            return new GeometryModelTexture(this.type, this.layer, this.data, this.cache, this.color, this.glowing, this.smoothShading);
+        }
     }
 
     /**
@@ -187,8 +317,8 @@ public class GeometryModelTexture
     public enum Type
     {
         UNKNOWN(location -> new ResourceLocation("missingno")),
-        INVISIBLE(location -> new ResourceLocation("missingno")),
-        LOCATION(ResourceLocation::new),
+//        INVISIBLE(location -> new ResourceLocation("missingno")),
+        LOCATION(ResourceLocation::tryParse),
         ONLINE(location -> new ResourceLocation(ModelAnima.MOD_ID, "base32" + ONLINE_PATTERN.matcher(new Base32().encodeAsString(location.getBytes()).toLowerCase(Locale.ROOT)).replaceAll("_")));
 
         private final Function<String, ResourceLocation> locationGenerator;
@@ -204,6 +334,7 @@ public class GeometryModelTexture
          * @param data The data to convert
          * @return The new location for that data
          */
+        @Nullable
         public ResourceLocation createLocation(String data)
         {
             return this.locationGenerator.apply(data);

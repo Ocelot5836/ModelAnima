@@ -75,7 +75,7 @@ public class GeometryModelRenderer
                 GeometryModelTexture[] layers = textures.getLayerTextures(material);
                 for (GeometryModelTexture texture : layers)
                 {
-                    if (texture.getType() == GeometryModelTexture.Type.INVISIBLE || texture.getLayer() != layer)
+                    if (texture.getLayer() != layer)
                         continue;
                     model.render(material, texture, matrixStack, model.getBuffer(buffer, GeometryTextureManager.getAtlas(), texture), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
                 }
