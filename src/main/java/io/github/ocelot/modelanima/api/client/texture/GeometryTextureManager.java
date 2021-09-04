@@ -102,7 +102,7 @@ public class GeometryTextureManager
     /**
      * <p>Reloads all textures and opens the loading gui if specified.</p>
      *
-     * @param showLoadingScreen Whether or not to show the loading screen during the reload
+     * @param showLoadingScreen Whether to show the loading screen during the reload
      * @return A future for when the reload is complete
      */
     public static CompletableFuture<Unit> reload(boolean showLoadingScreen)
@@ -127,7 +127,7 @@ public class GeometryTextureManager
     }
 
     /**
-     * @return Whether or not a reload is currently happening
+     * @return Whether the texture manager is currently happening
      */
     public static boolean isReloading()
     {

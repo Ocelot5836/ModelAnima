@@ -528,7 +528,7 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
     }
 
     /**
-     * @return The animations
+     * @return The animations this entity model is playing
      */
     public AnimationData[] getAnimations()
     {

@@ -12,18 +12,18 @@ import org.jetbrains.annotations.ApiStatus;
  * @author Ocelot
  */
 @ApiStatus.Internal
-public class SyncAnimationMessage
+public class ClientboundSyncAnimationMessage
 {
     private final int entityId;
     private final int animationId;
 
-    public <T extends Entity & AnimatedEntity> SyncAnimationMessage(T entity)
+    public <T extends Entity & AnimatedEntity> ClientboundSyncAnimationMessage(T entity)
     {
         this.entityId = entity.getId();
         this.animationId = ArrayUtils.indexOf(entity.getAnimationStates(), entity.getAnimationState());
     }
 
-    public SyncAnimationMessage(FriendlyByteBuf buf)
+    public ClientboundSyncAnimationMessage(FriendlyByteBuf buf)
     {
         this.entityId = buf.readVarInt();
         this.animationId = buf.readVarInt();

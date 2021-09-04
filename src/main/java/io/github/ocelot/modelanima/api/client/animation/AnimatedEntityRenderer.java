@@ -25,7 +25,7 @@ public abstract class AnimatedEntityRenderer<T extends PathfinderMob & AnimatedE
     @Override
     protected float getBob(T yeti, float partialTicks)
     {
-        return (yeti.isNoAnimatonPlaying() ? yeti.tickCount : yeti.getAnimationTick()) + partialTicks;
+        return (yeti.isNoAnimationPlaying() ? yeti.tickCount : yeti.getAnimationTick()) + partialTicks;
     }
 
     @Override
@@ -50,7 +50,7 @@ public abstract class AnimatedEntityRenderer<T extends PathfinderMob & AnimatedE
      */
     public ResourceLocation[] getAnimations(T entity)
     {
-        return entity.isNoAnimatonPlaying() ? new ResourceLocation[0] : entity.getAnimationState().getAnimations();
+        return entity.isNoAnimationPlaying() ? new ResourceLocation[0] : entity.getAnimationState().getAnimations();
     }
 
     /**

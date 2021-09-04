@@ -18,7 +18,7 @@ public class ModelAnimaClientMessageHandler
 {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static void handleSyncAnimationMessage(SyncAnimationMessage msg, NetworkEvent.Context ctx)
+    public static void handleSyncAnimationMessage(ClientboundSyncAnimationMessage msg, NetworkEvent.Context ctx)
     {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null)
@@ -45,7 +45,7 @@ public class ModelAnimaClientMessageHandler
             AnimationState[] animations = entity.getAnimationStates();
             if (animationId < 0 || animationId >= animations.length)
             {
-                LOGGER.warn("Server sent invalid animation for entity: " + e);
+                LOGGER.warn("Server sent invalid animation " + animationId + " for entity: " + e);
                 return;
             }
 

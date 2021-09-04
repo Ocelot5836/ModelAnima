@@ -2,7 +2,7 @@ package io.github.ocelot.modelanima.api.common.animation;
 
 import io.github.ocelot.modelanima.api.client.animation.AnimatedModel;
 import io.github.ocelot.modelanima.core.common.network.ModelAnimaMessages;
-import io.github.ocelot.modelanima.core.common.network.SyncAnimationMessage;
+import io.github.ocelot.modelanima.core.common.network.ClientboundSyncAnimationMessage;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -21,7 +21,7 @@ public interface AnimatedEntity
      */
     default void animationTick()
     {
-        if (this.isNoAnimatonPlaying())
+        if (this.isNoAnimationPlaying())
             return;
 
         AnimationState animationState = this.getAnimationState();
@@ -56,7 +56,7 @@ public interface AnimatedEntity
     }
 
     /**
-     * Called to reset the animation state back to the default. By default this will set the state to {@link AnimationState#EMPTY}.
+     * Called to reset the animation state back to the default. By default, this will set the state to {@link AnimationState#EMPTY}.
      */
     default void resetAnimationState()
     {
@@ -74,9 +74,9 @@ public interface AnimatedEntity
     AnimationState getAnimationState();
 
     /**
-     * @return Whether or not no animation is currently playing
+     * @return Whether no animation is currently playing
      */
-    default boolean isNoAnimatonPlaying()
+    default boolean isNoAnimationPlaying()
     {
         return this.getAnimationState() == AnimationState.EMPTY;
     }
@@ -85,9 +85,9 @@ public interface AnimatedEntity
      * Checks to see if the specified animation is playing.
      *
      * @param state The animation state to check
-     * @return Whether or not that state is playing
+     * @return Whether that state is playing
      */
-    default boolean isAnimatonPlaying(AnimationState state)
+    default boolean isAnimationPlaying(AnimationState state)
     {
         return this.getAnimationState() == state;
     }
@@ -126,6 +126,6 @@ public interface AnimatedEntity
         AnimationState before = entity.getAnimationState();
         entity.setAnimationState(animationState);
         if (before != animationState)
-            ModelAnimaMessages.PLAY.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new SyncAnimationMessage(entity));
+            ModelAnimaMessages.PLAY.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new ClientboundSyncAnimationMessage(entity));
     }
 }

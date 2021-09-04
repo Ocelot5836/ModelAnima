@@ -84,7 +84,7 @@ public class Yeti extends Monster implements AnimatedEntity
     @Override
     public boolean isImmobile()
     {
-        return !this.isNoAnimatonPlaying();
+        return !this.isNoAnimationPlaying();
     }
 
     @Override
@@ -95,7 +95,7 @@ public class Yeti extends Monster implements AnimatedEntity
 
         if (!this.level.isClientSide())
         {
-            if (this.isAnimatonPlaying(THROW_SNOWBALL) && this.getAnimationTick() == 12)
+            if (this.isAnimationPlaying(THROW_SNOWBALL) && this.getAnimationTick() == 12)
             {
 //                this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.NEUTRAL, 10.0F, 0.1F / (this.random.nextFloat() * 0.4F + 0.8F));
 //                GiantSnowball snowball = new GiantSnowball(this.level, this);
@@ -103,11 +103,11 @@ public class Yeti extends Monster implements AnimatedEntity
 //                this.level.addFreshEntity(snowball);
             }
         }
-        else if (!this.isNoAnimatonPlaying())
+        else if (!this.isNoAnimationPlaying())
         {
             for (AnimationState animation : CREATE_SNOWBALLS)
             {
-                if (this.isAnimatonPlaying(animation))
+                if (this.isAnimationPlaying(animation))
                 {
                     if (this.getAnimationTick() >= 13)
                         for (int i = 0; i < 4; i++)

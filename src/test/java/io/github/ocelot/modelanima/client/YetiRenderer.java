@@ -36,7 +36,7 @@ public class YetiRenderer extends AnimatedEntityRenderer<Yeti>
     @Override
     public ResourceLocation[] getAnimations(Yeti entity)
     {
-        if (entity.isNoAnimatonPlaying())
+        if (entity.isNoAnimationPlaying())
             return DEFAULT_ANIMATIONS;
         return super.getAnimations(entity);
     }

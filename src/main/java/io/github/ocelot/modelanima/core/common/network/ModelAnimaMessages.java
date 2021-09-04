@@ -19,7 +19,7 @@ public class ModelAnimaMessages
 
     public static void init()
     {
-        PLAY.registerMessage(0, SyncAnimationMessage.class, SyncAnimationMessage::write, SyncAnimationMessage::new, (msg, ctx) ->
+        PLAY.registerMessage(0, ClientboundSyncAnimationMessage.class, ClientboundSyncAnimationMessage::write, ClientboundSyncAnimationMessage::new, (msg, ctx) ->
         {
             ModelAnimaClientMessageHandler.handleSyncAnimationMessage(msg, ctx.get());
             ctx.get().setPacketHandled(true);
