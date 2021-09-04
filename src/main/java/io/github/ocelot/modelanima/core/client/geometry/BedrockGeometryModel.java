@@ -203,18 +203,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         runtime.setQuery("delta_time", Animation::getPartialTickTime);
         runtime.setQuery("life_time", animationTime);
 
-        boolean loop = false;
-        float length = 0;
-        for (AnimationData animation : animations)
-        {
-            if (animation.getLoop() == AnimationData.Loop.LOOP)
-                loop = true;
-            if (animation.getAnimationLength() > length)
-                length = animation.getAnimationLength();
-        }
-
-        if (loop && animationTime > length)
-            animationTime %= length;
+        animationTime %= getAnimationLength(animationTime, animations);
 
         this.transformations.values().forEach(AnimatedModelPart.AnimationPose::reset);
         for (AnimationData animation : animations)
@@ -263,6 +252,23 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     public String getActiveMaterial()
     {
         return activeMaterial;
+    }
+
+    public static float getAnimationLength(float animationTime, AnimationData[] animations)
+    {
+        boolean loop = false;
+        float length = 0;
+        for (AnimationData animation : animations)
+        {
+            if (animation.getLoop() == AnimationData.Loop.LOOP)
+                loop = true;
+            if (animation.getAnimationLength() > length)
+                length = animation.getAnimationLength();
+        }
+
+        if (loop && animationTime > length)
+            return length;
+        return Integer.MAX_VALUE;
     }
 
     private static void get(float animationTime, MolangRuntime.Builder runtime, AnimationData.KeyFrame[] frames, Vector3f result)

@@ -324,11 +324,17 @@ public class AnimationData
     {
         private final float time;
         private final String effect;
+        private final MolangExpression pitch;
+        private final MolangExpression volume;
+        private final boolean loop;
 
-        public SoundEffect(float time, String effect)
+        public SoundEffect(float time, String effect, MolangExpression pitch, MolangExpression volume, boolean loop)
         {
             this.time = time;
             this.effect = effect;
+            this.pitch = pitch;
+            this.volume = volume;
+            this.loop = loop;
         }
 
         /**
@@ -347,12 +353,39 @@ public class AnimationData
             return effect;
         }
 
+        /**
+         * @return The pitch multiplier from 0.5 to 2.0
+         */
+        public MolangExpression getPitch()
+        {
+            return pitch;
+        }
+
+        /**
+         * @return The distance modifier this sound can be heard from
+         */
+        public MolangExpression getVolume()
+        {
+            return volume;
+        }
+
+        /**
+         * @return Whether this sound should be played once and then looped
+         */
+        public boolean isLoop()
+        {
+            return loop;
+        }
+
         @Override
         public String toString()
         {
             return "SoundEffect{" +
                     "time=" + time +
                     ", effect='" + effect + '\'' +
+                    ", pitch='" + pitch + '\'' +
+                    ", volume='" + volume + '\'' +
+                    ", loop='" + loop + '\'' +
                     '}';
         }
     }
@@ -511,8 +544,16 @@ public class AnimationData
                 }
 
                 /* Parse Effects */
-                parseEffect((time, effectJson) -> soundEffects.add(new SoundEffect(time, GsonHelper.getAsString(GsonHelper.convertToJsonObject(effectJson, "sound_effects"), "effect"))), animationObject, "sound_effects");
-                parseEffect((time, effectJson) -> particleEffects.add(new ParticleEffect(time, GsonHelper.getAsString(GsonHelper.convertToJsonObject(effectJson, "particle_effects"), "effect"), GsonHelper.getAsString(GsonHelper.convertToJsonObject(effectJson, "effect"), "locator"))), animationObject, "particle_effects");
+                parseEffect((time, effectJson) ->
+                {
+                    JsonObject soundEffectsJson = GsonHelper.convertToJsonObject(effectJson, "sound_effects");
+                    soundEffects.add(new SoundEffect(time, GsonHelper.getAsString(soundEffectsJson, "effect"), JSONTupleParser.getExpression(soundEffectsJson, "pitch", () -> MolangExpression.of(1.0F)), JSONTupleParser.getExpression(soundEffectsJson, "volume", () -> MolangExpression.of(1.0F)), GsonHelper.getAsBoolean(soundEffectsJson, "loop", false)));
+                }, animationObject, "sound_effects");
+                parseEffect((time, effectJson) ->
+                {
+                    JsonObject particleEffectsJson = GsonHelper.convertToJsonObject(effectJson, "particle_effects");
+                    particleEffects.add(new ParticleEffect(time, GsonHelper.getAsString(particleEffectsJson, "effect"), GsonHelper.getAsString(particleEffectsJson, "locator")));
+                }, animationObject, "particle_effects");
                 parseEffect((time, effectJson) -> timlineEffects.add(new TimelineEffect(time, GsonHelper.convertToString(effectJson, Float.toString(time)))), animationObject, "timeline");
                 soundEffects.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));
                 particleEffects.sort((a, b) -> Float.compare(a.getTime(), b.getTime()));

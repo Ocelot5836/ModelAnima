@@ -4,7 +4,6 @@ import com.google.gson.*;
 import io.github.ocelot.molangcompiler.api.MolangCompiler;
 import io.github.ocelot.molangcompiler.api.MolangExpression;
 import io.github.ocelot.molangcompiler.api.exception.MolangException;
-import io.github.ocelot.molangcompiler.core.node.MolangConstantNode;
 import net.minecraft.util.GsonHelper;
 
 import javax.annotation.Nullable;
@@ -164,5 +163,38 @@ public class JSONTupleParser
             throw new JsonParseException("Failed to compile MoLang expression", e);
         }
         throw new JsonSyntaxException("Expected " + name + " to be a JsonArray or JsonPrimitive, was " + GsonHelper.getType(json));
+    }
+
+    /**
+     * Parses a single expression from the specified JSON.
+     *
+     * @param json         The json to get the values from
+     * @param name         The name of the tuple element
+     * @param defaultValue The default value if not required or <code>null</code> to make it required
+     * @return An array of values parsed
+     * @throws JsonSyntaxException If there is improper syntax in the JSON structure
+     */
+    public static MolangExpression getExpression(JsonObject json, String name, @Nullable Supplier<MolangExpression> defaultValue) throws JsonSyntaxException
+    {
+        try
+        {
+            if (!json.has(name) && defaultValue != null)
+                return defaultValue.get();
+            if (!json.has(name))
+                throw new JsonSyntaxException("Expected " + name + " to be a Float or JsonPrimitive, was " + GsonHelper.getType(json));
+            if (json.get(name).isJsonPrimitive())
+            {
+                JsonPrimitive valuePrimitive = json.getAsJsonPrimitive(name);
+                if (valuePrimitive.isNumber())
+                    return MolangExpression.of(valuePrimitive.getAsFloat());
+                if (valuePrimitive.isString())
+                    return MolangCompiler.compile(valuePrimitive.getAsString());
+            }
+        }
+        catch (MolangException e)
+        {
+            throw new JsonParseException("Failed to compile MoLang expression", e);
+        }
+        throw new JsonSyntaxException("Expected " + name + " to be a Float or JsonPrimitive, was " + GsonHelper.getType(json));
     }
 }

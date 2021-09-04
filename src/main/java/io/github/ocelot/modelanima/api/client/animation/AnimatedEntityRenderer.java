@@ -3,6 +3,7 @@ package io.github.ocelot.modelanima.api.client.animation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.common.animation.AnimatedEntity;
+import io.github.ocelot.modelanima.api.common.animation.AnimationEffectHandler;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -23,9 +24,9 @@ public abstract class AnimatedEntityRenderer<T extends PathfinderMob & AnimatedE
     }
 
     @Override
-    protected float getBob(T yeti, float partialTicks)
+    protected float getBob(T entity, float partialTicks)
     {
-        return (yeti.isNoAnimationPlaying() ? yeti.tickCount : yeti.getAnimationTick()) + partialTicks;
+        return (entity.isNoAnimationPlaying() ? entity.tickCount : entity.getAnimationTick()) + partialTicks;
     }
 
     @Override
@@ -34,6 +35,9 @@ public abstract class AnimatedEntityRenderer<T extends PathfinderMob & AnimatedE
         super.setupRotations(entity, matrixStack, ticksExisted, rotY, partialTicks);
         this.model.setTexture(this.getTextureTableLocation(entity));
         this.model.setAnimations(this.getAnimations(entity));
+        AnimationEffectHandler effectHandler = entity.getAnimationEffects();
+        if (effectHandler != null)
+            effectHandler.tick(this.getAnimations(entity), this.getBob(entity, partialTicks) / 20.0F);
     }
 
     @Override

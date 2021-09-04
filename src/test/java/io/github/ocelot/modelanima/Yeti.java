@@ -1,6 +1,7 @@
 package io.github.ocelot.modelanima;
 
 import io.github.ocelot.modelanima.api.common.animation.AnimatedEntity;
+import io.github.ocelot.modelanima.api.common.animation.AnimationEffectHandler;
 import io.github.ocelot.modelanima.api.common.animation.AnimationState;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -46,6 +47,7 @@ public class Yeti extends Monster implements AnimatedEntity
     };
     private static final AnimationState[] ANIMATIONS = Stream.concat(Stream.of(THROW_SNOWBALL, ATTACK), Arrays.stream(CREATE_SNOWBALLS)).toArray(AnimationState[]::new);
 
+    private final AnimationEffectHandler effectHandler;
     private AnimationState animationState;
     private int animationTick;
 
@@ -53,6 +55,7 @@ public class Yeti extends Monster implements AnimatedEntity
     {
         super(type, level);
         this.xpReward = 50;
+        this.effectHandler = new AnimationEffectHandler(this);
         this.animationState = AnimationState.EMPTY;
     }
 
@@ -221,6 +224,12 @@ public class Yeti extends Monster implements AnimatedEntity
     public AnimationState getAnimationState()
     {
         return this.animationState;
+    }
+
+    @Override
+    public AnimationEffectHandler getAnimationEffects()
+    {
+        return effectHandler;
     }
 
     @Override

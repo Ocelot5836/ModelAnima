@@ -96,7 +96,7 @@ public final class AnimationManager
     }
 
     /**
-     * @return Whether or not a reload is currently happening
+     * @return Whether a reload is currently happening
      */
     public static boolean isReloading()
     {

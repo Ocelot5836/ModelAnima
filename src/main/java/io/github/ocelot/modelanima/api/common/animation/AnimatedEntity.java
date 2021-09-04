@@ -1,11 +1,19 @@
 package io.github.ocelot.modelanima.api.common.animation;
 
 import io.github.ocelot.modelanima.api.client.animation.AnimatedModel;
-import io.github.ocelot.modelanima.core.common.network.ModelAnimaMessages;
+import io.github.ocelot.modelanima.core.client.animation.AnimationEffectSound;
 import io.github.ocelot.modelanima.core.common.network.ClientboundSyncAnimationMessage;
+import io.github.ocelot.modelanima.core.common.network.ModelAnimaMessages;
+import io.github.ocelot.molangcompiler.api.MolangRuntime;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.PacketDistributor;
+
+import javax.annotation.Nullable;
 
 /**
  * <p>Defines an entity as having animations states for animating {@link AnimatedModel}.</p>
@@ -14,7 +22,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
  * @author Ocelot
  * @since 1.0.0
  */
-public interface AnimatedEntity
+public interface AnimatedEntity extends AnimationEffectSource
 {
     /**
      * Increments the animation tick and automatically handles starting and stopping animations.
@@ -44,6 +52,9 @@ public interface AnimatedEntity
      */
     default void onAnimationStart(AnimationState state)
     {
+        AnimationEffectHandler effectHandler = this.getAnimationEffects();
+        if (effectHandler != null)
+            effectHandler.reset();
     }
 
     /**
@@ -64,6 +75,57 @@ public interface AnimatedEntity
     }
 
     /**
+     * Called when a sound event should be played.
+     *
+     * @param animation   The animation the effect is playing for
+     * @param soundEffect The effect to play
+     */
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    default void handleSoundEffect(AnimationData animation, AnimationData.SoundEffect soundEffect)
+    {
+        if (!(this instanceof Entity))
+            return;
+        Entity entity = (Entity) this;
+        ResourceLocation sound = ResourceLocation.tryParse(soundEffect.getEffect());
+        if (sound != null)
+        {
+            MolangRuntime runtime = MolangRuntime.runtime().create(1.0F); // 1.0 is the default pitch and volume
+            Minecraft.getInstance().getSoundManager().play(new AnimationEffectSound(sound, entity.getSoundSource(), animation, entity, soundEffect.getPitch().safeResolve(runtime), soundEffect.getVolume().safeResolve(runtime), soundEffect.isLoop()));
+        }
+    }
+
+    /**
+     * Called when a particle effect should be play.
+     *
+     * @param animation      The animation the effect is playing for
+     * @param particleEffect The particle information to play
+     * @param xOffset        The x offset of the effect from the origin of the model
+     * @param yOffset        The y offset of the effect from the origin of the model
+     * @param zOffset        The z offset of the effect from the origin of the model
+     */
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    default void handleParticleEffect(AnimationData animation, AnimationData.ParticleEffect particleEffect, double xOffset, double yOffset, double zOffset)
+    {
+        if (!(this instanceof Entity))
+            return;
+        Entity entity = (Entity) this;
+    }
+
+    /**
+     * Called when a custom effect is placed on the timeline.
+     *
+     * @param animation      The animation the effect is playing for
+     * @param timelineEffect The effect on the timeline
+     */
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    default void handleTimelineEffect(AnimationData animation, AnimationData.TimelineEffect timelineEffect)
+    {
+    }
+
+    /**
      * @return The current tick of animation
      */
     int getAnimationTick();
@@ -72,6 +134,12 @@ public interface AnimatedEntity
      * @return The current state of animation
      */
     AnimationState getAnimationState();
+
+    /**
+     * @return The handler for animation effects on this entity or <code>null</code> to ignore effects
+     */
+    @Nullable
+    AnimationEffectHandler getAnimationEffects();
 
     /**
      * @return Whether no animation is currently playing

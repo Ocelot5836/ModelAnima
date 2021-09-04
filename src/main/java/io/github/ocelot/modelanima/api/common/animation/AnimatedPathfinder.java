@@ -12,12 +12,14 @@ import net.minecraft.world.level.Level;
  */
 public abstract class AnimatedPathfinder extends PathfinderMob implements AnimatedEntity
 {
+    private final AnimationEffectHandler effectHandler;
     private AnimationState animationState;
     private int animationTick;
 
     protected AnimatedPathfinder(EntityType<? extends PathfinderMob> entityType, Level level)
     {
         super(entityType, level);
+        this.effectHandler = new AnimationEffectHandler(this);
         this.animationState = AnimationState.EMPTY;
     }
 
@@ -31,6 +33,12 @@ public abstract class AnimatedPathfinder extends PathfinderMob implements Animat
     public AnimationState getAnimationState()
     {
         return animationState;
+    }
+
+    @Override
+    public AnimationEffectHandler getAnimationEffects()
+    {
+        return effectHandler;
     }
 
     @Override
