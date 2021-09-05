@@ -507,7 +507,7 @@ public class AnimatedGeometryEntityModel<T extends Entity> extends EntityModel<T
     public void renderToBuffer(PoseStack matrixStack, VertexConsumer builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
         matrixStack.translate(0, 1.5F, 0); // what?
-        GeometryModelRenderer.render(this.getModel(), this.texture, matrixStack, Minecraft.getInstance().renderBuffers().bufferSource(), packedLight, packedOverlay, red, green, blue, alpha);
+        GeometryModelRenderer.render(this.getModel(), this.texture, matrixStack, packedLight, packedOverlay, red, green, blue, alpha);
     }
 
     /**

@@ -5,15 +5,14 @@ import cpw.mods.modlauncher.api.INameMappingService;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.common.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
+import io.github.ocelot.modelanima.core.client.geometry.GeometryModelBufferSource;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +25,7 @@ import java.util.Map;
 public class GeometryModelRenderer
 {
     private static final Map<Model, Map<String, ModelPart>> MODEL_PARTS = new HashMap<>();
+    private static final GeometryModelBufferSource SOURCE = new GeometryModelBufferSource();
 
     /**
      * Copies angles from the parent model to the geometry model.
@@ -55,7 +55,6 @@ public class GeometryModelRenderer
      * @param model           The model to render
      * @param textureLocation The textures to apply to the model or <code>null</code> to use a missing texture
      * @param matrixStack     The current stack of transformations
-     * @param buffer          The buffer to get the builder from
      * @param packedLight     The packed uv into the light texture the parts should be rendered at
      * @param packedOverlay   The packed uv into the overlay texture the parts should be rendered at
      * @param red             The red factor for color
@@ -63,24 +62,22 @@ public class GeometryModelRenderer
      * @param blue            The blue factor for color
      * @param alpha           The alpha factor for color
      */
-    public static void render(GeometryModel model, @Nullable ResourceLocation textureLocation, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+    public static void render(GeometryModel model, @Nullable ResourceLocation textureLocation, PoseStack matrixStack, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
         if (GeometryTextureManager.isReloading())
             return;
         GeometryModelTextureTable textures = textureLocation == null ? GeometryModelTextureTable.EMPTY : GeometryTextureManager.getTextures(textureLocation);
-        Arrays.stream(model.getMaterialKeys()).flatMap(material -> Arrays.stream(textures.getLayerTextures(material))).map(GeometryModelTexture::getLayer).sorted().forEach(layer ->
+        for (String material : model.getMaterialKeys())
         {
-            for (String material : model.getMaterialKeys())
+            GeometryModelTexture[] layers = textures.getLayerTextures(material);
+            for (GeometryModelTexture texture : layers)
             {
-                GeometryModelTexture[] layers = textures.getLayerTextures(material);
-                for (GeometryModelTexture texture : layers)
-                {
-                    if (texture.getType() == GeometryModelTexture.Type.INVISIBLE || texture.getLayer() != layer)
-                        continue;
-                    model.render(material, texture, matrixStack, model.getBuffer(buffer, GeometryTextureManager.getAtlas(), texture), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
-                }
+                SOURCE.setLayer(texture.getLayer());
+                model.render(material, texture, matrixStack, model.getBuffer(SOURCE, GeometryTextureManager.getAtlas(), texture), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
             }
-        });
+        }
+        SOURCE.setLayer(GeometryModelTexture.TextureLayer.SOLID);
+        SOURCE.endBatch();
     }
 
     private static Map<String, ModelPart> mapRenderers(Model model)
