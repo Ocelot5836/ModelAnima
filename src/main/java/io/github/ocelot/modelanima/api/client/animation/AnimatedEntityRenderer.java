@@ -34,7 +34,6 @@ public abstract class AnimatedEntityRenderer<T extends PathfinderMob & AnimatedE
     protected void setupRotations(T entity, PoseStack matrixStack, float ticksExisted, float rotY, float partialTicks)
     {
         super.setupRotations(entity, matrixStack, ticksExisted, rotY, partialTicks);
-        GeometryModelRenderer.beginBatch();
         this.model.setTexture(this.getTextureTableLocation(entity));
         this.model.setAnimations(this.getAnimations(entity));
         AnimationEffectHandler effectHandler = entity.getAnimationEffects();

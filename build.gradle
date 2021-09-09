@@ -15,8 +15,6 @@ archivesBaseName = project.mod_id
 loom {
     silentMojangMappingsLicense()
 
-    mixinConfigs = ["modelanima.mixins.json"]
-
     dataGen {
         mod project.mod_id
     }
@@ -134,6 +132,7 @@ publishing {
                 builtBy remapJar
             }
             artifact(sourcesJar) {
+                classifier "sources"
                 builtBy remapSourcesJar
             }
         }
