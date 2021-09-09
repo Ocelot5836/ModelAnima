@@ -1,6 +1,7 @@
 package io.github.ocelot.modelanima.api.client.animation;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.ocelot.modelanima.api.client.geometry.GeometryModelRenderer;
 import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.common.animation.AnimatedEntity;
 import io.github.ocelot.modelanima.api.common.animation.AnimationEffectHandler;
@@ -33,6 +34,7 @@ public abstract class AnimatedEntityRenderer<T extends PathfinderMob & AnimatedE
     protected void setupRotations(T entity, PoseStack matrixStack, float ticksExisted, float rotY, float partialTicks)
     {
         super.setupRotations(entity, matrixStack, ticksExisted, rotY, partialTicks);
+        GeometryModelRenderer.beginBatch();
         this.model.setTexture(this.getTextureTableLocation(entity));
         this.model.setAnimations(this.getAnimations(entity));
         AnimationEffectHandler effectHandler = entity.getAnimationEffects();

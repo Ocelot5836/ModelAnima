@@ -6,6 +6,7 @@ import io.github.ocelot.modelanima.api.client.texture.GeometryTextureManager;
 import io.github.ocelot.modelanima.api.common.texture.GeometryModelTexture;
 import io.github.ocelot.modelanima.api.common.texture.GeometryModelTextureTable;
 import io.github.ocelot.modelanima.core.client.geometry.GeometryModelBufferSource;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +27,7 @@ public class GeometryModelRenderer
 {
     private static final Map<Model, Map<String, ModelPart>> MODEL_PARTS = new HashMap<>();
     private static final GeometryModelBufferSource SOURCE = new GeometryModelBufferSource();
+    private static boolean batching = false;
 
     /**
      * Copies angles from the parent model to the geometry model.
@@ -73,9 +75,27 @@ public class GeometryModelRenderer
             for (GeometryModelTexture texture : layers)
             {
                 SOURCE.setLayer(texture.getLayer());
-                model.render(material, texture, matrixStack, model.getBuffer(SOURCE, GeometryTextureManager.getAtlas(), texture), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
+                model.render(material, texture, matrixStack, model.getBuffer(Minecraft.getInstance().renderBuffers().bufferSource(), GeometryTextureManager.getAtlas(), texture), texture.isGlowing() ? 15728880 : packedLight, packedOverlay, red * texture.getRed(), green * texture.getGreen(), blue * texture.getBlue(), alpha);
             }
         }
+        if (!batching)
+            endBatch();
+    }
+
+    /**
+     * Starts a batch render call.
+     */
+    public static void beginBatch()
+    {
+        batching = true;
+    }
+
+    /**
+     * Finalizes a batch render and draws everything.
+     */
+    public static void endBatch()
+    {
+        batching = false;
         SOURCE.setLayer(GeometryModelTexture.TextureLayer.SOLID);
         SOURCE.endBatch();
     }

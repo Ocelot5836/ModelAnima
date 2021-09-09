@@ -15,12 +15,24 @@ archivesBaseName = project.mod_id
 loom {
     silentMojangMappingsLicense()
 
+    mixinConfigs = ["modelanima.mixins.json"]
+
+    dataGen {
+        mod project.mod_id
+    }
+
     runs {
         client {
             runDir "run/client"
         }
         server {
             runDir "run/server"
+        }
+    }
+
+    launches {
+        data {
+            arg "--existing", file("src/main/resources").absolutePath
         }
     }
 

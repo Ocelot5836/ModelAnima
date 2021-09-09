@@ -8,6 +8,7 @@ import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import io.github.ocelot.modelanima.api.client.animation.AnimatedModelPart;
 import io.github.ocelot.modelanima.api.common.geometry.GeometryModelData;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.model.geom.ModelPart;
@@ -16,9 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ocelot
@@ -32,7 +31,7 @@ public class BoneModelPart extends ModelPart implements AnimatedModelPart
     private final BedrockGeometryModel parent;
     private final GeometryModelData.Bone bone;
     private final Set<BoneModelPart> children;
-    private final ObjectList<Quad> quads;
+    private final Map<String, ObjectList<Quad>> quads;
     private final ObjectList<Polygon> polygons;
     private final Matrix4f copyPosition;
     private final Matrix3f copyNormal;
@@ -45,7 +44,7 @@ public class BoneModelPart extends ModelPart implements AnimatedModelPart
         this.parent = parent;
         this.bone = bone;
         this.children = new HashSet<>();
-        this.quads = new ObjectArrayList<>();
+        this.quads = new Object2ObjectArrayMap<>();
         this.polygons = new ObjectArrayList<>();
         this.copyPosition = new Matrix4f();
         this.copyNormal = new Matrix3f();
@@ -155,7 +154,7 @@ public class BoneModelPart extends ModelPart implements AnimatedModelPart
         GeometryModelData.CubeUV uv = cube.getUV(face);
         if (uv != null)
         {
-            this.quads.add(new Quad(new Vertex[]{
+            this.quads.computeIfAbsent(uv.getMaterialInstance(), __ -> new ObjectArrayList<>()).add(new Quad(new Vertex[]{
                     new Vertex(matrix4f, x0, -y0, z0, (uv.getU() + uv.getUSize()) / this.parent.getTextureWidth(), uv.getV() / this.parent.getTextureHeight()),
                     new Vertex(matrix4f, x1, -y1, z1, uv.getU() / this.parent.getTextureWidth(), uv.getV() / this.parent.getTextureHeight()),
                     new Vertex(matrix4f, x2, -y2, z2, uv.getU() / this.parent.getTextureWidth(), (uv.getV() + uv.getVSize()) / this.parent.getTextureHeight()),
@@ -215,15 +214,17 @@ public class BoneModelPart extends ModelPart implements AnimatedModelPart
 
             Matrix4f matrix4f = matrixStack.last().pose();
             Matrix3f matrix3f = matrixStack.last().normal().copy();
-            for (Quad quad : this.quads)
+            Collection<Quad> quads = this.quads.get(this.parent.getActiveMaterial());
+            if (quads != null)
             {
-                if (!quad.material.equals(this.parent.getActiveMaterial()))
-                    continue;
-                NORMAL_VECTOR.set(-quad.normal.x(), quad.normal.y(), -quad.normal.z());
-                NORMAL_VECTOR.transform(matrix3f);
-                for (Vertex vertex : quad.vertices)
+                for (Quad quad : quads)
                 {
-                    addVertex(builder, packedLight, packedOverlay, red, green, blue, alpha, matrix4f, vertex);
+                    NORMAL_VECTOR.set(-quad.normal.x(), quad.normal.y(), -quad.normal.z());
+                    NORMAL_VECTOR.transform(matrix3f);
+                    for (Vertex vertex : quad.vertices)
+                    {
+                        addVertex(builder, packedLight, packedOverlay, red, green, blue, alpha, matrix4f, vertex);
+                    }
                 }
             }
             if ("poly_mesh.texture".equals(this.parent.getActiveMaterial()))
@@ -242,7 +243,8 @@ public class BoneModelPart extends ModelPart implements AnimatedModelPart
                 }
             }
 
-            this.children.forEach(renderer -> renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha));
+            for (ModelPart part : this.children)
+                part.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
 
             matrixStack.popPose();
         }

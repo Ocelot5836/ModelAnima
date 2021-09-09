@@ -112,7 +112,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
             GeometryModelData.Bone currentBone = pair.getLeft();
 
             this.modelParts.put(currentBone.getName(), pair.getRight());
-            if (parts.isEmpty() || currentBone.getParent() == null || currentBone.getParent().startsWith("parent."))
+            if (currentBone.getParent() == null || currentBone.getParent().startsWith("parent."))
             {
                 this.renderParts.add(pair.getRight());
             }
@@ -130,13 +130,8 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
     public void render(String material, GeometryModelTexture texture, PoseStack matrixStack, VertexConsumer builder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
         this.activeMaterial = material;
-        this.renderParts.forEach(renderer ->
-        {
-            String parent = renderer.getBone().getParent();
-            if (parent != null && !parent.startsWith("parent."))
-                return;
-            renderer.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
-        });
+        for (BoneModelPart part : this.renderParts)
+            part.render(matrixStack, builder, packedLight, packedOverlay, red, green, blue, alpha);
         this.activeMaterial = "texture";
     }
 
@@ -286,7 +281,7 @@ public class BedrockGeometryModel extends Model implements GeometryModel, Animat
         for (int i = 0; i < frames.length; i++)
         {
             AnimationData.KeyFrame to = frames[i];
-            if (to.getTime() == 0 || (to.getTime() < animationTime && i < frames.length - 1))
+            if ((to.getTime() < animationTime && i < frames.length - 1) || to.getTime() == 0)
                 continue;
 
             AnimationData.KeyFrame from = i == 0 ? null : frames[i - 1];
