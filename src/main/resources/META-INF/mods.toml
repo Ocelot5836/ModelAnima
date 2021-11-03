@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[36,)"
-license = "MIT"
+license = "GPLv3"
 issueTrackerURL = "https://github.com/Ocelot5836/ModelAnima/issues"
 
 [[mods]]
